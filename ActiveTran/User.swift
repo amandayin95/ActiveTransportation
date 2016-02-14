@@ -24,7 +24,9 @@ import Foundation
 
 struct User {
   let uid: String
+  let name: String
   let email: String
+  let contactInfo: String
   //let isStaff: true;
  
   // Initialize from Firebase
@@ -33,22 +35,28 @@ struct User {
     print("user.swift file authData uid")
     print(authData.uid)
     print("\n")
+    name = authData.providerData["name"] as! String
     email = authData.providerData["email"] as! String
     print("user.swift file authData email")
     print(email)
     print("\n")
+    contactInfo = authData.providerData["contactInfo"] as! String
   }
   
   // Initialize from arbitrary data
-    init(uid: String, email: String, listOfStudent: [Student]) {
+    init(uid: String, name: String, email: String, contactInfo: String) {
     self.uid = uid
+    self.name = name
     self.email = email
+    self.contactInfo = contactInfo
   }
     
     func toAnyObject() -> AnyObject {
     return[
     "uid": uid,
+    "name": name,
     "email": email,
+    "contactInfo": contactInfo,
     ]
     }
 

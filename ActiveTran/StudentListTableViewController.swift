@@ -49,7 +49,7 @@ class StudentListTableViewController: UITableViewController {
     userCountBarButtonItem.tintColor = UIColor.whiteColor()
     navigationItem.leftBarButtonItem = userCountBarButtonItem
     
-    user = User(uid: "FakeId", email: "hungry@person.food", listOfStudent: [Student]())
+    user = User(uid: "FakeId", name: "Fake User", email: "hungry@person.food", contactInfo: "123455667")
     print(user.email)
   }
     
@@ -64,14 +64,14 @@ class StudentListTableViewController: UITableViewController {
                 // 2
                 currentUserRef.setValue(self.user.toAnyObject())
                 // 3
-                currentUserRef.onDisconnectRemoveValue()
+                //currentUserRef.onDisconnectRemoveValue()
                 self.ref.unauth() // need this to switch between accounts 
-                                  // will not alter the uid of the user
+                                  // unauth will not alter or remove the uid of the user
                 
             }
         }
         
-        //queryOrderedByChild("arrived"). stategically giving up this feature for now
+        //queryOrderedByChild("arrived"). stategically giving up this feature for now  TODO
         
         // if staff, we do this
             ref.queryOrderedByChild("staffID").queryEqualToValue(user.uid).observeEventType(.Value, withBlock: { snapshot in
@@ -173,7 +173,7 @@ class StudentListTableViewController: UITableViewController {
             // 2
             let student = Student(name: textField.text!, school: "", arrived: false,  parentID: self.user.uid, staffID: self.user.uid )
             
-            // 3
+            // 3 TODO, how should we name the students? student name + uid?
             let studentRef = self.ref.childByAppendingPath(textField.text!.lowercaseString)
             
             // 4

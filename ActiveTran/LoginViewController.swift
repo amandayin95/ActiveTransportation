@@ -30,6 +30,7 @@ class LoginViewController: UIViewController {
     
   // MARK: Ref to database
   let ref = Firebase(url: "https://activetransportation.firebaseio.com")
+  let usersRef = Firebase(url: "https://activetransportation.firebaseio.com/users")
   
   // MARK: Outlets
   @IBOutlet weak var textFieldLoginEmail: UITextField!
@@ -67,11 +68,27 @@ class LoginViewController: UIViewController {
       message: "Register",
       preferredStyle: .Alert)
     
+//    //configured input textField
+//    var namefield:UITextField?;// operator ? because it's been initialized later
+//    alert.addTextFieldWithConfigurationHandler({(input:UITextField)in
+//        input.placeholder="Enter your name";
+//        input.clearButtonMode=UITextFieldViewMode.WhileEditing;
+//        namefield=input;//assign to outside variable(for later reference)
+//    });
+    
+    
+    
+    
     let saveAction = UIAlertAction(title: "Save",
       style: .Default) { (action: UIAlertAction!) -> Void in
-        
+      
       let emailField = alert.textFields![0] as UITextField!
+        if (self.textFieldLoginEmail.text?.isEmpty != true){
+            emailField.text = self.textFieldLoginEmail.text
+        }
       let passwordField = alert.textFields![1] as UITextField!
+      let nameField = alert.textFields![2] as UITextField!
+      let contactInfoField = alert.textFields![3] as UITextField!
         
         // 1
         self.ref.createUser(emailField.text, password: passwordField.text) { (error: NSError!) in
@@ -101,6 +118,17 @@ class LoginViewController: UIViewController {
       textPassword.secureTextEntry = true
       textPassword.placeholder = "Enter your password"
     }
+    
+    alert.addTextFieldWithConfigurationHandler {
+        (textName) -> Void in
+        textName.placeholder = "Enter your name"
+    }
+    
+    alert.addTextFieldWithConfigurationHandler {
+        (textInfo) -> Void in
+        textInfo.placeholder = "Enter your contact information"
+    }
+    
     
     alert.addAction(saveAction)
     alert.addAction(cancelAction)
