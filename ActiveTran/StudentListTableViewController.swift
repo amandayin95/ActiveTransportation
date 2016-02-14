@@ -32,7 +32,8 @@ class StudentListTableViewController: UITableViewController {
   var user: User!
   var userCountBarButtonItem: UIBarButtonItem!
   let ref = Firebase(url: "https://activetransportation.firebaseio.com/students")
-  let usersRef = Firebase(url: "https://activetransportation.firebaseio.com/online")
+  let usersRef = Firebase(url: "https://activetransportation.firebaseio.com/users")
+  // let listRef = Firebase(url: "https://activetransportation.firebaseio.com/list") not used now
   
   // MARK: UIViewController Lifecycle
   
@@ -48,7 +49,8 @@ class StudentListTableViewController: UITableViewController {
     userCountBarButtonItem.tintColor = UIColor.whiteColor()
     navigationItem.leftBarButtonItem = userCountBarButtonItem
     
-    user = User(uid: "FakeId", email: "hungry@person.food")
+    user = User(uid: "FakeId", email: "hungry@person.food", listOfStudent: [Student]())
+    print(user.email)
   }
     
     override func viewDidAppear(animated: Bool) {
@@ -57,18 +59,34 @@ class StudentListTableViewController: UITableViewController {
         ref.observeAuthEventWithBlock { authData in
             if authData != nil {
                 self.user = User(authData: authData)
+                // 1
+                let currentUserRef = self.usersRef.childByAppendingPath(self.user.uid)
+                // 2
+                currentUserRef.setValue(self.user.toAnyObject())
+                // 3
+                currentUserRef.onDisconnectRemoveValue()
+                self.ref.unauth() // need this to switch between accounts 
+                                  // will not alter the uid of the user
+                
             }
         }
         
-        ref.queryOrderedByChild("arrived").observeEventType(.Value, withBlock: { snapshot in
-            var newStudents = [Student]()
-            for item in snapshot.children {
-                let newStudent = Student(snapshot: item as! FDataSnapshot)
-                newStudents.append(newStudent)
-            }
-            self.students = newStudents
-            self.tableView.reloadData()
-        })
+        //queryOrderedByChild("arrived"). stategically giving up this feature for now
+        
+        // if staff, we do this
+            ref.queryOrderedByChild("staffID").queryEqualToValue(user.uid).observeEventType(.Value, withBlock: { snapshot in
+                var newStudents = [Student]()
+                for item in snapshot.children {
+                    let newStudent = Student(snapshot: item as! FDataSnapshot)
+                    newStudents.append(newStudent)
+                }
+                self.students = newStudents
+                self.tableView.reloadData()
+            })
+        
+        // otherwise we do
+        //   ref.queryOrderedByChild("parentID").queryEqualToValue(user.uid) .......
+        //         to display the list for parent
         
     }
     
@@ -97,6 +115,8 @@ class StudentListTableViewController: UITableViewController {
   }
   
   override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+    //TODO if staff true parent false
+    
     return true
   }
   
@@ -151,13 +171,17 @@ class StudentListTableViewController: UITableViewController {
             let textField = alert.textFields![0] as UITextField
             
             // 2
-            let student = Student(name: textField.text!, school: "", arrived: false,  parentID: self.user.email.lowercaseString, staffID: "" )
+            let student = Student(name: textField.text!, school: "", arrived: false,  parentID: self.user.uid, staffID: self.user.uid )
             
             // 3
             let studentRef = self.ref.childByAppendingPath(textField.text!.lowercaseString)
             
             // 4
             studentRef.setValue(student.toAnyObject())
+            
+            // now other than that we also need the id of the student to the staff's list
+            
+            
     }
     let cancelAction = UIAlertAction(title: "Cancel",
       style: .Default) { (action: UIAlertAction!) -> Void in

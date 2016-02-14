@@ -39,7 +39,8 @@ class LoginViewController: UIViewController {
   
   // MARK: UIViewController Lifecycle
     override func viewDidAppear(animated: Bool) {
-        super.viewDidAppear(animated)
+        print("login view did appaer, \n")
+        
         
         // 1
         ref.observeAuthEventWithBlock { (authData) -> Void in
@@ -49,6 +50,8 @@ class LoginViewController: UIViewController {
                 self.performSegueWithIdentifier(self.LoginToList, sender: nil)
             }
         }
+        
+        super.viewDidAppear(animated)
     }
     
   // MARK: Actions
@@ -77,6 +80,7 @@ class LoginViewController: UIViewController {
                 // 3
                 self.ref.authUser(emailField.text, password: passwordField.text,
                     withCompletionBlock: { (error, auth) -> Void in
+                        
                         // 4
                 })
             }
