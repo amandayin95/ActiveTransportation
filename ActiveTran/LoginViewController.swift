@@ -28,6 +28,13 @@ class LoginViewController: UIViewController {
   // MARK: Constants
   let LoginToList = "LoginToList"
     
+  // MARK: Data passed to StudentListTableView
+    var contactInfoToPass: String!
+    var nameToPass: String!
+    
+  // MARK: flag for segue identifier
+    var signUpMode = false
+    
   // MARK: Ref to database
   let ref = Firebase(url: "https://activetransportation.firebaseio.com")
   let usersRef = Firebase(url: "https://activetransportation.firebaseio.com/users")
@@ -40,9 +47,7 @@ class LoginViewController: UIViewController {
   
   // MARK: UIViewController Lifecycle
     override func viewDidAppear(animated: Bool) {
-        print("login view did appaer, \n")
-        
-        
+       signUpMode = false
         // 1
         ref.observeAuthEventWithBlock { (authData) -> Void in
             // 2
@@ -64,21 +69,12 @@ class LoginViewController: UIViewController {
     }
 
   @IBAction func signUpDidTouch(sender: AnyObject) {
-    var alert = UIAlertController(title: "Register",
-      message: "Register",
+    signUpMode = true
+    
+    var alert = UIAlertController(title: "Sign Up",
+      message: "Sign Up for Active Transporation",
       preferredStyle: .Alert)
-    
-//    //configured input textField
-//    var namefield:UITextField?;// operator ? because it's been initialized later
-//    alert.addTextFieldWithConfigurationHandler({(input:UITextField)in
-//        input.placeholder="Enter your name";
-//        input.clearButtonMode=UITextFieldViewMode.WhileEditing;
-//        namefield=input;//assign to outside variable(for later reference)
-//    });
-    
-    
-    
-    
+   
     let saveAction = UIAlertAction(title: "Save",
       style: .Default) { (action: UIAlertAction!) -> Void in
       
@@ -89,6 +85,8 @@ class LoginViewController: UIViewController {
       let passwordField = alert.textFields![1] as UITextField!
       let nameField = alert.textFields![2] as UITextField!
       let contactInfoField = alert.textFields![3] as UITextField!
+      self.nameToPass = nameField.text
+      self.contactInfoToPass = contactInfoField.text
         
         // 1
         self.ref.createUser(emailField.text, password: passwordField.text) { (error: NSError!) in
@@ -98,7 +96,7 @@ class LoginViewController: UIViewController {
                 self.ref.authUser(emailField.text, password: passwordField.text,
                     withCompletionBlock: { (error, auth) -> Void in
                         
-                        // 4
+                        
                 })
             }
         }
@@ -137,6 +135,19 @@ class LoginViewController: UIViewController {
       animated: true,
       completion: nil)
   }
+    
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject!) {
+        if (segue.identifier == "LoginToList") {
+            let nav = segue.destinationViewController as! UINavigationController
+            let svc = nav.topViewController as! StudentListTableViewController
+            if (self.signUpMode == true){
+            svc.nameToPass = self.nameToPass
+            svc.contactInfoToPass = self.contactInfoToPass
+            svc.signUpMode = self.signUpMode
+            }
+        }
+    }
 
 }
 

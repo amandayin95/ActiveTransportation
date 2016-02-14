@@ -30,18 +30,26 @@ struct User {
   //let isStaff: true;
  
   // Initialize from Firebase
-  init(authData: FAuthData) {
-    uid = authData.uid
+    init(authData: FAuthData, name:String, contactInfo: String) {
+    self.uid = authData.uid
     print("user.swift file authData uid")
     print(authData.uid)
     print("\n")
-    name = authData.providerData["name"] as! String
-    email = authData.providerData["email"] as! String
+    self.name = name
+    self.email = authData.providerData["email"] as! String
     print("user.swift file authData email")
     print(email)
     print("\n")
-    contactInfo = authData.providerData["contactInfo"] as! String
+    self.contactInfo = contactInfo
   }
+    
+    init(snapshot: FDataSnapshot) {
+        uid = snapshot.value["uid"] as! String
+        name = snapshot.value["name"] as! String
+        email = snapshot.value["email"] as! String
+        contactInfo = snapshot.value["contactInfo"] as! String
+    
+    }
   
   // Initialize from arbitrary data
     init(uid: String, name: String, email: String, contactInfo: String) {

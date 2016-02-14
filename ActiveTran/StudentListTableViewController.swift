@@ -26,6 +26,11 @@ class StudentListTableViewController: UITableViewController {
 
   // MARK: Constants
   let ListToUsers = "ListToUsers"
+    
+  // MARK: Data passed in from segue
+  var contactInfoToPass: String!
+  var nameToPass: String!
+  var signUpMode = false
   
   // MARK: Properties 
   var students = [Student]()
@@ -58,16 +63,31 @@ class StudentListTableViewController: UITableViewController {
         
         ref.observeAuthEventWithBlock { authData in
             if authData != nil {
-                self.user = User(authData: authData)
-                // 1
-                let currentUserRef = self.usersRef.childByAppendingPath(self.user.uid)
-                // 2
-                currentUserRef.setValue(self.user.toAnyObject())
-                // 3
-                //currentUserRef.onDisconnectRemoveValue()
-                self.ref.unauth() // need this to switch between accounts 
-                                  // unauth will not alter or remove the uid of the user
-                
+                if (self.signUpMode == true){
+                    self.user = User(authData: authData, name:self.nameToPass, contactInfo: self.contactInfoToPass )
+                    //1
+                    let currentUserRef = self.usersRef.childByAppendingPath(self.user.uid)
+                    //2
+                    currentUserRef.setValue(self.user.toAnyObject())
+                    // 3
+                    // currentUserRef.onDisconnectRemoveValue()
+                    self.ref.unauth() // need this to switch between accounts
+                    // unauth will not alter or remove the uid of the user
+                }else{
+                    let idCopy = authData.uid
+                    //1
+                    self.usersRef.queryOrderedByChild("uid").queryEqualToValue(idCopy).observeEventType(.Value, withBlock: { snapshot in
+                        for item in snapshot.children {
+                            self.user = User(snapshot: item as! FDataSnapshot)
+                        }
+                    })
+                    
+                    // 3
+                    
+                    self.ref.unauth() // need this to switch between accounts
+                    // unauth will not alter or remove the uid of the user
+                    
+                }
             }
         }
         
@@ -171,7 +191,7 @@ class StudentListTableViewController: UITableViewController {
             let textField = alert.textFields![0] as UITextField
             
             // 2
-            let student = Student(name: textField.text!, school: "", arrived: false,  parentID: self.user.uid, staffID: self.user.uid )
+            let student = Student(name: textField.text!, school: "", arrived: false,  parentID: self.user.name, staffID: self.user.uid )
             
             // 3 TODO, how should we name the students? student name + uid?
             let studentRef = self.ref.childByAppendingPath(textField.text!.lowercaseString)
