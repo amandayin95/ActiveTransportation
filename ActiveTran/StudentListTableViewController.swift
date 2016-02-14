@@ -32,6 +32,7 @@ class StudentListTableViewController: UITableViewController {
   var user: User!
   var userCountBarButtonItem: UIBarButtonItem!
   let ref = Firebase(url: "https://activetransportation.firebaseio.com/students")
+  let usersRef = Firebase(url: "https://activetransportation.firebaseio.com/online")
   
   // MARK: UIViewController Lifecycle
   
@@ -49,28 +50,26 @@ class StudentListTableViewController: UITableViewController {
     
     user = User(uid: "FakeId", email: "hungry@person.food")
   }
-  
-  override func viewDidAppear(animated: Bool) {
-      super.viewDidAppear(animated)
+    
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(animated)
         
-        // 1
-      ref.observeEventType(.Value, withBlock: { snapshot in
-            
-            // 2
+        ref.observeAuthEventWithBlock { authData in
+            if authData != nil {
+                self.user = User(authData: authData)
+            }
+        }
+        
+        ref.queryOrderedByChild("arrived").observeEventType(.Value, withBlock: { snapshot in
             var newStudents = [Student]()
-            
-            // 3
             for item in snapshot.children {
-                
-                // 4
                 let newStudent = Student(snapshot: item as! FDataSnapshot)
                 newStudents.append(newStudent)
             }
-            
-            // 5
             self.students = newStudents
             self.tableView.reloadData()
         })
+        
     }
     
   override func viewDidDisappear(animated: Bool) {
@@ -85,7 +84,7 @@ class StudentListTableViewController: UITableViewController {
   }
   
   override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-    let cell = tableView.dequeueReusableCellWithIdentifier("ItemCell") as! UITableViewCell!
+    let cell = tableView.dequeueReusableCellWithIdentifier("ItemCell") as UITableViewCell!
     let studentSelected = students[indexPath.row]
     
     cell.textLabel?.text = studentSelected.name
@@ -152,7 +151,7 @@ class StudentListTableViewController: UITableViewController {
             let textField = alert.textFields![0] as UITextField
             
             // 2
-            let student = Student(name: textField.text!, school: "", arrived: false,  parentID: self.user.email, staffID: "" )
+            let student = Student(name: textField.text!, school: "", arrived: false,  parentID: self.user.email.lowercaseString, staffID: "" )
             
             // 3
             let studentRef = self.ref.childByAppendingPath(textField.text!.lowercaseString)

@@ -27,6 +27,9 @@ class LoginViewController: UIViewController {
 
   // MARK: Constants
   let LoginToList = "LoginToList"
+    
+  // MARK: Ref to database
+  let ref = Firebase(url: "https://activetransportation.firebaseio.com")
   
   // MARK: Outlets
   @IBOutlet weak var textFieldLoginEmail: UITextField!
@@ -35,14 +38,26 @@ class LoginViewController: UIViewController {
   // MARK: Properties
   
   // MARK: UIViewController Lifecycle
-  override func viewDidLoad() {
-    super.viewDidLoad()
-  }
-  
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        // 1
+        ref.observeAuthEventWithBlock { (authData) -> Void in
+            // 2
+            if authData != nil {
+                // 3
+                self.performSegueWithIdentifier(self.LoginToList, sender: nil)
+            }
+        }
+    }
+    
   // MARK: Actions
-  @IBAction func loginDidTouch(sender: AnyObject) {
-    performSegueWithIdentifier(LoginToList, sender: nil)
-  }
+    @IBAction func loginDidTouch(sender: AnyObject) {
+        ref.authUser(textFieldLoginEmail.text, password: textFieldLoginPassword.text,
+            withCompletionBlock: { (error, auth) in
+                
+        })
+    }
 
   @IBAction func signUpDidTouch(sender: AnyObject) {
     var alert = UIAlertController(title: "Register",
@@ -54,9 +69,18 @@ class LoginViewController: UIViewController {
         
       let emailField = alert.textFields![0] as UITextField!
       let passwordField = alert.textFields![1] as UITextField!
-      
-      
         
+        // 1
+        self.ref.createUser(emailField.text, password: passwordField.text) { (error: NSError!) in
+            // 2
+            if error == nil {
+                // 3
+                self.ref.authUser(emailField.text, password: passwordField.text,
+                    withCompletionBlock: { (error, auth) -> Void in
+                        // 4
+                })
+            }
+        }
     }
     
     let cancelAction = UIAlertAction(title: "Cancel",

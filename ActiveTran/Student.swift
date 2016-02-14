@@ -33,7 +33,7 @@ struct Student {
   var arrived: Bool!
   
   // Initialize from arbitrary data
-  init(name: String, school: String, arrived: Bool, key: String = "", parentID : String!, staffID : String!) {
+  init(name: String, school: String, arrived: Bool, key: String = "", parentID : String, staffID : String) {
     self.key = key
     self.name = name
     self.school = school
