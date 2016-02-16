@@ -122,7 +122,7 @@ class StudentListTableViewController: UITableViewController {
   }
   
   override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-    let cell = tableView.dequeueReusableCellWithIdentifier("ItemCell") as UITableViewCell!
+    let cell = tableView.dequeueReusableCellWithIdentifier("ItemCell") as! UITableViewCell
     let studentSelected = students[indexPath.row]
     
     cell.textLabel?.text = studentSelected.name
@@ -188,7 +188,7 @@ class StudentListTableViewController: UITableViewController {
         style: .Default) { (action: UIAlertAction!) -> Void in
             
             // 1
-            let textField = alert.textFields![0] as UITextField
+            let textField = alert.textFields![0] as! UITextField
             
             // 2
             let student = Student(name: textField.text!, school: "", arrived: false,  parentID: self.user.name, staffID: self.user.uid )

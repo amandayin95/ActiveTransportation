@@ -78,13 +78,13 @@ class LoginViewController: UIViewController {
     let saveAction = UIAlertAction(title: "Save",
       style: .Default) { (action: UIAlertAction!) -> Void in
       
-      let emailField = alert.textFields![0] as UITextField!
+      let emailField = alert.textFields![0] as! UITextField
         if (self.textFieldLoginEmail.text?.isEmpty != true){
             emailField.text = self.textFieldLoginEmail.text
         }
-      let passwordField = alert.textFields![1] as UITextField!
-      let nameField = alert.textFields![2] as UITextField!
-      let contactInfoField = alert.textFields![3] as UITextField!
+      let passwordField = alert.textFields![1] as! UITextField
+      let nameField = alert.textFields![2] as! UITextField
+      let contactInfoField = alert.textFields![3] as! UITextField
       self.nameToPass = nameField.text
       self.contactInfoToPass = contactInfoField.text
         

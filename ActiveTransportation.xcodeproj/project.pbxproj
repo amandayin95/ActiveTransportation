@@ -7,10 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		74A6B1111C723FC80042BF15 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 74A6B10F1C723FC80042BF15 /* Main.storyboard */; };
 		941A68C9047CFC613264BFB7 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F599D9265F4B40571F432E78 /* libPods.a */; };
 		BB2385621B3DD5AB0079CD01 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB2385611B3DD5AB0079CD01 /* AppDelegate.swift */; };
 		BB2385641B3DD5AB0079CD01 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB2385631B3DD5AB0079CD01 /* LoginViewController.swift */; };
-		BB2385671B3DD5AB0079CD01 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BB2385651B3DD5AB0079CD01 /* Main.storyboard */; };
 		BB2385691B3DD5AB0079CD01 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BB2385681B3DD5AB0079CD01 /* Images.xcassets */; };
 		BB23856C1B3DD5AB0079CD01 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = BB23856A1B3DD5AB0079CD01 /* LaunchScreen.xib */; };
 		BB2385841B3DD8660079CD01 /* StudentListTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB2385831B3DD8660079CD01 /* StudentListTableViewController.swift */; };
@@ -20,13 +20,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		74A6B1101C723FC80042BF15 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		9BA2A2DB5BA4733818152B9B /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 		A898E3AE11425E4495FAC93A /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 		BB23855C1B3DD5AB0079CD01 /* ActiveTransportation.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ActiveTransportation.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BB2385601B3DD5AB0079CD01 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BB2385611B3DD5AB0079CD01 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		BB2385631B3DD5AB0079CD01 /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
-		BB2385661B3DD5AB0079CD01 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		BB2385681B3DD5AB0079CD01 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		BB23856B1B3DD5AB0079CD01 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		BB2385831B3DD8660079CD01 /* StudentListTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StudentListTableViewController.swift; sourceTree = "<group>"; };
@@ -112,7 +112,7 @@
 		BB2385821B3DD8490079CD01 /* Layouts */ = {
 			isa = PBXGroup;
 			children = (
-				BB2385651B3DD5AB0079CD01 /* Main.storyboard */,
+				74A6B10F1C723FC80042BF15 /* Main.storyboard */,
 				BB23856A1B3DD5AB0079CD01 /* LaunchScreen.xib */,
 			);
 			name = Layouts;
@@ -204,7 +204,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BB2385671B3DD5AB0079CD01 /* Main.storyboard in Resources */,
+				74A6B1111C723FC80042BF15 /* Main.storyboard in Resources */,
 				BB23856C1B3DD5AB0079CD01 /* LaunchScreen.xib in Resources */,
 				BB2385691B3DD5AB0079CD01 /* Images.xcassets in Resources */,
 			);
@@ -262,14 +262,13 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
-		BB2385651B3DD5AB0079CD01 /* Main.storyboard */ = {
+		74A6B10F1C723FC80042BF15 /* Main.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
-				BB2385661B3DD5AB0079CD01 /* Base */,
+				74A6B1101C723FC80042BF15 /* Base */,
 			);
 			name = Main.storyboard;
-			path = "/Users/shuopengyin/Documents/ActiveTran-starter/ActiveTran";
-			sourceTree = "<absolute>";
+			sourceTree = "<group>";
 		};
 		BB23856A1B3DD5AB0079CD01 /* LaunchScreen.xib */ = {
 			isa = PBXVariantGroup;
@@ -372,12 +371,12 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = ActiveTran/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.davideast.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = ActiveTransportation;
 				PROVISIONING_PROFILE = "";
-				SWIFT_OBJC_BRIDGING_HEADER = "/Users/shuopengyin/Documents/ActiveTran-starter/ActiveTran/ActiveTran-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "/Users/XiaoyangQian/Documents/2015-2016/School/Spring2016/CS121/codebase/ActiveTransportation/ActiveTran/ActiveTran-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -391,12 +390,12 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = ActiveTran/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.davideast.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = ActiveTransportation;
 				PROVISIONING_PROFILE = "";
-				SWIFT_OBJC_BRIDGING_HEADER = "/Users/shuopengyin/Documents/ActiveTran-starter/ActiveTran/ActiveTran-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "/Users/XiaoyangQian/Documents/2015-2016/School/Spring2016/CS121/codebase/ActiveTransportation/ActiveTran/ActiveTran-Bridging-Header.h";
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
