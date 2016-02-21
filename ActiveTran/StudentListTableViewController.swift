@@ -26,6 +26,8 @@ class StudentListTableViewController: UITableViewController {
 
   // MARK: Constants
   let ListToUsers = "ListToUsers"
+  let MORNING_PERIOD = "morning"
+  let AFTERNOON_PERIOD = "afternoon"
     
   // MARK: Data passed in from segue
   var contactInfoToPass: String!
@@ -33,6 +35,7 @@ class StudentListTableViewController: UITableViewController {
   var busRouteToPass: String!
   var signUpMode = false
   var logExsits = false
+  var isMorning = true
   var currentDate : String!
   
   // MARK: Properties
@@ -54,7 +57,20 @@ class StudentListTableViewController: UITableViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     
-    currentDate = "2016-02-20"
+    let date = NSDate()
+    let calendar = NSCalendar.currentCalendar()
+    let components = calendar.components([.Hour], fromDate: date)
+    let hour = components.hour
+    if (hour > 0 && hour < 12){
+        isMorning = true
+    }else{
+        isMorning = false
+    }
+    
+    let dateFormatter = NSDateFormatter()
+    dateFormatter.dateFormat = "yyyy-MM-dd"
+    self.currentDate =  dateFormatter.stringFromDate(date)
+    
     
     // Set up swipe to delete
     tableView.allowsMultipleSelectionDuringEditing = false
@@ -67,35 +83,8 @@ class StudentListTableViewController: UITableViewController {
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
-//        
-//        let queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
-//        let group = dispatch_group_create()
-//        
-//        
-//        // Add a task to the group
-//        dispatch_group_async(group, queue, {
+
             self.authenticateUser()
-//        })
-//        
-//        dispatch_group_wait(group, DISPATCH_TIME_FOREVER)
-//        
-//        dispatch_group_enter(group)
-//
-//        
-//        // Add a task to the group
-//        dispatch_group_async(group, queue, {
-//            self.loadStudentInfo()
-//        })
-//        
-//        self.loadStudentArvInfo()
-//        
-//        dispatch_group_wait(group, DISPATCH_TIME_FOREVER)
-//        
-//        // Release the group when it is no longer needed.
-//        dispatch_group_leave(group)
-//
-//        
-//       reloadTable()
  }
    
 
@@ -214,35 +203,32 @@ class StudentListTableViewController: UITableViewController {
   }
     
     func authenticateUser(){
-        print("Does it authenticate at all 1? \n")
         self.ref.observeAuthEventWithBlock { authData in
-            print("Does it authenticate at all? 2 \n")
             if authData != nil {
-                
-                print("Does it authenticate at all? 3 \n" + authData.uid!.lowercaseString)
                 if (self.signUpMode == true){
-                    self.user = User(authData: authData, name:self.nameToPass, contactInfo: self.contactInfoToPass, routeID: "r2" )
-                    print("Does it authenticate at all? 4 \n")
+                    self.user = User(authData: authData, name:self.nameToPass, contactInfo: self.contactInfoToPass, routeID: "r3" )
                     //1
                     let currentUserRef = self.usersRef.childByAppendingPath(self.user.uid)
                     //2
                     currentUserRef.setValue(self.user.toAnyObject())
                     // 3
                     // currentUserRef.onDisconnectRemoveValue()
-                    // 4
                     self.ref.unauth() // need this to switch between accounts
                     // unauth will not alter or remove the uid of the user
+                    // 4
+                    self.reloadTable();
                 }else{
                     let idCopy = authData.uid
+                    print (idCopy.lowercaseString + " id copy \n")
                     //1
                     self.usersRef.queryOrderedByChild("uid").queryEqualToValue(idCopy).observeEventType(.Value, withBlock: { snapshot in
-                        print("Does it authenticate at all? 5 \n")
                         if (snapshot.hasChildren()){
-                        for item in snapshot.children {
-                            self.user = User(snapshot: item as! FDataSnapshot)
-                            print("Does it authenticate at all? 6 \n")
+                            print("getting anything? \n")
+                            for item in snapshot.children {
+                                self.user = User(snapshot: item as! FDataSnapshot)
+                            }
                         }
-                        }
+                        print(self.user.uid.lowercaseString + " id before loading student info \n")
                         self.loadStudentInfo()
                     })
                     // 3
@@ -256,12 +242,11 @@ class StudentListTableViewController: UITableViewController {
     }
 
     func loadStudentInfo(){
-        print("loading student into 1 \n")
+        print(self.user.uid.lowercaseString)
         self.ref.queryOrderedByChild("staffID").queryEqualToValue(self.user.uid).observeEventType(.Value, withBlock: { snapshot in
             var newStudents = [Student]()
             if (snapshot.hasChildren()){
             for item in snapshot.children {
-                print("loading student into 2 \n")
                 var newStudent = Student(snapshot: item as! FDataSnapshot)
                 newStudents.append(newStudent)
             }
@@ -272,7 +257,13 @@ class StudentListTableViewController: UITableViewController {
     }
     
     func loadStudentArvInfo(){
-        var currentLogRef = self.logRef.childByAppendingPath(self.currentDate)
+        var currentLogRef = Firebase!()
+        
+        if (isMorning == true){
+           currentLogRef  = self.logRef.childByAppendingPath(self.currentDate).childByAppendingPath(MORNING_PERIOD)
+        }else{
+            currentLogRef = self.logRef.childByAppendingPath(self.currentDate).childByAppendingPath(AFTERNOON_PERIOD)
+        }
         
         currentLogRef.queryOrderedByChild("staffID").queryEqualToValue(self.user.uid).observeEventType(.Value, withBlock: {
             snapshot in
