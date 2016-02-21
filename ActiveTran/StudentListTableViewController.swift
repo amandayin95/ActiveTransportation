@@ -221,7 +221,7 @@ class StudentListTableViewController: UITableViewController {
                     let idCopy = authData.uid
                     print (idCopy.lowercaseString + " id copy \n")
                     //1
-                    self.usersRef.queryOrderedByChild("uid").queryEqualToValue(idCopy).observeEventType(.Value, withBlock: { snapshot in
+                    self.usersRef.queryOrderedByChild("uid").queryEqualToValue(idCopy.lowercaseString).observeEventType(.Value, withBlock: { snapshot in
                         if (snapshot.hasChildren()){
                             print("getting anything? \n")
                             for item in snapshot.children {
