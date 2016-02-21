@@ -30,21 +30,31 @@ class StudentListTableViewController: UITableViewController {
   // MARK: Data passed in from segue
   var contactInfoToPass: String!
   var nameToPass: String!
+  var busRouteToPass: String!
   var signUpMode = false
+  var logExsits = false
+  var currentDate : String!
   
-  // MARK: Properties 
+  // MARK: Properties
+  var studentsWrapper = [StudentWrapper]()
   var students = [Student]()
+  var studentArvInfo = [StudentArvInfo]()
   var user: User!
   var userCountBarButtonItem: UIBarButtonItem!
   let ref = Firebase(url: "https://activetransportation.firebaseio.com/students")
   let usersRef = Firebase(url: "https://activetransportation.firebaseio.com/users")
-  // let listRef = Firebase(url: "https://activetransportation.firebaseio.com/list") not used now
+  let routeRef = Firebase(url: "https://activetransportation.firebaseio.com/busroutes")
+  let logRef = Firebase(url: "https://activetransportation.firebaseio.com/logs")
+    
+  // MARK: Dispatch Group to wait for query
+  
   
   // MARK: UIViewController Lifecycle
   
   override func viewDidLoad() {
     super.viewDidLoad()
     
+    currentDate = "2016-02-20"
     
     // Set up swipe to delete
     tableView.allowsMultipleSelectionDuringEditing = false
@@ -53,62 +63,42 @@ class StudentListTableViewController: UITableViewController {
     userCountBarButtonItem = UIBarButtonItem(title: "1", style: UIBarButtonItemStyle.Plain, target: self, action: Selector("userCountButtonDidTouch"))
     userCountBarButtonItem.tintColor = UIColor.whiteColor()
     navigationItem.leftBarButtonItem = userCountBarButtonItem
-    
-    user = User(uid: "FakeId", name: "Fake User", email: "hungry@person.food", contactInfo: "123455667")
-    print(user.email)
-  }
+}
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
-        
-        ref.observeAuthEventWithBlock { authData in
-            if authData != nil {
-                if (self.signUpMode == true){
-                    self.user = User(authData: authData, name:self.nameToPass, contactInfo: self.contactInfoToPass )
-                    //1
-                    let currentUserRef = self.usersRef.childByAppendingPath(self.user.uid)
-                    //2
-                    currentUserRef.setValue(self.user.toAnyObject())
-                    // 3
-                    // currentUserRef.onDisconnectRemoveValue()
-                    self.ref.unauth() // need this to switch between accounts
-                    // unauth will not alter or remove the uid of the user
-                }else{
-                    let idCopy = authData.uid
-                    //1
-                    self.usersRef.queryOrderedByChild("uid").queryEqualToValue(idCopy).observeEventType(.Value, withBlock: { snapshot in
-                        for item in snapshot.children {
-                            self.user = User(snapshot: item as! FDataSnapshot)
-                        }
-                    })
-                    
-                    // 3
-                    
-                    self.ref.unauth() // need this to switch between accounts
-                    // unauth will not alter or remove the uid of the user
-                    
-                }
-            }
-        }
-        
-        //queryOrderedByChild("arrived"). stategically giving up this feature for now  TODO
-        
-        // if staff, we do this
-            ref.queryOrderedByChild("staffID").queryEqualToValue(user.uid).observeEventType(.Value, withBlock: { snapshot in
-                var newStudents = [Student]()
-                for item in snapshot.children {
-                    let newStudent = Student(snapshot: item as! FDataSnapshot)
-                    newStudents.append(newStudent)
-                }
-                self.students = newStudents
-                self.tableView.reloadData()
-            })
-        
-        // otherwise we do
-        //   ref.queryOrderedByChild("parentID").queryEqualToValue(user.uid) .......
-        //         to display the list for parent
-        
-    }
+//        
+//        let queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
+//        let group = dispatch_group_create()
+//        
+//        
+//        // Add a task to the group
+//        dispatch_group_async(group, queue, {
+            self.authenticateUser()
+//        })
+//        
+//        dispatch_group_wait(group, DISPATCH_TIME_FOREVER)
+//        
+//        dispatch_group_enter(group)
+//
+//        
+//        // Add a task to the group
+//        dispatch_group_async(group, queue, {
+//            self.loadStudentInfo()
+//        })
+//        
+//        self.loadStudentArvInfo()
+//        
+//        dispatch_group_wait(group, DISPATCH_TIME_FOREVER)
+//        
+//        // Release the group when it is no longer needed.
+//        dispatch_group_leave(group)
+//
+//        
+//       reloadTable()
+ }
+   
+
     
   override func viewDidDisappear(animated: Bool) {
     super.viewDidDisappear(animated)
@@ -118,18 +108,18 @@ class StudentListTableViewController: UITableViewController {
   // MARK: UITableView Delegate methods
   
   override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    return students.count
+    return studentsWrapper.count
   }
   
   override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
     let cell = tableView.dequeueReusableCellWithIdentifier("ItemCell") as UITableViewCell!
-    let studentSelected = students[indexPath.row]
+    let studentSelected = studentsWrapper[indexPath.row]
     
-    cell.textLabel?.text = studentSelected.name
-    cell.detailTextLabel?.text = studentSelected.parentID
+    cell.textLabel?.text = studentSelected.student.name
+    cell.detailTextLabel?.text = studentSelected.student.parentID
     
     // Determine whether the cell is checked
-    toggleCellCheckbox(cell, isCompleted: studentSelected.arrived)
+    toggleCellCheckbox(cell, isCompleted: studentSelected.studentArvInfo.arrived)
     
     return cell
   }
@@ -153,13 +143,13 @@ class StudentListTableViewController: UITableViewController {
         // 1
         let cell = tableView.cellForRowAtIndexPath(indexPath)!
         // 2
-        var studentSelected = students[indexPath.row]
+        var studentSelected = studentsWrapper[indexPath.row]
         // 3
-        let toggledCompletion = !studentSelected.arrived
+        let toggledCompletion = !studentSelected.studentArvInfo.arrived
         // 4
         toggleCellCheckbox(cell, isCompleted: toggledCompletion)
         // 5
-        studentSelected.ref?.updateChildValues([
+        studentSelected.studentArvInfo.ref?.updateChildValues([
             "arrived": toggledCompletion
             ])
     }
@@ -191,7 +181,7 @@ class StudentListTableViewController: UITableViewController {
             let textField = alert.textFields![0] as UITextField
             
             // 2
-            let student = Student(name: textField.text!, school: "", arrived: false,  parentID: self.user.name, staffID: self.user.uid )
+            let student = Student(name: textField.text!, studentID: textField.text!, school: "", arrived: false,  parentID: self.user.name, staffID: self.user.uid, routeID: self.user.routeID )
             
             // 3 TODO, how should we name the students? student name + uid?
             let studentRef = self.ref.childByAppendingPath(textField.text!.lowercaseString)
@@ -222,5 +212,110 @@ class StudentListTableViewController: UITableViewController {
   func userCountButtonDidTouch() {
     performSegueWithIdentifier(ListToUsers, sender: nil)
   }
-  
+    
+    func authenticateUser(){
+        print("Does it authenticate at all 1? \n")
+        self.ref.observeAuthEventWithBlock { authData in
+            print("Does it authenticate at all? 2 \n")
+            if authData != nil {
+                
+                print("Does it authenticate at all? 3 \n" + authData.uid!.lowercaseString)
+                if (self.signUpMode == true){
+                    self.user = User(authData: authData, name:self.nameToPass, contactInfo: self.contactInfoToPass, routeID: "r2" )
+                    print("Does it authenticate at all? 4 \n")
+                    //1
+                    let currentUserRef = self.usersRef.childByAppendingPath(self.user.uid)
+                    //2
+                    currentUserRef.setValue(self.user.toAnyObject())
+                    // 3
+                    // currentUserRef.onDisconnectRemoveValue()
+                    // 4
+                    self.ref.unauth() // need this to switch between accounts
+                    // unauth will not alter or remove the uid of the user
+                }else{
+                    let idCopy = authData.uid
+                    //1
+                    self.usersRef.queryOrderedByChild("uid").queryEqualToValue(idCopy).observeEventType(.Value, withBlock: { snapshot in
+                        print("Does it authenticate at all? 5 \n")
+                        if (snapshot.hasChildren()){
+                        for item in snapshot.children {
+                            self.user = User(snapshot: item as! FDataSnapshot)
+                            print("Does it authenticate at all? 6 \n")
+                        }
+                        }
+                        self.loadStudentInfo()
+                    })
+                    // 3
+                    self.ref.unauth() // need this to switch between accounts
+                    // unauth will not alter or remove the uid of the user
+                    
+                }
+                
+            }
+        }
+    }
+
+    func loadStudentInfo(){
+        print("loading student into 1 \n")
+        self.ref.queryOrderedByChild("staffID").queryEqualToValue(self.user.uid).observeEventType(.Value, withBlock: { snapshot in
+            var newStudents = [Student]()
+            if (snapshot.hasChildren()){
+            for item in snapshot.children {
+                print("loading student into 2 \n")
+                var newStudent = Student(snapshot: item as! FDataSnapshot)
+                newStudents.append(newStudent)
+            }
+            }
+            self.students = newStudents
+            self.loadStudentArvInfo()
+        })
+    }
+    
+    func loadStudentArvInfo(){
+        var currentLogRef = self.logRef.childByAppendingPath(self.currentDate)
+        
+        currentLogRef.queryOrderedByChild("staffID").queryEqualToValue(self.user.uid).observeEventType(.Value, withBlock: {
+            snapshot in
+            var sArvInfo = [StudentArvInfo]()
+            if (!snapshot.hasChildren()){
+                for item in self.students{
+                    var newSArvInfo = StudentArvInfo(arrived: item.arrived, key: item.key, studentID: item.studentID, staffID: item.staffID )
+                    var studentLogRef = currentLogRef.childByAppendingPath(newSArvInfo.studentID)
+                    newSArvInfo.ref = studentLogRef
+                    studentLogRef.setValue(newSArvInfo.toAnyObject())
+                }
+                self.logExsits = true
+                self.studentArvInfo = sArvInfo
+            }else{
+                for item in snapshot.children{
+                    var newSArvInfo = StudentArvInfo(snapshot: item as! FDataSnapshot)
+                    sArvInfo.append(newSArvInfo)
+                }
+                self.logExsits = true
+                self.studentArvInfo = sArvInfo
+                
+            }
+            self.reloadTable()
+        })
+
+    }
+    
+    func reloadTable(){
+        var sWrapper = [StudentWrapper]()
+        if (self.students.count > 0 && self.studentArvInfo.count > 0){
+            // use the information from the log
+            for i in 1...self.studentArvInfo.count{
+                for j in 1...self.students.count{
+                    if (self.students[j-1].studentID == self.studentArvInfo[i-1].studentID){
+                        var newSWrapper = StudentWrapper(student: self.students[j-1], studentArvInfo: self.studentArvInfo[i-1])
+                        sWrapper.append(newSWrapper)
+                    }
+                }
+            }
+        }
+        self.studentsWrapper = sWrapper
+        self.tableView.reloadData()
+
+    }
+    
 }
