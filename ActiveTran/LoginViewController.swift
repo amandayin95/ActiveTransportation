@@ -98,7 +98,7 @@ class LoginViewController: UIViewController {
                 self.ref.authUser(emailField.text, password: passwordField.text,
                     withCompletionBlock: { (error, auth) -> Void in
                         
-                        
+                     self.performSegueWithIdentifier(self.LoginToList, sender: nil)
                 })
             }
         }

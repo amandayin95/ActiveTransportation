@@ -32,7 +32,7 @@ struct User {
  
   // Initialize from Firebase
     init(authData: FAuthData, name:String, contactInfo: String, routeID: String) {
-    self.uid = authData.uid
+    self.uid = authData.uid.lowercaseString
     self.name = name
     self.email = authData.providerData["email"] as! String
     self.contactInfo = contactInfo
@@ -43,7 +43,6 @@ struct User {
         uid = snapshot.value["uid"] as! String
         name = snapshot.value["name"] as! String
         email = snapshot.value["email"] as! String
-        //routeID = ""
         routeID = snapshot.value["routeID"] as! String
         contactInfo = snapshot.value["contactInfo"] as! String
     }
