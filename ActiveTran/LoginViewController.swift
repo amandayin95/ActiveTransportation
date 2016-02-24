@@ -52,10 +52,9 @@ class LoginViewController: UIViewController {
         // 1
         ref.observeAuthEventWithBlock { (authData) -> Void in
             // 2
-            print("auth data before segue? 1\n")
             if authData != nil {
                 // 3
-                print("auth data before segue? 2 :  " + authData.uid!.lowercaseString + "\n")
+                print("auth data before segue? :  " + authData.uid!.lowercaseString + "\n")
                 self.performSegueWithIdentifier(self.LoginToList, sender: nil)
             }
         }
@@ -99,7 +98,7 @@ class LoginViewController: UIViewController {
                 self.ref.authUser(emailField.text, password: passwordField.text,
                     withCompletionBlock: { (error, auth) -> Void in
                         
-                        
+                     self.performSegueWithIdentifier(self.LoginToList, sender: nil)
                 })
             }
         }

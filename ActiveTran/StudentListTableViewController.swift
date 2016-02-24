@@ -48,10 +48,7 @@ class StudentListTableViewController: UITableViewController {
   let usersRef = Firebase(url: "https://activetransportation.firebaseio.com/users")
   let routeRef = Firebase(url: "https://activetransportation.firebaseio.com/busroutes")
   let logRef = Firebase(url: "https://activetransportation.firebaseio.com/logs")
-    
-  // MARK: Dispatch Group to wait for query
-  
-  
+
   // MARK: UIViewController Lifecycle
   
   override func viewDidLoad() {
@@ -71,8 +68,8 @@ class StudentListTableViewController: UITableViewController {
     dateFormatter.dateFormat = "yyyy-MM-dd"
     self.currentDate =  dateFormatter.stringFromDate(date)
     
-    
-    // Set up swipe to delete
+    // Set up swipe to delete  
+    // TODO what does this have to do with delete?
     tableView.allowsMultipleSelectionDuringEditing = false
     
     // User Count
@@ -124,14 +121,30 @@ class StudentListTableViewController: UITableViewController {
     return true
   }
   
-    override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
-        if editingStyle == .Delete {
-            // 1
-            let student = students[indexPath.row]
-            // 2
-            student.ref?.removeValue()
+//    override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
+//        if editingStyle == .Delete {
+//            // 1
+//            let student = students[indexPath.row]
+//            // 2
+//            student.ref?.removeValue()
+//        }
+//    }
+//    
+//    override func tableView(tableView: UITableView, titleForDeleteConfirmationButtonForRowAtIndexPath indexPath: NSIndexPath) -> String? {
+//        return "More"
+//    }
+    
+    
+    override func tableView(tableView: UITableView, editActionsForRowAtIndexPath indexPath: NSIndexPath) -> [UITableViewRowAction]? {
+        let more = UITableViewRowAction(style: .Normal, title: "More") { (action, indexPath) in
+            print("called more tab! \n")
         }
+        
+        more.backgroundColor = UIColor.grayColor()
+        
+        return [more]
     }
+    
   
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         // 1
@@ -210,6 +223,7 @@ class StudentListTableViewController: UITableViewController {
     func authenticateUser(){
         self.ref.observeAuthEventWithBlock { authData in
             if authData != nil {
+                print(authData.uid.lowercaseString + " if authdata is not null \n");
                 if (self.signUpMode == true){
                     self.user = User(authData: authData, name:self.nameToPass, contactInfo: self.contactInfoToPass, routeID: "r3" )
                     //1
@@ -223,8 +237,8 @@ class StudentListTableViewController: UITableViewController {
                     // 4
                     self.reloadTable();
                 }else{
-                    let idCopy = authData.uid
-                    print (idCopy.lowercaseString + " id copy \n")
+                    let idCopy = authData.uid.lowercaseString
+                    print (idCopy + " id copy \n")
                     //1
                     self.usersRef.queryOrderedByChild("uid").queryEqualToValue(idCopy).observeEventType(.Value, withBlock: { snapshot in
                         if (snapshot.hasChildren()){
@@ -233,7 +247,7 @@ class StudentListTableViewController: UITableViewController {
                                 self.user = User(snapshot: item as! FDataSnapshot)
                             }
                         }
-                        print(self.user.uid.lowercaseString + " id before loading student info \n")
+                        print(self.user.uid + " id before loading student info \n")
                         self.loadStudentInfo()
                     })
                     // 3
