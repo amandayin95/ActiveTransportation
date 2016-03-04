@@ -132,7 +132,16 @@ class StudentListTableViewController: UITableViewController {
     
     override func tableView(tableView: UITableView, editActionsForRowAtIndexPath indexPath: NSIndexPath) -> [UITableViewRowAction]? {
         let more = UITableViewRowAction(style: .Normal, title: "More") { (action, indexPath) in
-            print("called more tab! \n")
+            var studentSelected = self.studentsWrapper[indexPath.row]
+            
+            
+            
+            
+            
+            
+            
+            
+            
         }
         
         more.backgroundColor = UIColor.grayColor()
