@@ -1,24 +1,3 @@
-/*
-* Copyright (c) 2015 Razeware LLC
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files (the "Software"), to deal
-* in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the Software is
-* furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in
-* all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-* THE SOFTWARE.
-*/
 
 import UIKit
 import QuartzCore
@@ -35,11 +14,11 @@ class LoginViewController: UIViewController {
     
   // MARK: flag for segue identifier
     var signUpMode = false
+
+    // Mark: Communicator with Firebase
+    var dbComm = DbCommunicator()
     
-  // MARK: Ref to database
-  let ref = Firebase(url: "https://activetransportation.firebaseio.com")
-  let usersRef = Firebase(url: "https://activetransportation.firebaseio.com/users")
-  
+    
   // MARK: Outlets
   @IBOutlet weak var textFieldLoginEmail: UITextField!
   @IBOutlet weak var textFieldLoginPassword: UITextField!
@@ -50,7 +29,7 @@ class LoginViewController: UIViewController {
     override func viewDidAppear(animated: Bool) {
        signUpMode = false
         // 1
-        ref.observeAuthEventWithBlock { (authData) -> Void in
+        dbComm.ref.observeAuthEventWithBlock { (authData) -> Void in
             // 2
             if authData != nil {
                 // 3
@@ -64,7 +43,7 @@ class LoginViewController: UIViewController {
     
   // MARK: Actions
     @IBAction func loginDidTouch(sender: AnyObject) {
-        ref.authUser(textFieldLoginEmail.text, password: textFieldLoginPassword.text,
+        dbComm.ref.authUser(textFieldLoginEmail.text, password: textFieldLoginPassword.text,
             withCompletionBlock: { (error, auth) in
                 
         })
@@ -91,11 +70,11 @@ class LoginViewController: UIViewController {
       self.contactInfoToPass = contactInfoField.text
         
         // 1
-        self.ref.createUser(emailField.text, password: passwordField.text) { (error: NSError!) in
+        self.dbComm.ref.createUser(emailField.text, password: passwordField.text) { (error: NSError!) in
             // 2
             if error == nil {
                 // 3
-                self.ref.authUser(emailField.text, password: passwordField.text,
+                self.dbComm.ref.authUser(emailField.text, password: passwordField.text,
                     withCompletionBlock: { (error, auth) -> Void in
                         
                      self.performSegueWithIdentifier(self.LoginToList, sender: nil)

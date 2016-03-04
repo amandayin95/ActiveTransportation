@@ -1,24 +1,3 @@
-/*
-* Copyright (c) 2015 Razeware LLC
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files (the "Software"), to deal
-* in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the Software is
-* furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in
-* all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-* THE SOFTWARE.
-*/
 
 import UIKit
 
@@ -44,10 +23,9 @@ class StudentListTableViewController: UITableViewController {
   var studentArvInfo = [StudentArvInfo]()
   var user: User!
   var userCountBarButtonItem: UIBarButtonItem!
-  let ref = Firebase(url: "https://activetransportation.firebaseio.com/students")
-  let usersRef = Firebase(url: "https://activetransportation.firebaseio.com/users")
-  let routeRef = Firebase(url: "https://activetransportation.firebaseio.com/busroutes")
-  let logRef = Firebase(url: "https://activetransportation.firebaseio.com/logs")
+
+  // Mark: DbCommunicator
+  var dbComm = DbCommunicator()
 
   // MARK: UIViewController Lifecycle
   
@@ -116,20 +94,6 @@ class StudentListTableViewController: UITableViewController {
     
     return true
   }
-  
-//    override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
-//        if editingStyle == .Delete {
-//            // 1
-//            let student = students[indexPath.row]
-//            // 2
-//            student.ref?.removeValue()
-//        }
-//    }
-//    
-//    override func tableView(tableView: UITableView, titleForDeleteConfirmationButtonForRowAtIndexPath indexPath: NSIndexPath) -> String? {
-//        return "More"
-//    }
-    
     
      func tableView(tableView: UITableView, editActionsForRowAtIndexPath indexPath: NSIndexPath) -> [UITableViewRowAction?] {
         let more = UITableViewRowAction(style: .Normal, title: "More") { (action, indexPath) in
@@ -187,7 +151,7 @@ class StudentListTableViewController: UITableViewController {
             let student = Student(name: textField.text!, studentID: textField.text!, school: "", arrived: false,  parentID: self.user.name, staffID: self.user.uid, routeID: self.user.routeID )
             
             // 3 TODO, how should we name the students? student name + uid?
-            let studentRef = self.ref.childByAppendingPath(textField.text!.lowercaseString)
+            let studentRef = self.dbComm.ref.childByAppendingPath(textField.text!.lowercaseString)
             
             // 4
             studentRef.setValue(student.toAnyObject())
@@ -217,18 +181,18 @@ class StudentListTableViewController: UITableViewController {
   }
     
     func authenticateUser(){
-        self.ref.observeAuthEventWithBlock { authData in
+        self.dbComm.ref.observeAuthEventWithBlock { authData in
             if authData != nil {
                 print(authData.uid.lowercaseString + " if authdata is not null \n");
                 if (self.signUpMode == true){
                     self.user = User(authData: authData, name:self.nameToPass, contactInfo: self.contactInfoToPass, routeID: "r3" )
                     //1
-                    let currentUserRef = self.usersRef.childByAppendingPath(self.user.uid)
+                    let currentUserRef = self.dbComm.usersRef.childByAppendingPath(self.user.uid)
                     //2
                     currentUserRef.setValue(self.user.toAnyObject())
                     // 3
                     // currentUserRef.onDisconnectRemoveValue()
-                    self.ref.unauth() // need this to switch between accounts
+                    self.dbComm.ref.unauth() // need this to switch between accounts
                     // unauth will not alter or remove the uid of the user
                     // 4
                     self.reloadTable();
@@ -236,7 +200,7 @@ class StudentListTableViewController: UITableViewController {
                     let idCopy = authData.uid.lowercaseString
                     print (idCopy + " id copy \n")
                     //1
-                    self.usersRef.queryOrderedByChild("uid").queryEqualToValue(idCopy).observeEventType(.Value, withBlock: { snapshot in
+                    self.dbComm.usersRef.queryOrderedByChild("uid").queryEqualToValue(idCopy).observeEventType(.Value, withBlock: { snapshot in
                         if (snapshot.hasChildren()){
                             print("getting anything? \n")
                             for item in snapshot.children {
@@ -247,7 +211,7 @@ class StudentListTableViewController: UITableViewController {
                         self.loadStudentInfo()
                     })
                     // 3
-                    self.ref.unauth() // need this to switch between accounts
+                    self.dbComm.ref.unauth() // need this to switch between accounts
                     // unauth will not alter or remove the uid of the user
                     
                 }
@@ -258,7 +222,7 @@ class StudentListTableViewController: UITableViewController {
 
     func loadStudentInfo(){
         print(self.user.uid.lowercaseString)
-        self.ref.queryOrderedByChild("staffID").queryEqualToValue(self.user.uid).observeEventType(.Value, withBlock: { snapshot in
+        self.dbComm.ref.queryOrderedByChild("staffID").queryEqualToValue(self.user.uid).observeEventType(.Value, withBlock: { snapshot in
             var newStudents = [Student]()
             if (snapshot.hasChildren()){
             for item in snapshot.children {
@@ -275,9 +239,9 @@ class StudentListTableViewController: UITableViewController {
         var currentLogRef = Firebase()
         
         if (isMorning == true){
-           currentLogRef  = self.logRef.childByAppendingPath(self.currentDate).childByAppendingPath(MORNING_PERIOD)
+           currentLogRef  = self.dbComm.logRef.childByAppendingPath(self.currentDate).childByAppendingPath(MORNING_PERIOD)
         }else{
-            currentLogRef = self.logRef.childByAppendingPath(self.currentDate).childByAppendingPath(AFTERNOON_PERIOD)
+            currentLogRef = self.dbComm.logRef.childByAppendingPath(self.currentDate).childByAppendingPath(AFTERNOON_PERIOD)
         }
         
         currentLogRef.queryOrderedByChild("staffID").queryEqualToValue(self.user.uid).observeEventType(.Value, withBlock: {

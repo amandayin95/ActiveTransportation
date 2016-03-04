@@ -11,6 +11,7 @@
 		03B206881C792F2B00FD7782 /* StudentArvInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03B206871C792F2B00FD7782 /* StudentArvInfo.swift */; };
 		03B2068A1C79526300FD7782 /* StudentWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03B206891C79526300FD7782 /* StudentWrapper.swift */; };
 		744334CA1C896B6800B4AD99 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 744334C91C896B6800B4AD99 /* Main.storyboard */; };
+		744334CE1C8970A200B4AD99 /* DbCommunicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 744334CD1C8970A200B4AD99 /* DbCommunicator.swift */; };
 		941A68C9047CFC613264BFB7 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F599D9265F4B40571F432E78 /* libPods.a */; };
 		BB2385621B3DD5AB0079CD01 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB2385611B3DD5AB0079CD01 /* AppDelegate.swift */; };
 		BB2385641B3DD5AB0079CD01 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB2385631B3DD5AB0079CD01 /* LoginViewController.swift */; };
@@ -27,6 +28,7 @@
 		03B206871C792F2B00FD7782 /* StudentArvInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StudentArvInfo.swift; sourceTree = "<group>"; };
 		03B206891C79526300FD7782 /* StudentWrapper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StudentWrapper.swift; sourceTree = "<group>"; };
 		744334C91C896B6800B4AD99 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
+		744334CD1C8970A200B4AD99 /* DbCommunicator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DbCommunicator.swift; sourceTree = "<group>"; };
 		9BA2A2DB5BA4733818152B9B /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 		A898E3AE11425E4495FAC93A /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 		BB23855C1B3DD5AB0079CD01 /* ActiveTransportation.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ActiveTransportation.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -132,6 +134,7 @@
 				03B206851C78225B00FD7782 /* BusRoute.swift */,
 				03B206871C792F2B00FD7782 /* StudentArvInfo.swift */,
 				03B206891C79526300FD7782 /* StudentWrapper.swift */,
+				744334CD1C8970A200B4AD99 /* DbCommunicator.swift */,
 			);
 			name = Models;
 			sourceTree = "<group>";
@@ -261,6 +264,7 @@
 			files = (
 				03B206861C78225B00FD7782 /* BusRoute.swift in Sources */,
 				BB2385641B3DD5AB0079CD01 /* LoginViewController.swift in Sources */,
+				744334CE1C8970A200B4AD99 /* DbCommunicator.swift in Sources */,
 				BB2385841B3DD8660079CD01 /* StudentListTableViewController.swift in Sources */,
 				BB23858A1B3DD9640079CD01 /* Student.swift in Sources */,
 				BB30CD4A1B439B60004B3177 /* OnlineUsersTableViewController.swift in Sources */,
