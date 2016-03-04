@@ -43,7 +43,7 @@ class OnlineUsersTableViewController: UITableViewController {
   }
   
   override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-    let cell = tableView.dequeueReusableCellWithIdentifier(UserCell) as UITableViewCell!
+    let cell = tableView.dequeueReusableCellWithIdentifier(UserCell)! as UITableViewCell
     let onlineUserEmail = currentUsers[indexPath.row]
     cell.textLabel?.text = onlineUserEmail
     return cell

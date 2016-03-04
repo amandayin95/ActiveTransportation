@@ -1,10 +1,3 @@
-//
-//  BusRoute.swift
-//  ActiveTransportation
-//
-//  Created by shuopeng yin on 2/19/16.
-//  Copyright © 2016 Razeware LLC. All rights reserved.
-//
 
 import Foundation
 

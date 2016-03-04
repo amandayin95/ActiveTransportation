@@ -15,7 +15,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "135"
             endingLineNumber = "135"
-            landmarkName = "tableView(_:editActionsForRowAtIndexPath:)"
+            landmarkName = "toggleCellCheckbox(_:isCompleted:)"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
