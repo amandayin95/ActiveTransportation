@@ -27,33 +27,36 @@ struct User {
   let name: String
   let email: String
   let contactInfo: String
-  var routeID: String
   //let isStaff: true;
  
   // Initialize from Firebase
-    init(authData: FAuthData, name:String, contactInfo: String, routeID: String) {
-    self.uid = authData.uid.lowercaseString
+    init(authData: FAuthData, name:String, contactInfo: String) {
+    self.uid = authData.uid
+    print("user.swift file authData uid")
+    print(authData.uid)
+    print("\n")
     self.name = name
     self.email = authData.providerData["email"] as! String
+    print("user.swift file authData email")
+    print(email)
+    print("\n")
     self.contactInfo = contactInfo
-    self.routeID = routeID
   }
     
     init(snapshot: FDataSnapshot) {
         uid = snapshot.value["uid"] as! String
         name = snapshot.value["name"] as! String
         email = snapshot.value["email"] as! String
-        routeID = snapshot.value["routeID"] as! String
         contactInfo = snapshot.value["contactInfo"] as! String
+    
     }
   
   // Initialize from arbitrary data
-    init(uid: String, name: String, email: String, contactInfo: String, routeID: String) {
+    init(uid: String, name: String, email: String, contactInfo: String) {
     self.uid = uid
     self.name = name
     self.email = email
     self.contactInfo = contactInfo
-    self.routeID = routeID
   }
     
     func toAnyObject() -> AnyObject {
@@ -62,7 +65,6 @@ struct User {
     "name": name,
     "email": email,
     "contactInfo": contactInfo,
-    "routeID": routeID,
     ]
     }
 

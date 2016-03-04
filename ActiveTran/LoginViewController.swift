@@ -31,7 +31,6 @@ class LoginViewController: UIViewController {
   // MARK: Data passed to StudentListTableView
     var contactInfoToPass: String!
     var nameToPass: String!
-    var routeIDToPass: String!
     
   // MARK: flag for segue identifier
     var signUpMode = false
@@ -54,7 +53,6 @@ class LoginViewController: UIViewController {
             // 2
             if authData != nil {
                 // 3
-                print("auth data before segue? :  " + authData.uid!.lowercaseString + "\n")
                 self.performSegueWithIdentifier(self.LoginToList, sender: nil)
             }
         }
@@ -98,7 +96,7 @@ class LoginViewController: UIViewController {
                 self.ref.authUser(emailField.text, password: passwordField.text,
                     withCompletionBlock: { (error, auth) -> Void in
                         
-                     self.performSegueWithIdentifier(self.LoginToList, sender: nil)
+                        
                 })
             }
         }
@@ -146,7 +144,6 @@ class LoginViewController: UIViewController {
             if (self.signUpMode == true){
             svc.nameToPass = self.nameToPass
             svc.contactInfoToPass = self.contactInfoToPass
-            svc.busRouteToPass = self.routeIDToPass
             svc.signUpMode = self.signUpMode
             }
         }
