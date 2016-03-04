@@ -183,6 +183,7 @@
 		BB2385541B3DD5AB0079CD01 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftMigration = 0700;
 				LastSwiftUpdateCheck = 0700;
 				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = "Razeware LLC";
@@ -384,7 +385,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.davideast.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = ActiveTransportation;
 				PROVISIONING_PROFILE = "";
-				SWIFT_OBJC_BRIDGING_HEADER = "/Users/XiaoyangQian/Documents/2015-2016/School/Spring2016/CS121/codebase/ActiveTransportation/ActiveTran/ActiveTran-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "/Users/shuopengyin/Documents/ActiveTran-starter/ActiveTran/ActiveTran-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -403,7 +404,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.davideast.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = ActiveTransportation;
 				PROVISIONING_PROFILE = "";
-				SWIFT_OBJC_BRIDGING_HEADER = "/Users/XiaoyangQian/Documents/2015-2016/School/Spring2016/CS121/codebase/ActiveTransportation/ActiveTran/ActiveTran-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "/Users/shuopengyin/Documents/ActiveTran-starter/ActiveTran/ActiveTran-Bridging-Header.h";
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;

@@ -33,7 +33,7 @@ class LoginViewController: UIViewController {
             // 2
             if authData != nil {
                 // 3
-                print("auth data before segue? :  " + authData.uid!.lowercaseString + "\n")
+                print("auth data before segue? :  " + authData.uid!.lowercaseString + "\n", terminator: "")
                 self.performSegueWithIdentifier(self.LoginToList, sender: nil)
             }
         }
@@ -52,20 +52,20 @@ class LoginViewController: UIViewController {
   @IBAction func signUpDidTouch(sender: AnyObject) {
     signUpMode = true
     
-    var alert = UIAlertController(title: "Sign Up",
+    let alert = UIAlertController(title: "Sign Up",
       message: "Sign Up for Active Transporation",
       preferredStyle: .Alert)
    
     let saveAction = UIAlertAction(title: "Save",
-      style: .Default) { (action: UIAlertAction!) -> Void in
+      style: .Default) { (action: UIAlertAction) -> Void in
       
-      let emailField = alert.textFields![0] as! UITextField
+      let emailField = alert.textFields![0] 
         if (self.textFieldLoginEmail.text?.isEmpty != true){
             emailField.text = self.textFieldLoginEmail.text
         }
-      let passwordField = alert.textFields![1] as! UITextField
-      let nameField = alert.textFields![2] as! UITextField
-      let contactInfoField = alert.textFields![3] as! UITextField
+      let passwordField = alert.textFields![1] 
+      let nameField = alert.textFields![2] 
+      let contactInfoField = alert.textFields![3] 
       self.nameToPass = nameField.text
       self.contactInfoToPass = contactInfoField.text
         
@@ -84,7 +84,7 @@ class LoginViewController: UIViewController {
     }
     
     let cancelAction = UIAlertAction(title: "Cancel",
-      style: .Default) { (action: UIAlertAction!) -> Void in
+      style: .Default) { (action: UIAlertAction) -> Void in
     }
     
     alert.addTextFieldWithConfigurationHandler {
