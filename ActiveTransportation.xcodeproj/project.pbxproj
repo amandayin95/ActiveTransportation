@@ -19,7 +19,7 @@
 		BB23856C1B3DD5AB0079CD01 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = BB23856A1B3DD5AB0079CD01 /* LaunchScreen.xib */; };
 		BB2385841B3DD8660079CD01 /* StudentListTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB2385831B3DD8660079CD01 /* StudentListTableViewController.swift */; };
 		BB23858A1B3DD9640079CD01 /* Student.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB2385891B3DD9640079CD01 /* Student.swift */; };
-		BB30CD4A1B439B60004B3177 /* OnlineUsersTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB30CD491B439B60004B3177 /* OnlineUsersTableViewController.swift */; };
+		BB30CD4A1B439B60004B3177 /* MeetingInfoTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB30CD491B439B60004B3177 /* MeetingInfoTableViewController.swift */; };
 		BB7DA5111B42C8100018B530 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB7DA5101B42C8100018B530 /* User.swift */; };
 /* End PBXBuildFile section */
 
@@ -40,7 +40,7 @@
 		BB2385831B3DD8660079CD01 /* StudentListTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StudentListTableViewController.swift; sourceTree = "<group>"; };
 		BB2385851B3DD8820079CD01 /* ActiveTran-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ActiveTran-Bridging-Header.h"; sourceTree = "<group>"; };
 		BB2385891B3DD9640079CD01 /* Student.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Student.swift; sourceTree = "<group>"; };
-		BB30CD491B439B60004B3177 /* OnlineUsersTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OnlineUsersTableViewController.swift; sourceTree = "<group>"; };
+		BB30CD491B439B60004B3177 /* MeetingInfoTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeetingInfoTableViewController.swift; sourceTree = "<group>"; };
 		BB7DA5101B42C8100018B530 /* User.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		F599D9265F4B40571F432E78 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -112,7 +112,7 @@
 			children = (
 				BB2385631B3DD5AB0079CD01 /* LoginViewController.swift */,
 				BB2385831B3DD8660079CD01 /* StudentListTableViewController.swift */,
-				BB30CD491B439B60004B3177 /* OnlineUsersTableViewController.swift */,
+				BB30CD491B439B60004B3177 /* MeetingInfoTableViewController.swift */,
 			);
 			name = Controllers;
 			sourceTree = "<group>";
@@ -268,7 +268,7 @@
 				744334CE1C8970A200B4AD99 /* DbCommunicator.swift in Sources */,
 				BB2385841B3DD8660079CD01 /* StudentListTableViewController.swift in Sources */,
 				BB23858A1B3DD9640079CD01 /* Student.swift in Sources */,
-				BB30CD4A1B439B60004B3177 /* OnlineUsersTableViewController.swift in Sources */,
+				BB30CD4A1B439B60004B3177 /* MeetingInfoTableViewController.swift in Sources */,
 				03B2068A1C79526300FD7782 /* StudentWrapper.swift in Sources */,
 				BB7DA5111B42C8100018B530 /* User.swift in Sources */,
 				BB2385621B3DD5AB0079CD01 /* AppDelegate.swift in Sources */,

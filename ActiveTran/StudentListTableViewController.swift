@@ -22,7 +22,7 @@ class StudentListTableViewController: UITableViewController {
   var students = [Student]()
   var studentArvInfo = [StudentArvInfo]()
   var user: User!
-  var userCountBarButtonItem: UIBarButtonItem!
+  var meetingInfoBarButtonItem: UIBarButtonItem!
 
   // Mark: DbCommunicator
   var dbComm = DbCommunicator()
@@ -51,10 +51,12 @@ class StudentListTableViewController: UITableViewController {
     // TODO what does this have to do with delete?
     tableView.allowsMultipleSelectionDuringEditing = false
     
-    // User Count
-    userCountBarButtonItem = UIBarButtonItem(title: "1", style: UIBarButtonItemStyle.Plain, target: self, action: Selector("userCountButtonDidTouch"))
-    userCountBarButtonItem.tintColor = UIColor.whiteColor()
-    navigationItem.leftBarButtonItem = userCountBarButtonItem
+    // meeting info display
+    meetingInfoBarButtonItem = UIBarButtonItem(title: "Meeting Info", style: UIBarButtonItemStyle.Plain, target: self, action: Selector("meetingInfoButtonDidTouch"))
+    
+    //TODO change font size
+    meetingInfoBarButtonItem.tintColor = UIColor.whiteColor()
+    navigationItem.leftBarButtonItem = meetingInfoBarButtonItem
 }
     
     override func viewDidAppear(animated: Bool) {
@@ -157,7 +159,7 @@ class StudentListTableViewController: UITableViewController {
             let textField = alert.textFields![0] 
             
             // 2
-            let student = Student(name: textField.text!, studentID: textField.text!, school: "", arrived: false,  parentID: self.user.name, staffID: self.user.uid, routeID: self.user.routeID )
+            let student = Student(name: textField.text!, studentID: textField.text!, school: "", parentID: self.user.name, staffID: self.user.uid, routeID: self.user.routeID )
             
             // 3 TODO, how should we name the students? student name + uid?
             let studentRef = self.dbComm.ref.childByAppendingPath(textField.text!.lowercaseString)
@@ -185,9 +187,27 @@ class StudentListTableViewController: UITableViewController {
       completion: nil)
   }
   
-  func userCountButtonDidTouch() {
-    performSegueWithIdentifier(ListToUsers, sender: nil)
+  func meetingInfoButtonDidTouch() {
+    performSegueWithIdentifier(self.ListToUsers, sender: nil)
   }
+    
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject!) {
+        if (segue.identifier == "ListToUsers") {
+            let nav = segue.destinationViewController as! MeetingInfoTableViewController
+            if (self.user != nil){
+                nav.user = self.user
+            }
+        }
+    }
+
+   
+    
+    
+    
+    
+    
+    
     
     func authenticateUser(){
         self.dbComm.ref.observeAuthEventWithBlock { authData in
@@ -258,7 +278,7 @@ class StudentListTableViewController: UITableViewController {
             var sArvInfo = [StudentArvInfo]()
             if (!snapshot.hasChildren()){
                 for item in self.students{
-                    var newSArvInfo = StudentArvInfo(arrived: item.arrived, key: item.key, studentID: item.studentID, staffID: item.staffID )
+                    var newSArvInfo = StudentArvInfo(arrived: false, key: item.key, studentID: item.studentID, staffID: item.staffID )
                     let studentLogRef = currentLogRef.childByAppendingPath(newSArvInfo.studentID)
                     newSArvInfo.ref = studentLogRef
                     studentLogRef.setValue(newSArvInfo.toAnyObject())
