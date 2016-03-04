@@ -95,7 +95,7 @@ class StudentListTableViewController: UITableViewController {
     return true
   }
     
-     func tableView(tableView: UITableView, editActionsForRowAtIndexPath indexPath: NSIndexPath) -> [UITableViewRowAction?] {
+    override func tableView(tableView: UITableView, editActionsForRowAtIndexPath indexPath: NSIndexPath) -> [UITableViewRowAction]? {
         let more = UITableViewRowAction(style: .Normal, title: "More") { (action, indexPath) in
             var studentSelected = self.studentsWrapper[indexPath.row]
             
@@ -119,7 +119,7 @@ class StudentListTableViewController: UITableViewController {
         // 1
         let cell = tableView.cellForRowAtIndexPath(indexPath)!
         // 2
-        var studentSelected = studentsWrapper[indexPath.row]
+        let studentSelected = studentsWrapper[indexPath.row]
         // 3
         let toggledCompletion = !studentSelected.studentArvInfo.arrived
         // 4
@@ -146,15 +146,15 @@ class StudentListTableViewController: UITableViewController {
   
   @IBAction func addButtonDidTouch(sender: AnyObject) {
     // Alert View for input
-    var alert = UIAlertController(title: "Student",
+    let alert = UIAlertController(title: "Student",
       message: "Add a student",
       preferredStyle: .Alert)
     
     let saveAction = UIAlertAction(title: "Save",
-        style: .Default) { (action: UIAlertAction!) -> Void in
+        style: .Default) { (action: UIAlertAction) -> Void in
             
             // 1
-            let textField = alert.textFields![0] as! UITextField
+            let textField = alert.textFields![0] 
             
             // 2
             let student = Student(name: textField.text!, studentID: textField.text!, school: "", arrived: false,  parentID: self.user.name, staffID: self.user.uid, routeID: self.user.routeID )
@@ -170,7 +170,7 @@ class StudentListTableViewController: UITableViewController {
             
     }
     let cancelAction = UIAlertAction(title: "Cancel",
-      style: .Default) { (action: UIAlertAction!) -> Void in
+      style: .Default) { (action: UIAlertAction) -> Void in
     }
     
     alert.addTextFieldWithConfigurationHandler {
@@ -192,7 +192,7 @@ class StudentListTableViewController: UITableViewController {
     func authenticateUser(){
         self.dbComm.ref.observeAuthEventWithBlock { authData in
             if authData != nil {
-                print(authData.uid.lowercaseString + " if authdata is not null \n");
+                print(authData.uid.lowercaseString + " if authdata is not null \n", terminator: "");
                 if (self.signUpMode == true){
                     self.user = User(authData: authData, name:self.nameToPass, contactInfo: self.contactInfoToPass, routeID: "r3" )
                     //1
@@ -207,16 +207,16 @@ class StudentListTableViewController: UITableViewController {
                     self.reloadTable();
                 }else{
                     let idCopy = authData.uid.lowercaseString
-                    print (idCopy + " id copy \n")
+                    print (idCopy + " id copy \n", terminator: "")
                     //1
                     self.dbComm.usersRef.queryOrderedByChild("uid").queryEqualToValue(idCopy).observeEventType(.Value, withBlock: { snapshot in
                         if (snapshot.hasChildren()){
-                            print("getting anything? \n")
+                            print("getting anything? \n", terminator: "")
                             for item in snapshot.children {
                                 self.user = User(snapshot: item as! FDataSnapshot)
                             }
                         }
-                        print(self.user.uid + " id before loading student info \n")
+                        print(self.user.uid + " id before loading student info \n", terminator: "")
                         self.loadStudentInfo()
                     })
                     // 3
@@ -230,12 +230,12 @@ class StudentListTableViewController: UITableViewController {
     }
 
     func loadStudentInfo(){
-        print(self.user.uid.lowercaseString)
+        print(self.user.uid.lowercaseString, terminator: "")
         self.dbComm.ref.queryOrderedByChild("staffID").queryEqualToValue(self.user.uid).observeEventType(.Value, withBlock: { snapshot in
             var newStudents = [Student]()
             if (snapshot.hasChildren()){
             for item in snapshot.children {
-                var newStudent = Student(snapshot: item as! FDataSnapshot)
+                let newStudent = Student(snapshot: item as! FDataSnapshot)
                 newStudents.append(newStudent)
             }
             }
@@ -259,7 +259,7 @@ class StudentListTableViewController: UITableViewController {
             if (!snapshot.hasChildren()){
                 for item in self.students{
                     var newSArvInfo = StudentArvInfo(arrived: item.arrived, key: item.key, studentID: item.studentID, staffID: item.staffID )
-                    var studentLogRef = currentLogRef.childByAppendingPath(newSArvInfo.studentID)
+                    let studentLogRef = currentLogRef.childByAppendingPath(newSArvInfo.studentID)
                     newSArvInfo.ref = studentLogRef
                     studentLogRef.setValue(newSArvInfo.toAnyObject())
                 }
@@ -267,7 +267,7 @@ class StudentListTableViewController: UITableViewController {
                 self.studentArvInfo = sArvInfo
             }else{
                 for item in snapshot.children{
-                    var newSArvInfo = StudentArvInfo(snapshot: item as! FDataSnapshot)
+                    let newSArvInfo = StudentArvInfo(snapshot: item as! FDataSnapshot)
                     sArvInfo.append(newSArvInfo)
                 }
                 self.logExsits = true
@@ -286,7 +286,7 @@ class StudentListTableViewController: UITableViewController {
             for i in 1...self.studentArvInfo.count{
                 for j in 1...self.students.count{
                     if (self.students[j-1].studentID == self.studentArvInfo[i-1].studentID){
-                        var newSWrapper = StudentWrapper(student: self.students[j-1], studentArvInfo: self.studentArvInfo[i-1])
+                        let newSWrapper = StudentWrapper(student: self.students[j-1], studentArvInfo: self.studentArvInfo[i-1])
                         sWrapper.append(newSWrapper)
                     }
                 }
