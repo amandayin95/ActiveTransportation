@@ -28,12 +28,12 @@ class LoginViewController: UIViewController {
   // MARK: UIViewController Lifecycle
     override func viewDidAppear(animated: Bool) {
        signUpMode = false
-        // 1
+        // Create an authentication observer
         dbComm.ref.observeAuthEventWithBlock { (authData) -> Void in
-            // 2
+            // Block passed the authData parameter
             if authData != nil {
-                // 3
-                print("auth data before segue? :  " + authData.uid!.lowercaseString + "\n", terminator: "")
+                // On successful authentication, perform the segue. Pass nil as the sender.
+                print("auth data before segue? :  " + authData.uid!.lowercaseString + "\n")
                 self.performSegueWithIdentifier(self.LoginToList, sender: nil)
             }
         }
