@@ -7,15 +7,16 @@ struct User {
   let email: String
   let contactInfo: String
   var routeID: String
-  //let isStaff: true;
+  var isStaff: Bool!
  
   // Initialize from Firebase
-    init(authData: FAuthData, name:String, contactInfo: String, routeID: String) {
+    init(authData: FAuthData, name:String, contactInfo: String, routeID: String, isStaff: Bool) {
     self.uid = authData.uid.lowercaseString
     self.name = name
     self.email = authData.providerData["email"] as! String
     self.contactInfo = contactInfo
     self.routeID = routeID
+    self.isStaff = isStaff
   }
     
     init(snapshot: FDataSnapshot) {
@@ -24,15 +25,17 @@ struct User {
         email = snapshot.value["email"] as! String
         routeID = snapshot.value["routeID"] as! String
         contactInfo = snapshot.value["contactInfo"] as! String
+        isStaff = snapshot.value["isStaff"] as! Bool
     }
   
   // Initialize from arbitrary data
-    init(uid: String, name: String, email: String, contactInfo: String, routeID: String) {
+    init(uid: String, name: String, email: String, contactInfo: String, routeID: String, isStaff: Bool) {
     self.uid = uid
     self.name = name
     self.email = email
     self.contactInfo = contactInfo
     self.routeID = routeID
+    self.isStaff = isStaff
   }
     
     func toAnyObject() -> AnyObject {
@@ -42,6 +45,7 @@ struct User {
     "email": email,
     "contactInfo": contactInfo,
     "routeID": routeID,
+    "isStaff": isStaff,
     ]
     }
 

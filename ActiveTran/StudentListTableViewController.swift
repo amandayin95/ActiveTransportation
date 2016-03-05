@@ -23,6 +23,7 @@ class StudentListTableViewController: UITableViewController {
   var studentArvInfo = [StudentArvInfo]()
   var user: User!
   var meetingInfoBarButtonItem: UIBarButtonItem!
+  var queryString: String!
 
   // Mark: DbCommunicator
   var dbComm = DbCommunicator()
@@ -83,7 +84,7 @@ class StudentListTableViewController: UITableViewController {
     let studentSelected = studentsWrapper[indexPath.row]
     
     cell.textLabel?.text = studentSelected.student.name
-    cell.detailTextLabel?.text = studentSelected.student.parentID
+    cell.detailTextLabel?.text = "Student ID Number: " + studentSelected.student.studentID
     
     // Determine whether the cell is checked
     toggleCellCheckbox(cell, isCompleted: studentSelected.studentArvInfo.arrived)
@@ -92,8 +93,6 @@ class StudentListTableViewController: UITableViewController {
   }
   
   override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
-    //TODO if staff true parent false
-    
     return true
   }
     
@@ -104,7 +103,7 @@ class StudentListTableViewController: UITableViewController {
             
             
             
-            
+            // TODO more does different things in parent's and staff's version
             
             
             
@@ -119,19 +118,19 @@ class StudentListTableViewController: UITableViewController {
     
   
   override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        // Find the cell that user tapped using cellForRowAtIndexPath
-        let cell = tableView.cellForRowAtIndexPath(indexPath)!
-        // Get the corresponding GreoceryItem by using the index path's row
-        var studentSelected = studentsWrapper[indexPath.row]
-        // Negate completed on the grocery item to toggle the status
-
-        let toggledCompletion = !studentSelected.studentArvInfo.arrived
-        // Call toggleCellCheckbox() update the visual properties of the cell
-        toggleCellCheckbox(cell, isCompleted: toggledCompletion)
-        // Passing a dictioary to update Firebase
-        studentSelected.studentArvInfo.ref?.updateChildValues([
-            "arrived": toggledCompletion
-            ])
+      // Find the cell that user tapped using cellForRowAtIndexPath
+      let cell = tableView.cellForRowAtIndexPath(indexPath)!
+      // Get the corresponding GreoceryItem by using the index path's row
+      var studentSelected = studentsWrapper[indexPath.row]
+    
+      // Staff Only: Negate completed on the student to toggle the status
+      if (self.user.isStaff == true){
+          let toggledCompletion = !studentSelected.studentArvInfo.arrived
+          // Call toggleCellCheckbox() update the visual properties of the cell
+          toggleCellCheckbox(cell, isCompleted: toggledCompletion)
+          // Passing a dictioary to update Firebase
+          studentSelected.studentArvInfo.ref?.updateChildValues(["arrived": toggledCompletion])
+      }
     }
     
   func toggleCellCheckbox(cell: UITableViewCell, isCompleted: Bool) {
@@ -161,7 +160,7 @@ class StudentListTableViewController: UITableViewController {
             let textField = alert.textFields![0] as! UITextField
             
             // Create a new student.
-            let student = Student(name: textField.text!, studentID: textField.text!, school: "", parentID: self.user.name, staffID: self.user.uid, routeID: self.user.routeID )
+            let student = Student(name: textField.text!, studentID: textField.text!, school: "", parentID: self.user.uid, staffID: self.user.uid, routeID: self.user.routeID )
 
             
             // 3 Create a studentRef
@@ -203,43 +202,45 @@ class StudentListTableViewController: UITableViewController {
             }
         }
     }
-
-   
-    
-    
-    
-    
-    
-    
     
     func authenticateUser(){
         self.dbComm.ref.observeAuthEventWithBlock { authData in
             if authData != nil {
-                print(authData.uid.lowercaseString + " if authdata is not null \n", terminator: "");
                 if (self.signUpMode == true){
-                    self.user = User(authData: authData, name:self.nameToPass, contactInfo: self.contactInfoToPass, routeID: "r3" )
+                    self.user = User(authData: authData, name:self.nameToPass, contactInfo: self.contactInfoToPass, routeID: "r3", isStaff: false )
+                    
+                    if (self.user.isStaff == true){
+                        self.queryString = "staffID"
+                    }else{
+                        self.queryString = "parentID"
+                    }
+                    
                     //1
                     let currentUserRef = self.dbComm.usersRef.childByAppendingPath(self.user.uid)
                     //2
                     currentUserRef.setValue(self.user.toAnyObject())
                     // 3
-                    // currentUserRef.onDisconnectRemoveValue()
                     self.dbComm.ref.unauth() // need this to switch between accounts
                     // unauth will not alter or remove the uid of the user
                     // 4
                     self.reloadTable();
                 }else{
                     let idCopy = authData.uid.lowercaseString
-                    print (idCopy + " id copy \n", terminator: "")
                     //1
                     self.dbComm.usersRef.queryOrderedByChild("uid").queryEqualToValue(idCopy).observeEventType(.Value, withBlock: { snapshot in
                         if (snapshot.hasChildren()){
-                            print("getting anything? \n", terminator: "")
                             for item in snapshot.children {
                                 self.user = User(snapshot: item as! FDataSnapshot)
+                                
                             }
                         }
-                        print(self.user.uid + " id before loading student info \n", terminator: "")
+                        
+                        if (self.user.isStaff == true){
+                            self.queryString = "staffID"
+                        }else{
+                            self.queryString = "parentID"
+                        }
+                        
                         self.loadStudentInfo()
                     })
                     // 3
@@ -253,8 +254,8 @@ class StudentListTableViewController: UITableViewController {
     }
 
     func loadStudentInfo(){
-        print(self.user.uid.lowercaseString, terminator: "")
-        self.dbComm.ref.queryOrderedByChild("staffID").queryEqualToValue(self.user.uid).observeEventType(.Value, withBlock: { snapshot in
+       
+        self.dbComm.ref.queryOrderedByChild(self.queryString).queryEqualToValue(self.user.uid).observeEventType(.Value, withBlock: { snapshot in
             var newStudents = [Student]()
             if (snapshot.hasChildren()){
             for item in snapshot.children {
@@ -275,31 +276,50 @@ class StudentListTableViewController: UITableViewController {
         }else{
             currentLogRef = self.dbComm.logRef.childByAppendingPath(self.currentDate).childByAppendingPath(AFTERNOON_PERIOD)
         }
-        
-        currentLogRef.queryOrderedByChild("staffID").queryEqualToValue(self.user.uid).observeEventType(.Value, withBlock: {
-            snapshot in
-            var sArvInfo = [StudentArvInfo]()
-            if (!snapshot.hasChildren()){
-                for item in self.students{
-                    var newSArvInfo = StudentArvInfo(arrived: false, key: item.key, studentID: item.studentID, staffID: item.staffID )
-                    let studentLogRef = currentLogRef.childByAppendingPath(newSArvInfo.studentID)
-                    newSArvInfo.ref = studentLogRef
-                    studentLogRef.setValue(newSArvInfo.toAnyObject())
+        if (self.user.isStaff == true){
+            currentLogRef.queryOrderedByChild(self.queryString).queryEqualToValue(self.user.uid).observeEventType(.Value, withBlock: {
+                snapshot in
+                var sArvInfo = [StudentArvInfo]()
+                if (!snapshot.hasChildren()){
+                    for item in self.students{
+                        var newSArvInfo = StudentArvInfo(arrived: false, key: item.key, studentID: item.studentID, staffID: item.staffID )
+                        let studentLogRef = currentLogRef.childByAppendingPath(newSArvInfo.studentID)
+                        newSArvInfo.ref = studentLogRef
+                        studentLogRef.setValue(newSArvInfo.toAnyObject())
+                    }
+                    self.logExsits = true
+                    self.studentArvInfo = sArvInfo
+                }else{
+                    for item in snapshot.children{
+                        let newSArvInfo = StudentArvInfo(snapshot: item as! FDataSnapshot)
+                        sArvInfo.append(newSArvInfo)
+                    }
+                    self.logExsits = true
+                    self.studentArvInfo = sArvInfo
+                    
                 }
-                self.logExsits = true
-                self.studentArvInfo = sArvInfo
-            }else{
-                for item in snapshot.children{
-                    let newSArvInfo = StudentArvInfo(snapshot: item as! FDataSnapshot)
-                    sArvInfo.append(newSArvInfo)
-                }
-                self.logExsits = true
-                self.studentArvInfo = sArvInfo
-                
+                self.reloadTable()
+            })
+        }else{
+            // if the user is a parent other than a staff
+            // create a counter for reload table after all student arv info finish loading
+            for everyStudent in self.students{
+                currentLogRef.queryOrderedByChild("studentID").queryEqualToValue(everyStudent.studentID).observeEventType(.Value, withBlock: {
+                    snapshot in
+                    if (!snapshot.hasChildren()){
+                        self.logExsits = false
+                    }else{
+                        for item in snapshot.children{
+                            let newSArvInfo = StudentArvInfo(snapshot: item as! FDataSnapshot)
+                            self.studentArvInfo.append(newSArvInfo)
+                        }
+                        self.logExsits = true
+                    }
+                    self.reloadTable()
+                })
             }
-            self.reloadTable()
-        })
-
+        }
+        
     }
     
     func reloadTable(){
