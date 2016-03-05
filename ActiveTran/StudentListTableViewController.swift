@@ -34,7 +34,6 @@ class StudentListTableViewController: UITableViewController {
     
     let date = NSDate()
     let calendar:NSCalendar = NSCalendar.currentCalendar()
-  //  let components = calendar.components(.CalendarUnitHour,fromDate:date)
     let components = calendar.components([.Hour], fromDate: date)
     let hour = components.hour
     if (hour > 0 && hour < 12){
@@ -42,6 +41,7 @@ class StudentListTableViewController: UITableViewController {
     }else{
         isMorning = false
     }
+
     
     let dateFormatter = NSDateFormatter()
     dateFormatter.dateFormat = "yyyy-MM-dd"
@@ -59,10 +59,10 @@ class StudentListTableViewController: UITableViewController {
     navigationItem.leftBarButtonItem = meetingInfoBarButtonItem
 }
     
-    override func viewDidAppear(animated: Bool) {
+  override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
 
-            self.authenticateUser()
+        self.authenticateUser()
  }
    
 
@@ -97,7 +97,8 @@ class StudentListTableViewController: UITableViewController {
     return true
   }
     
-    override func tableView(tableView: UITableView, editActionsForRowAtIndexPath indexPath: NSIndexPath) -> [UITableViewRowAction]? {
+
+  override func tableView(tableView: UITableView, editActionsForRowAtIndexPath indexPath: NSIndexPath) -> [UITableViewRowAction]? {
         let more = UITableViewRowAction(style: .Normal, title: "More") { (action, indexPath) in
             var studentSelected = self.studentsWrapper[indexPath.row]
             
@@ -117,16 +118,17 @@ class StudentListTableViewController: UITableViewController {
     }
     
   
-    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        // 1
+  override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        // Find the cell that user tapped using cellForRowAtIndexPath
         let cell = tableView.cellForRowAtIndexPath(indexPath)!
-        // 2
-        let studentSelected = studentsWrapper[indexPath.row]
-        // 3
+        // Get the corresponding GreoceryItem by using the index path's row
+        var studentSelected = studentsWrapper[indexPath.row]
+        // Negate completed on the grocery item to toggle the status
+
         let toggledCompletion = !studentSelected.studentArvInfo.arrived
-        // 4
+        // Call toggleCellCheckbox() update the visual properties of the cell
         toggleCellCheckbox(cell, isCompleted: toggledCompletion)
-        // 5
+        // Passing a dictioary to update Firebase
         studentSelected.studentArvInfo.ref?.updateChildValues([
             "arrived": toggledCompletion
             ])
@@ -155,19 +157,20 @@ class StudentListTableViewController: UITableViewController {
     let saveAction = UIAlertAction(title: "Save",
         style: .Default) { (action: UIAlertAction) -> Void in
             
-            // 1
-            let textField = alert.textFields![0] 
+            // Get the text field from the alert controller
+            let textField = alert.textFields![0] as! UITextField
             
-            // 2
+            // Create a new student.
             let student = Student(name: textField.text!, studentID: textField.text!, school: "", parentID: self.user.name, staffID: self.user.uid, routeID: self.user.routeID )
+
             
-            // 3 TODO, how should we name the students? student name + uid?
+            // 3 Create a studentRef
             let studentRef = self.dbComm.ref.childByAppendingPath(textField.text!.lowercaseString)
             
-            // 4
+            // use setValue to save data to the database
             studentRef.setValue(student.toAnyObject())
             
-            // now other than that we also need the id of the student to the staff's list
+            // we also need the id of the student to the staff's list
             
             
     }
