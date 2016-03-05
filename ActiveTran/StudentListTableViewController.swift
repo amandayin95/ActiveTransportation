@@ -34,7 +34,6 @@ class StudentListTableViewController: UITableViewController {
     
     let date = NSDate()
     let calendar:NSCalendar = NSCalendar.currentCalendar()
-  //  let components = calendar.components(.CalendarUnitHour,fromDate:date)
     let components = calendar.components([.Hour], fromDate: date)
     let hour = components.hour
     if (hour > 0 && hour < 12){
