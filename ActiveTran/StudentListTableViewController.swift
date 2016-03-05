@@ -42,9 +42,7 @@ class StudentListTableViewController: UITableViewController {
     }else{
         isMorning = false
     }
-    
-    var time = FirebaseServerValue.timestamp();
-    print time;
+
     
     let dateFormatter = NSDateFormatter()
     dateFormatter.dateFormat = "yyyy-MM-dd"
@@ -124,15 +122,10 @@ class StudentListTableViewController: UITableViewController {
   override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         // Find the cell that user tapped using cellForRowAtIndexPath
         let cell = tableView.cellForRowAtIndexPath(indexPath)!
-<<<<<<< HEAD
         // Get the corresponding GreoceryItem by using the index path's row
         var studentSelected = studentsWrapper[indexPath.row]
         // Negate completed on the grocery item to toggle the status
-=======
-        // 2
-        let studentSelected = studentsWrapper[indexPath.row]
-        // 3
->>>>>>> 1593cd6e2cfa853a52371c640657c111af26e693
+
         let toggledCompletion = !studentSelected.studentArvInfo.arrived
         // Call toggleCellCheckbox() update the visual properties of the cell
         toggleCellCheckbox(cell, isCompleted: toggledCompletion)
@@ -165,19 +158,12 @@ class StudentListTableViewController: UITableViewController {
     let saveAction = UIAlertAction(title: "Save",
         style: .Default) { (action: UIAlertAction) -> Void in
             
-<<<<<<< HEAD
             // Get the text field from the alert controller
             let textField = alert.textFields![0] as! UITextField
             
             // Create a new student.
-            let student = Student(name: textField.text!, studentID: textField.text!, school: "", arrived: false,  parentID: self.user.name, staffID: self.user.uid, routeID: self.user.routeID )
-=======
-            // 1
-            let textField = alert.textFields![0] 
-            
-            // 2
             let student = Student(name: textField.text!, studentID: textField.text!, school: "", parentID: self.user.name, staffID: self.user.uid, routeID: self.user.routeID )
->>>>>>> 1593cd6e2cfa853a52371c640657c111af26e693
+
             
             // 3 Create a studentRef
             let studentRef = self.dbComm.ref.childByAppendingPath(textField.text!.lowercaseString)
