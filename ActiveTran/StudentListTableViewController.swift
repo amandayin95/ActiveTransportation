@@ -22,7 +22,7 @@ class StudentListTableViewController: UITableViewController {
   var students = [Student]()
   var studentArvInfo = [StudentArvInfo]()
   var user: User!
-  var userCountBarButtonItem: UIBarButtonItem!
+  var meetingInfoBarButtonItem: UIBarButtonItem!
 
   // Mark: DbCommunicator
   var dbComm = DbCommunicator()
@@ -34,8 +34,8 @@ class StudentListTableViewController: UITableViewController {
     
     let date = NSDate()
     let calendar:NSCalendar = NSCalendar.currentCalendar()
-    let components = calendar.components(.CalendarUnitHour,fromDate:date)
-//    let components = [NSCalendar] calendar.components([.Hour], fromDate: date)
+  //  let components = calendar.components(.CalendarUnitHour,fromDate:date)
+    let components = calendar.components([.Hour], fromDate: date)
     let hour = components.hour
     if (hour > 0 && hour < 12){
         isMorning = true
@@ -54,10 +54,12 @@ class StudentListTableViewController: UITableViewController {
     // TODO what does this have to do with delete?
     tableView.allowsMultipleSelectionDuringEditing = false
     
-    // User Count
-    userCountBarButtonItem = UIBarButtonItem(title: "1", style: UIBarButtonItemStyle.Plain, target: self, action: Selector("userCountButtonDidTouch"))
-    userCountBarButtonItem.tintColor = UIColor.whiteColor()
-    navigationItem.leftBarButtonItem = userCountBarButtonItem
+    // meeting info display
+    meetingInfoBarButtonItem = UIBarButtonItem(title: "Meeting Info", style: UIBarButtonItemStyle.Plain, target: self, action: Selector("meetingInfoButtonDidTouch"))
+    
+    //TODO change font size
+    meetingInfoBarButtonItem.tintColor = UIColor.whiteColor()
+    navigationItem.leftBarButtonItem = meetingInfoBarButtonItem
 }
     
   override func viewDidAppear(animated: Bool) {
@@ -80,7 +82,7 @@ class StudentListTableViewController: UITableViewController {
   }
   
   override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-    let cell = tableView.dequeueReusableCellWithIdentifier("ItemCell") as! UITableViewCell
+    let cell = tableView.dequeueReusableCellWithIdentifier("ItemCell")! as UITableViewCell
     let studentSelected = studentsWrapper[indexPath.row]
     
     cell.textLabel?.text = studentSelected.student.name
@@ -98,9 +100,19 @@ class StudentListTableViewController: UITableViewController {
     return true
   }
     
-  func tableView(tableView: UITableView, editActionsForRowAtIndexPath indexPath: NSIndexPath) -> [UITableViewRowAction?] {
+
+  override func tableView(tableView: UITableView, editActionsForRowAtIndexPath indexPath: NSIndexPath) -> [UITableViewRowAction]? {
         let more = UITableViewRowAction(style: .Normal, title: "More") { (action, indexPath) in
-            print("called more tab! \n")
+            var studentSelected = self.studentsWrapper[indexPath.row]
+            
+            
+            
+            
+            
+            
+            
+            
+            
         }
         
         more.backgroundColor = UIColor.grayColor()
@@ -112,9 +124,15 @@ class StudentListTableViewController: UITableViewController {
   override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         // Find the cell that user tapped using cellForRowAtIndexPath
         let cell = tableView.cellForRowAtIndexPath(indexPath)!
+<<<<<<< HEAD
         // Get the corresponding GreoceryItem by using the index path's row
         var studentSelected = studentsWrapper[indexPath.row]
         // Negate completed on the grocery item to toggle the status
+=======
+        // 2
+        let studentSelected = studentsWrapper[indexPath.row]
+        // 3
+>>>>>>> 1593cd6e2cfa853a52371c640657c111af26e693
         let toggledCompletion = !studentSelected.studentArvInfo.arrived
         // Call toggleCellCheckbox() update the visual properties of the cell
         toggleCellCheckbox(cell, isCompleted: toggledCompletion)
@@ -140,18 +158,26 @@ class StudentListTableViewController: UITableViewController {
   
   @IBAction func addButtonDidTouch(sender: AnyObject) {
     // Alert View for input
-    var alert = UIAlertController(title: "Student",
+    let alert = UIAlertController(title: "Student",
       message: "Add a student",
       preferredStyle: .Alert)
     
     let saveAction = UIAlertAction(title: "Save",
-        style: .Default) { (action: UIAlertAction!) -> Void in
+        style: .Default) { (action: UIAlertAction) -> Void in
             
+<<<<<<< HEAD
             // Get the text field from the alert controller
             let textField = alert.textFields![0] as! UITextField
             
             // Create a new student.
             let student = Student(name: textField.text!, studentID: textField.text!, school: "", arrived: false,  parentID: self.user.name, staffID: self.user.uid, routeID: self.user.routeID )
+=======
+            // 1
+            let textField = alert.textFields![0] 
+            
+            // 2
+            let student = Student(name: textField.text!, studentID: textField.text!, school: "", parentID: self.user.name, staffID: self.user.uid, routeID: self.user.routeID )
+>>>>>>> 1593cd6e2cfa853a52371c640657c111af26e693
             
             // 3 Create a studentRef
             let studentRef = self.dbComm.ref.childByAppendingPath(textField.text!.lowercaseString)
@@ -164,7 +190,7 @@ class StudentListTableViewController: UITableViewController {
             
     }
     let cancelAction = UIAlertAction(title: "Cancel",
-      style: .Default) { (action: UIAlertAction!) -> Void in
+      style: .Default) { (action: UIAlertAction) -> Void in
     }
     
     alert.addTextFieldWithConfigurationHandler {
@@ -179,14 +205,32 @@ class StudentListTableViewController: UITableViewController {
       completion: nil)
   }
   
-  func userCountButtonDidTouch() {
-    performSegueWithIdentifier(ListToUsers, sender: nil)
+  func meetingInfoButtonDidTouch() {
+    performSegueWithIdentifier(self.ListToUsers, sender: nil)
   }
+    
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject!) {
+        if (segue.identifier == "ListToUsers") {
+            let nav = segue.destinationViewController as! MeetingInfoTableViewController
+            if (self.user != nil){
+                nav.user = self.user
+            }
+        }
+    }
+
+   
+    
+    
+    
+    
+    
+    
     
     func authenticateUser(){
         self.dbComm.ref.observeAuthEventWithBlock { authData in
             if authData != nil {
-                print(authData.uid.lowercaseString + " if authdata is not null \n");
+                print(authData.uid.lowercaseString + " if authdata is not null \n", terminator: "");
                 if (self.signUpMode == true){
                     self.user = User(authData: authData, name:self.nameToPass, contactInfo: self.contactInfoToPass, routeID: "r3" )
                     //1
@@ -201,16 +245,16 @@ class StudentListTableViewController: UITableViewController {
                     self.reloadTable();
                 }else{
                     let idCopy = authData.uid.lowercaseString
-                    print (idCopy + " id copy \n")
+                    print (idCopy + " id copy \n", terminator: "")
                     //1
                     self.dbComm.usersRef.queryOrderedByChild("uid").queryEqualToValue(idCopy).observeEventType(.Value, withBlock: { snapshot in
                         if (snapshot.hasChildren()){
-                            print("getting anything? \n")
+                            print("getting anything? \n", terminator: "")
                             for item in snapshot.children {
                                 self.user = User(snapshot: item as! FDataSnapshot)
                             }
                         }
-                        print(self.user.uid + " id before loading student info \n")
+                        print(self.user.uid + " id before loading student info \n", terminator: "")
                         self.loadStudentInfo()
                     })
                     // 3
@@ -224,12 +268,12 @@ class StudentListTableViewController: UITableViewController {
     }
 
     func loadStudentInfo(){
-        print(self.user.uid.lowercaseString)
+        print(self.user.uid.lowercaseString, terminator: "")
         self.dbComm.ref.queryOrderedByChild("staffID").queryEqualToValue(self.user.uid).observeEventType(.Value, withBlock: { snapshot in
             var newStudents = [Student]()
             if (snapshot.hasChildren()){
             for item in snapshot.children {
-                var newStudent = Student(snapshot: item as! FDataSnapshot)
+                let newStudent = Student(snapshot: item as! FDataSnapshot)
                 newStudents.append(newStudent)
             }
             }
@@ -252,8 +296,8 @@ class StudentListTableViewController: UITableViewController {
             var sArvInfo = [StudentArvInfo]()
             if (!snapshot.hasChildren()){
                 for item in self.students{
-                    var newSArvInfo = StudentArvInfo(arrived: item.arrived, key: item.key, studentID: item.studentID, staffID: item.staffID )
-                    var studentLogRef = currentLogRef.childByAppendingPath(newSArvInfo.studentID)
+                    var newSArvInfo = StudentArvInfo(arrived: false, key: item.key, studentID: item.studentID, staffID: item.staffID )
+                    let studentLogRef = currentLogRef.childByAppendingPath(newSArvInfo.studentID)
                     newSArvInfo.ref = studentLogRef
                     studentLogRef.setValue(newSArvInfo.toAnyObject())
                 }
@@ -261,7 +305,7 @@ class StudentListTableViewController: UITableViewController {
                 self.studentArvInfo = sArvInfo
             }else{
                 for item in snapshot.children{
-                    var newSArvInfo = StudentArvInfo(snapshot: item as! FDataSnapshot)
+                    let newSArvInfo = StudentArvInfo(snapshot: item as! FDataSnapshot)
                     sArvInfo.append(newSArvInfo)
                 }
                 self.logExsits = true
@@ -280,7 +324,7 @@ class StudentListTableViewController: UITableViewController {
             for i in 1...self.studentArvInfo.count{
                 for j in 1...self.students.count{
                     if (self.students[j-1].studentID == self.studentArvInfo[i-1].studentID){
-                        var newSWrapper = StudentWrapper(student: self.students[j-1], studentArvInfo: self.studentArvInfo[i-1])
+                        let newSWrapper = StudentWrapper(student: self.students[j-1], studentArvInfo: self.studentArvInfo[i-1])
                         sWrapper.append(newSWrapper)
                     }
                 }
