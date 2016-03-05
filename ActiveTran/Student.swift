@@ -10,7 +10,7 @@ struct Student {
   let staffID: String!
   let routeID: String!
   let school: String!
-  let ref: Firebase?
+  // let ref: Firebase?
   var arrived: Bool!
   
   // Initialize from arbitrary data
@@ -23,7 +23,7 @@ struct Student {
     self.parentID = parentID;
     self.staffID = staffID;
     self.routeID = routeID;
-    self.ref = nil
+    // self.ref = nil
   }
   
   init(snapshot: FDataSnapshot) {
@@ -35,7 +35,7 @@ struct Student {
     parentID = snapshot.value["parentID"] as! String
     staffID = snapshot.value["staffID"] as! String
     routeID = snapshot.value["routeID"] as! String
-    ref = snapshot.ref
+    // ref = snapshot.ref
   }
   
   func toAnyObject() -> AnyObject {
