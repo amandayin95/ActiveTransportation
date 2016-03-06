@@ -80,7 +80,9 @@ class StudentListTableViewController: UITableViewController {
   // MARK: UITableView Delegate methods
   
   override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    
     return studentsWrapper.count
+
   }
   
   override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
@@ -202,6 +204,7 @@ class StudentListTableViewController: UITableViewController {
             let nav = segue.destinationViewController as! MeetingInfoTableViewController
             if (self.user != nil){
                 nav.user = self.user
+                nav.students = self.students
             }
         } else if (segue.identifier == "ListToContactInfo") {
             let nav = segue.destinationViewController as! ContactInfoViewController
@@ -263,7 +266,8 @@ class StudentListTableViewController: UITableViewController {
 
     func loadStudentInfo(){
        
-        self.dbComm.ref.queryOrderedByChild(self.queryString).queryEqualToValue(self.user.uid).observeEventType(.Value, withBlock: { snapshot in
+        self.dbComm.ref.queryOrderedByChild(self.queryString).queryEqualToValue(self.user.uid).observeEventType(.Value, withBlock: {
+            snapshot in
             var newStudents = [Student]()
             if (snapshot.hasChildren()){
             for item in snapshot.children {
@@ -284,6 +288,7 @@ class StudentListTableViewController: UITableViewController {
         }else{
             currentLogRef = self.dbComm.logRef.childByAppendingPath(self.currentDate).childByAppendingPath(AFTERNOON_PERIOD)
         }
+        
         if (self.user.isStaff == true){
             currentLogRef.queryOrderedByChild(self.queryString).queryEqualToValue(self.user.uid).observeEventType(.Value, withBlock: {
                 snapshot in
@@ -310,7 +315,6 @@ class StudentListTableViewController: UITableViewController {
             })
         }else{
             // if the user is a parent other than a staff
-            // create a counter for reload table after all student arv info finish loading
             for everyStudent in self.students{
                 currentLogRef.queryOrderedByChild("studentID").queryEqualToValue(everyStudent.studentID).observeEventType(.Value, withBlock: {
                     snapshot in
@@ -345,7 +349,5 @@ class StudentListTableViewController: UITableViewController {
         }
         self.studentsWrapper = sWrapper
         self.tableView.reloadData()
-
     }
-    
 }
