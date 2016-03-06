@@ -1,13 +1,11 @@
-//
-//  ContactInfoViewController.swift
-//  ActiveTransportation
-//
-//  Created by Xiaoyang Qian on 3/5/16.
-//
-//
-
-
 import UIKit
+
+/*
+ * ContactInfoViewController: Controller for detailed info on parents' contact information.
+ * Connected by push segue from student list.
+ * A student is passed in by segue based on what row in student list is selected.
+ * Connects to Firebase to query parents' contact info.
+ */
 
 class ContactInfoViewController: UITableViewController {
     
