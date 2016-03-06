@@ -2,12 +2,13 @@
 import UIKit
 
 class MeetingInfoTableViewController: UITableViewController {
-  
+    
+      
     var busRoutes = [BusRoute]()
+    var students = [Student]()
     var user: User!
     
-    // only used when the user is parent
-    var childrenForParentView = [Student]()
+    var meetingInfoWrapperList = [MeetingInfoWrapper]()
     
     // Mark: DbCommunicator
     var dbComm = DbCommunicator()
@@ -15,8 +16,6 @@ class MeetingInfoTableViewController: UITableViewController {
     // MARK: UIViewController Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        
         
         if (self.user.isStaff == true){
             dbComm.routeRef.queryOrderedByChild("routeID").queryEqualToValue(self.user.routeID).observeEventType(.Value, withBlock: {   snapshot in
@@ -28,10 +27,11 @@ class MeetingInfoTableViewController: UITableViewController {
                     }
                 }
                 self.busRoutes = busRoutesFromDB
+                self.reloadTable()
             })
         }else if (self.user.isStaff == false){
-            for child in childrenForParentView {
-                dbComm.routeRef.queryOrderedByChild("routeID").queryEqualToValue(child.routeID).observeEventType(.Value, withBlock: {   snapshot in
+            for item in students {
+                dbComm.routeRef.queryOrderedByChild("routeID").queryEqualToValue(item.routeID).observeEventType(.Value, withBlock: {   snapshot in
                     
                     if (snapshot.hasChildren()){
                         for item in snapshot.children {
@@ -39,6 +39,7 @@ class MeetingInfoTableViewController: UITableViewController {
                             self.busRoutes.append(routeFromDB)
                         }
                     }
+                    self.reloadTable()
                 })
             }
         }
@@ -46,8 +47,6 @@ class MeetingInfoTableViewController: UITableViewController {
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
-        
-        self.tableView.reloadData()
     }
 
 
@@ -60,12 +59,35 @@ class MeetingInfoTableViewController: UITableViewController {
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> MeetingInfoCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("MeetingInfoCell")! as! MeetingInfoCell
         
-        cell.infoOwnerLabel?.text = "Showing details for AcTran staff member: " + user.name
-        cell.meetingLocationLabel?.text = busRoutes[indexPath.row].meetingLocation
-        cell.meetingTimeLabel?.text = busRoutes[indexPath.row].meetingTime
-    
+        if (user.isStaff == true){
+            cell.infoOwnerLabel?.text = "Showing details for AcTran staff member: " + user.name
+            cell.meetingLocationLabel?.text = busRoutes[indexPath.row].meetingLocation
+            cell.meetingTimeLabel?.text = busRoutes[indexPath.row].meetingTime
+        }else{
+            cell.infoOwnerLabel?.text = "Showing details for student: " + meetingInfoWrapperList[indexPath.row].student.name
+            cell.meetingLocationLabel?.text = meetingInfoWrapperList[indexPath.row].busRoute.meetingLocation
+            cell.meetingTimeLabel?.text = meetingInfoWrapperList[indexPath.row].busRoute.meetingTime
+        }
         return cell
     }
 
-    
+    func reloadTable(){
+        
+        if (user.isStaff == false){
+            var mWrapper = [MeetingInfoWrapper]()
+            if (self.students.count > 0 && self.busRoutes.count > 0){
+                for i in 1...self.busRoutes.count{
+                    for j in 1...self.students.count{
+                        if (self.students[j-1].routeID == self.busRoutes[i-1].routeID){
+                            let newInfoWrapper = MeetingInfoWrapper(student: self.students[j-1], busRoute: self.busRoutes[i-1])
+                            mWrapper.append(newInfoWrapper)
+                        }
+                        continue
+                    }
+                }
+            }
+            self.meetingInfoWrapperList = mWrapper
+        }
+        self.tableView.reloadData()
+    }
 }
