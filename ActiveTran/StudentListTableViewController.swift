@@ -202,6 +202,10 @@ class StudentListTableViewController: UITableViewController {
             let nav = segue.destinationViewController as! MeetingInfoTableViewController
             if (self.user != nil){
                 nav.user = self.user
+                
+                if (self.user.isStaff == false){
+                    nav.childrenForParentView = self.students
+                }
             }
         } else if (segue.identifier == "ListToContactInfo") {
             let nav = segue.destinationViewController as! ContactInfoViewController
