@@ -12,8 +12,9 @@ class MeetingInfoTableViewController: UITableViewController {
   // MARK: UIViewController Lifecycle
   override func viewDidLoad() {
     super.viewDidLoad()
-    
-    dbComm.routeRef.queryOrderedByChild("routeID").queryEqualToValue(self.user.routeID).observeEventType(.Value, withBlock: { snapshot in
+
+    if (self.user.isStaff == true){
+        dbComm.routeRef.queryOrderedByChild("routeID").queryEqualToValue(self.user.routeID).observeEventType(.Value, withBlock: { snapshot in
             var busRoutesFromDB = [BusRoute]()
             if (snapshot.hasChildren()){
                 for item in snapshot.children {
@@ -23,6 +24,8 @@ class MeetingInfoTableViewController: UITableViewController {
             }
             self.busRoutes = busRoutesFromDB
         })
+
+    }
     
   }
     

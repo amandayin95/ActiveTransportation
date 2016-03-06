@@ -31,7 +31,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "327"
             endingLineNumber = "327"
-            landmarkName = "reloadTable()"
+            landmarkName = "loadStudentArvInfo()"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
