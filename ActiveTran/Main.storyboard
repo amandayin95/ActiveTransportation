@@ -83,15 +83,16 @@
                                     <action selector="loginDidTouch:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="yIv-aa-I82"/>
                                 </connections>
                             </button>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Active Trans" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="XlR-6D-pNE">
-                                <rect key="frame" x="92" y="53" width="418" height="88"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Active Transportation" lineBreakMode="wordWrap" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="XlR-6D-pNE">
+                                <rect key="frame" x="92" y="53" width="426" height="88"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="252" id="D2O-pG-5WL"/>
                                     <constraint firstAttribute="height" constant="59" id="gPQ-9y-BZM"/>
                                 </constraints>
-                                <fontDescription key="fontDescription" name="Avenir-Light" family="Avenir" pointSize="43"/>
+                                <fontDescription key="fontDescription" name="Avenir-Light" family="Avenir" pointSize="35"/>
                                 <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <nil key="highlightedColor"/>
+                                <size key="shadowOffset" width="0.0" height="-2"/>
                             </label>
                         </subviews>
                         <color key="backgroundColor" red="0.34901960784313724" green="0.70196078431372544" blue="0.56470588235294117" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -164,7 +165,51 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="34B-UD-7ew" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2663" y="399"/>
+            <point key="canvasLocation" x="2401" y="405"/>
+        </scene>
+        <!--Contact Info-->
+        <scene sceneID="yUs-hS-UeW">
+            <objects>
+                <tableViewController title="Contact Info" id="a3D-3x-hHE" customClass="ContactInfoViewController" customModule="ActiveTransportation" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" id="NHk-P1-YaB">
+                        <rect key="frame" x="0.0" y="64" width="600" height="536"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <prototypes>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="ContactInfoCell" textLabel="noo-SZ-HQc" detailTextLabel="4qF-Sy-g5p" style="IBUITableViewCellStyleSubtitle" id="5SK-16-N49">
+                                <rect key="frame" x="0.0" y="28" width="600" height="44"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="5SK-16-N49" id="7fr-eB-0Uv">
+                                    <rect key="frame" x="0.0" y="0.0" width="600" height="43.5"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <subviews>
+                                        <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="noo-SZ-HQc">
+                                            <rect key="frame" x="15" y="6" width="31.5" height="19.5"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                            <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                        <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Subtitle" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="4qF-Sy-g5p">
+                                            <rect key="frame" x="15" y="25.5" width="40.5" height="13.5"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="11"/>
+                                            <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                    </subviews>
+                                </tableViewCellContentView>
+                            </tableViewCell>
+                        </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="a3D-3x-hHE" id="4yG-b3-yOt"/>
+                            <outlet property="delegate" destination="a3D-3x-hHE" id="fmh-bb-R0N"/>
+                        </connections>
+                    </tableView>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="j9B-00-JmC" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1716" y="1145"/>
         </scene>
         <!--Student List-->
         <scene sceneID="GDd-Ja-sb5">
@@ -215,11 +260,12 @@
                     </navigationItem>
                     <connections>
                         <segue destination="oUo-Uh-r42" kind="show" identifier="ListToUsers" id="NRC-oz-J58"/>
+                        <segue destination="a3D-3x-hHE" kind="show" identifier="ListToContactInfo" id="hCp-oB-t1i"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="fRX-FK-8Yw" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1865" y="399"/>
+            <point key="canvasLocation" x="1716" y="405"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="5Ek-Z0-CEa">

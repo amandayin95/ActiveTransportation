@@ -5,6 +5,7 @@ class StudentListTableViewController: UITableViewController {
 
   // MARK: Constants
   let ListToUsers = "ListToUsers"
+  let ListToContactInfo = "ListToContactInfo"
   let MORNING_PERIOD = "morning"
   let AFTERNOON_PERIOD = "afternoon"
     
@@ -17,6 +18,9 @@ class StudentListTableViewController: UITableViewController {
   var isMorning = true
   var currentDate : String!
   
+  // MARK: Selected student
+  var studentSelected: Student!
+    
   // MARK: Properties
   var studentsWrapper = [StudentWrapper]()
   var students = [Student]()
@@ -98,16 +102,15 @@ class StudentListTableViewController: UITableViewController {
     
 
   override func tableView(tableView: UITableView, editActionsForRowAtIndexPath indexPath: NSIndexPath) -> [UITableViewRowAction]? {
-        let more = UITableViewRowAction(style: .Normal, title: "More") { (action, indexPath) in
-            var studentSelected = self.studentsWrapper[indexPath.row]
+            let more = UITableViewRowAction(style: .Normal, title: "More") { (action, indexPath) in
+            self.studentSelected = self.studentsWrapper[indexPath.row].student
             
-            
+            // display student contact information if the user is staff
+            if (self.user.isStaff!) {
+                self.performSegueWithIdentifier(self.ListToContactInfo, sender: nil)
+            }
             
             // TODO more does different things in parent's and staff's version
-            
-            
-            
-            
             
         }
         
@@ -189,9 +192,9 @@ class StudentListTableViewController: UITableViewController {
       completion: nil)
   }
   
-  func meetingInfoButtonDidTouch() {
-    performSegueWithIdentifier(self.ListToUsers, sender: nil)
-  }
+    func meetingInfoButtonDidTouch() {
+        performSegueWithIdentifier(self.ListToUsers, sender: nil)
+    }
     
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject!) {
@@ -199,6 +202,11 @@ class StudentListTableViewController: UITableViewController {
             let nav = segue.destinationViewController as! MeetingInfoTableViewController
             if (self.user != nil){
                 nav.user = self.user
+            }
+        } else if (segue.identifier == "ListToContactInfo") {
+            let nav = segue.destinationViewController as! ContactInfoViewController
+            if (self.user != nil) {
+                nav.studentSelected = self.studentSelected
             }
         }
     }

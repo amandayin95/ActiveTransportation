@@ -6,8 +6,8 @@ class MeetingInfoTableViewController: UITableViewController {
   var busRoutes = [BusRoute]()
   var user: User!
     
-   // Mark: DbCommunicator
-   var dbComm = DbCommunicator()
+  // Mark: DbCommunicator
+  var dbComm = DbCommunicator()
   
   // MARK: UIViewController Lifecycle
   override func viewDidLoad() {

@@ -42,7 +42,7 @@ class LoginViewController: UIViewController {
     }
     
   // MARK: Actions
-    @IBAction func loginDidTouch(sender: AnyObject) {
+  @IBAction func loginDidTouch(sender: AnyObject) {
         dbComm.ref.authUser(textFieldLoginEmail.text, password: textFieldLoginPassword.text,
             withCompletionBlock: { (error, auth) in
                 
@@ -118,7 +118,7 @@ class LoginViewController: UIViewController {
   }
     
     
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject!) {
+  override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject!) {
         if (segue.identifier == "LoginToList") {
             let nav = segue.destinationViewController as! UINavigationController
             let svc = nav.topViewController as! StudentListTableViewController
@@ -129,7 +129,7 @@ class LoginViewController: UIViewController {
             svc.signUpMode = self.signUpMode
             }
         }
-    }
+  }
 
 }
 
