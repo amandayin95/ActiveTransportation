@@ -16,6 +16,8 @@ class MeetingInfoTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        
+        
         if (self.user.isStaff == true){
             dbComm.routeRef.queryOrderedByChild("routeID").queryEqualToValue(self.user.routeID).observeEventType(.Value, withBlock: {   snapshot in
                 var busRoutesFromDB = [BusRoute]()
@@ -55,21 +57,15 @@ class MeetingInfoTableViewController: UITableViewController {
         return busRoutes.count
     }
   
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("MeetingInfoCell")! as UITableViewCell
-    
-        cell.textLabel?.text = busRoutes[indexPath.row].meetingLocation
-        cell.detailTextLabel?.text = busRoutes[indexPath.row].meetingTime
+    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> MeetingInfoCell {
+        let cell = tableView.dequeueReusableCellWithIdentifier("MeetingInfoCell")! as! MeetingInfoCell
+        
+        cell.infoOwnerLabel?.text = "Showing details for AcTran staff member: " + user.name
+        cell.meetingLocationLabel?.text = busRoutes[indexPath.row].meetingLocation
+        cell.meetingTimeLabel?.text = busRoutes[indexPath.row].meetingTime
     
         return cell
     }
-//    for i in 1...self.childrenForParentView.count{
-//    for j in 1...self.busRoutes.count{
-//    if (self.busRoutes[j-1].routeID == self.childrenForParentView[i-1].routeID){
-//    let newSWrapper = StudentWrapper(student: self.students[j-1], studentArvInfo: self.studentArvInfo[i-1])
-//    sWrapper.append(newSWrapper)
-//    }
-//    }
-//    }
+
     
 }
