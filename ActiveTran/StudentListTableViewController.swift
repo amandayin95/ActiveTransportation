@@ -106,14 +106,7 @@ class StudentListTableViewController: UITableViewController {
   override func tableView(tableView: UITableView, editActionsForRowAtIndexPath indexPath: NSIndexPath) -> [UITableViewRowAction]? {
             let more = UITableViewRowAction(style: .Normal, title: "More") { (action, indexPath) in
             self.studentSelected = self.studentsWrapper[indexPath.row].student
-            
-            // display student contact information if the user is staff
-            if (self.user.isStaff!) {
-                self.performSegueWithIdentifier(self.ListToContactInfo, sender: nil)
-            }
-            
-            // TODO more does different things in parent's and staff's version
-            
+            self.performSegueWithIdentifier(self.ListToContactInfo, sender: nil)
         }
         
         more.backgroundColor = UIColor.grayColor()
@@ -210,7 +203,8 @@ class StudentListTableViewController: UITableViewController {
             let nav = segue.destinationViewController as! ContactInfoViewController
             if (self.user != nil) {
                 nav.studentSelected = self.studentSelected
-            }
+                nav.user = self.user
+        }
         }
     }
     

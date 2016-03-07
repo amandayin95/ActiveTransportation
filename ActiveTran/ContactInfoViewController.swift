@@ -11,23 +11,31 @@ class ContactInfoViewController: UITableViewController {
     
     // MARK: Property passed in through segue
     var studentSelected:Student!
-    
+    var user:User!
+    var queryString:String!
     // MARK: DbCommunicator
     var dbComm = DbCommunicator()
     
     // MARK: Parent list fetched from db
-    var parents = [User!]()
+    var users = [User!]()
     
     // MARK: UIViewController Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        if (self.user.isStaff == true){
+            self.queryString = self.studentSelected.parentID
+        } else {
+            self.queryString = self.studentSelected.staffID
+        }
+
         
-        dbComm.usersRef.queryOrderedByChild("uid").queryEqualToValue(self.studentSelected.parentID).observeEventType(.Value, withBlock:{ snapshot in
+        dbComm.usersRef.queryOrderedByChild("uid").queryEqualToValue(self.queryString).observeEventType(.Value, withBlock:{ snapshot in
                 // a list to store the parents for the given student
                 if (snapshot.hasChildren()){
                     for item in snapshot.children {
-                        let parent = User(snapshot: item as! FDataSnapshot)
-                        self.parents.append(parent)
+                        let user = User(snapshot: item as! FDataSnapshot)
+                        self.users.append(user)
                     }
                 }
                 })
@@ -44,14 +52,14 @@ class ContactInfoViewController: UITableViewController {
     // MARK: UITableView Delegate methods
     
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return parents.count
+        return users.count
     }
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("ContactInfoCell")! as UITableViewCell
         
-        cell.textLabel?.text = parents[indexPath.row].name
-        cell.detailTextLabel?.text = parents[indexPath.row].contactInfo
+        cell.textLabel?.text = users[indexPath.row].name
+        cell.detailTextLabel?.text = users[indexPath.row].contactInfo
         
         return cell
         
