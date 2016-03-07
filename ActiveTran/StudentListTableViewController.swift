@@ -331,15 +331,37 @@ class StudentListTableViewController: UITableViewController {
     func reloadTable(){
         var sWrapper = [StudentWrapper]()
         if (self.students.count > 0 && self.studentArvInfo.count > 0){
-            // use the information from the log
-            for i in 1...self.studentArvInfo.count{
+            if (user.isStaff == true){
+                // use the information from the log
+                for i in 1...self.studentArvInfo.count{
+                    for j in 1...self.students.count{
+                        if (self.students[j-1].studentID == self.studentArvInfo[i-1].studentID){
+                            let newSWrapper = StudentWrapper(student: self.students[j-1], studentArvInfo: self.studentArvInfo[i-1])
+                            sWrapper.append(newSWrapper)
+                        }
+                    }
+                }
+            }else{
+                // handle the case where staff have not yet logged in so some student Arv info is missing
                 for j in 1...self.students.count{
-                    if (self.students[j-1].studentID == self.studentArvInfo[i-1].studentID){
-                        let newSWrapper = StudentWrapper(student: self.students[j-1], studentArvInfo: self.studentArvInfo[i-1])
+                    var foundMatch = false
+                    for i in 1...self.studentArvInfo.count{
+                        if (self.students[j-1].studentID == self.studentArvInfo[i-1].studentID){
+                            foundMatch = true
+                            let newSWrapper = StudentWrapper(student: self.students[j-1], studentArvInfo: self.studentArvInfo[i-1])
+                            sWrapper.append(newSWrapper)
+                            continue
+                        }
+                    }
+                    if (foundMatch == false){
+                        // if we did not find matching student arv info we create local ones for parent to view 
+                        var fakeStudentArvInfo = StudentArvInfo(arrived: false, key:"", studentID: self.students[j-1].studentID, staffID: self.students[j-1].staffID)
+                        let newSWrapper = StudentWrapper(student: self.students[j-1], studentArvInfo: fakeStudentArvInfo)
                         sWrapper.append(newSWrapper)
                     }
                 }
             }
+        
         }
         self.studentsWrapper = sWrapper
         self.tableView.reloadData()
