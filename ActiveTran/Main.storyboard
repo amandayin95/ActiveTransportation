@@ -139,12 +139,6 @@
                                     <rect key="frame" x="0.0" y="0.0" width="600" height="99"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
-                                        <label opaque="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="InfoOwner" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="jVc-PZ-3Te">
-                                            <rect key="frame" x="20" y="10" width="500" height="21"/>
-                                            <accessibility key="accessibilityConfiguration" identifier="infoOwnerLabel" label="infoOwner"/>
-                                            <fontDescription key="fontDescription" name="Avenir-Book" family="Avenir" pointSize="12"/>
-                                            <nil key="highlightedColor"/>
-                                        </label>
                                         <label opaque="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="MeetingTime" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="uhD-mf-cyV">
                                             <rect key="frame" x="20" y="68" width="218" height="21"/>
                                             <accessibility key="accessibilityConfiguration" identifier="meetingTimeLabel" label="meetingTime"/>
@@ -155,6 +149,12 @@
                                             <rect key="frame" x="20" y="37" width="218" height="21"/>
                                             <accessibility key="accessibilityConfiguration" identifier="meetingLocationLabel" label="meetingLocation"/>
                                             <fontDescription key="fontDescription" name="Avenir-Book" family="Avenir" pointSize="16"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                        <label opaque="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="InfoOwner" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="jVc-PZ-3Te">
+                                            <rect key="frame" x="20" y="8" width="500" height="21"/>
+                                            <accessibility key="accessibilityConfiguration" identifier="infoOwnerLabel" label="infoOwner"/>
+                                            <fontDescription key="fontDescription" name="Avenir-Book" family="Avenir" pointSize="12"/>
                                             <nil key="highlightedColor"/>
                                         </label>
                                     </subviews>
