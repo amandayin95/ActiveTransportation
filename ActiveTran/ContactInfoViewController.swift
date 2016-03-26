@@ -58,8 +58,14 @@ class ContactInfoViewController: UITableViewController {
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("ContactInfoCell")! as UITableViewCell
         
+        var contactType : String!
+        if (self.user.isStaff == true){
+            contactType = "Parent contact info "
+        } else {
+            contactType = "Staff contact info "
+        }
         cell.textLabel?.text = users[indexPath.row].name
-        cell.detailTextLabel?.text = users[indexPath.row].contactInfo
+        cell.detailTextLabel?.text = contactType + users[indexPath.row].contactInfo
         
         return cell
         
