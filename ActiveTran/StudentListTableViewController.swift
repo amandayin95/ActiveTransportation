@@ -1,7 +1,8 @@
 
 import UIKit
+import MessageUI
 
-class StudentListTableViewController: UITableViewController {
+class StudentListTableViewController: UITableViewController, MFMailComposeViewControllerDelegate{
 
   // MARK: Constants
   let ListToUsers = "ListToUsers"
@@ -35,40 +36,39 @@ class StudentListTableViewController: UITableViewController {
   // MARK: UIViewController Lifecycle
   
   override func viewDidLoad() {
-    super.viewDidLoad()
-    
-    let date = NSDate()
-    let calendar:NSCalendar = NSCalendar.currentCalendar()
-    let components = calendar.components([.Hour], fromDate: date)
-    let hour = components.hour
-    if (hour > 0 && hour < 12){
-        isMorning = true
-    }else{
-        isMorning = false
-    }
+        super.viewDidLoad()
+        
+        let date = NSDate()
+        let calendar:NSCalendar = NSCalendar.currentCalendar()
+        let components = calendar.components([.Hour], fromDate: date)
+        let hour = components.hour
+        if (hour > 0 && hour < 12){
+            isMorning = true
+        }else{
+            isMorning = false
+        }
 
-    
-    let dateFormatter = NSDateFormatter()
-    dateFormatter.dateFormat = "yyyy-MM-dd"
-    self.currentDate =  dateFormatter.stringFromDate(date)
-    
-    // Set up swipe to delete  
-    // TODO what does this have to do with delete?
-    tableView.allowsMultipleSelectionDuringEditing = false
-    
-    // meeting info display
-    meetingInfoBarButtonItem = UIBarButtonItem(title: "Meeting Info", style: UIBarButtonItemStyle.Plain, target: self, action: Selector("meetingInfoButtonDidTouch"))
-    
-    //TODO change font size
-    meetingInfoBarButtonItem.tintColor = UIColor.whiteColor()
-    navigationItem.leftBarButtonItem = meetingInfoBarButtonItem
-}
+        
+        let dateFormatter = NSDateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        self.currentDate =  dateFormatter.stringFromDate(date)
+        
+        // Set up swipe to delete  
+        // TODO what does this have to do with delete?
+        tableView.allowsMultipleSelectionDuringEditing = false
+        
+        // meeting info display
+        meetingInfoBarButtonItem = UIBarButtonItem(title: "Meeting Info", style: UIBarButtonItemStyle.Plain, target: self, action: Selector("meetingInfoButtonDidTouch"))
+        
+        //TODO change font size
+        meetingInfoBarButtonItem.tintColor = UIColor.whiteColor()
+        navigationItem.leftBarButtonItem = meetingInfoBarButtonItem
+    }
     
   override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
-
         self.authenticateUser()
- }
+  }
    
 
     
@@ -144,48 +144,36 @@ class StudentListTableViewController: UITableViewController {
   }
   
   // MARK: Add Item
-  
-  @IBAction func addButtonDidTouch(sender: AnyObject) {
-    // Alert View for input
-    let alert = UIAlertController(title: "Student",
-      message: "Add a student",
-      preferredStyle: .Alert)
+  // Button to email page
+  @IBAction func emailButtonDidTouch(sender: AnyObject) {
     
-    let saveAction = UIAlertAction(title: "Save",
-        style: .Default) { (action: UIAlertAction) -> Void in
-            
-            // Get the text field from the alert controller
-            let textField = alert.textFields![0] as! UITextField
-            
-            // Create a new student.
-            let student = Student(name: textField.text!, studentID: textField.text!, school: "", parentID: self.user.uid, staffID: self.user.uid, routeID: self.user.routeID )
-
-            
-            // 3 Create a studentRef
-            let studentRef = self.dbComm.ref.childByAppendingPath(textField.text!.lowercaseString)
-            
-            // use setValue to save data to the database
-            studentRef.setValue(student.toAnyObject())
-            
-            // we also need the id of the student to the staff's list
-            
-            
-    }
-    let cancelAction = UIAlertAction(title: "Cancel",
-      style: .Default) { (action: UIAlertAction) -> Void in
+        let mailComposeViewController = configuredMailComposeViewController()
+        if MFMailComposeViewController.canSendMail(){
+            self.presentViewController(mailComposeViewController, animated: true, completion: nil)
+        } else {
+            self.showSendMailErrorAlert()
+        }
     }
     
-    alert.addTextFieldWithConfigurationHandler {
-      (textField: UITextField!) -> Void in
+    func showSendMailErrorAlert(){
+        let sendMailErrorAlert = UIAlertView(title:"Could Not Send Email", message:"Your device could not send e-mail.  Please check e-mail configuration and try again.", delegate: self, cancelButtonTitle: "OK")
+            sendMailErrorAlert.show()
     }
     
-    alert.addAction(saveAction)
-    alert.addAction(cancelAction)
+    func configuredMailComposeViewController() -> MFMailComposeViewController {
+        let mailComposerVC = MFMailComposeViewController()
+        mailComposerVC.mailComposeDelegate = self
+        mailComposerVC.setToRecipients(["someone@somewhere.com"])
+        mailComposerVC.setSubject("Sending you an in-app e-mail...")
+        mailComposerVC.setMessageBody("Sending e-mail in-app is not so bad!", isHTML: false)
+        
+        return mailComposerVC
+    }
     
-    presentViewController(alert,
-      animated: true,
-      completion: nil)
-  }
+    // MARK: MFMailComposeViewControllerDelegate Method
+    func mailComposeController(controller: MFMailComposeViewController!, didFinishWithResult result: MFMailComposeResult, error: NSError!) {
+        controller.dismissViewControllerAnimated(true, completion: nil)
+    }
   
     func meetingInfoButtonDidTouch() {
         performSegueWithIdentifier(self.ListToUsers, sender: nil)
@@ -325,7 +313,6 @@ class StudentListTableViewController: UITableViewController {
                 })
             }
         }
-        
     }
     
     func reloadTable(){
