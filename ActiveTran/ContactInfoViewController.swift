@@ -145,6 +145,8 @@ class ContactInfoViewController: UITableViewController, MFMessageComposeViewCont
                             msg.messageComposeDelegate = self
                             self.presentViewController(msg,animated:true,completion:nil)
                             
+                        } else {
+                            print ("cannot send text")
                         }
                 }
                         

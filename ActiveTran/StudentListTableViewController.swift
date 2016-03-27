@@ -144,8 +144,8 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
   }
   
   // MARK: Add Item
-  // Instead of adding a student, change the button to send email
-  @IBAction func addButtonDidTouch(sender: AnyObject) {
+  // Button to email page
+  @IBAction func emailButtonDidTouch(sender: AnyObject) {
     
         let mailComposeViewController = configuredMailComposeViewController()
         if MFMailComposeViewController.canSendMail(){
@@ -174,48 +174,6 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
     func mailComposeController(controller: MFMailComposeViewController!, didFinishWithResult result: MFMailComposeResult, error: NSError!) {
         controller.dismissViewControllerAnimated(true, completion: nil)
     }
-    
-//    // Alert View for input
-//    let alert = UIAlertController(title: "Student",
-//      message: "Add a student",
-//      preferredStyle: .Alert)
-//    
-//    let saveAction = UIAlertAction(title: "Save",
-//        style: .Default) { (action: UIAlertAction) -> Void in
-//            
-//            // Get the text field from the alert controller
-//            let textField = alert.textFields![0] as! UITextField
-//            
-//            // Create a new student.
-//            let student = Student(name: textField.text!, studentID: textField.text!, school: "", parentID: self.user.uid, staffID: self.user.uid, routeID: self.user.routeID )
-//
-//            
-//            // 3 Create a studentRef
-//            let studentRef = self.dbComm.ref.childByAppendingPath(textField.text!.lowercaseString)
-//            
-//            // use setValue to save data to the database
-//            studentRef.setValue(student.toAnyObject())
-//            
-//            // we also need the id of the student to the staff's list
-    
-//            
-//        }
-//        
-//        
-//        let cancelAction = UIAlertAction(title: "Cancel",
-//          style: .Default) { (action: UIAlertAction) -> Void in
-//        }
-//        
-//        alert.addTextFieldWithConfigurationHandler {
-//          (textField: UITextField!) -> Void in
-//        }
-//        
-//        alert.addAction(saveAction)
-//        alert.addAction(cancelAction)
-//        
-//        presentViewController(alert,
-//          animated: true,
-//          completion: nil)
   
     func meetingInfoButtonDidTouch() {
         performSegueWithIdentifier(self.ListToUsers, sender: nil)
