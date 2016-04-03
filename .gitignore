@@ -31,3 +31,6 @@ playground.xcworkspace
 
 ## DS_Store
 .DS_Store
+
+## Bridging header
+*.ActiveTran-Bridging-Header.h
