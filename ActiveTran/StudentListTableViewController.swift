@@ -20,16 +20,16 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
   var currentDate : String!
   
   // MARK: Selected student
-  var studentSelected: Student!
+  var studentSelected: StudentWrapper!
     
   // MARK: Properties
-  var studentsWrapper = [StudentWrapper]()
+  var studentsWrapper = [String:StudentWrapper]()
   var students = [Student]()
-  var studentArvInfo = [StudentArvInfo]()
+  var keysForTable = [String]()
   var parent:Parent!
   var staff:Staff!
   var meetingInfoBarButtonItem: UIBarButtonItem!
-  var isStaff = false
+    var isStaff = false
   // Mark: DbCommunicator
   var dbComm = DbCommunicator()
 
@@ -87,13 +87,13 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
   
   override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
     let cell = tableView.dequeueReusableCellWithIdentifier("ItemCell")! as UITableViewCell
-    let studentSelected = studentsWrapper[indexPath.row]
+    let studentSelected = studentsWrapper[keysForTable[indexPath.row]]
     
-    cell.textLabel?.text = studentSelected.student.name
-    cell.detailTextLabel?.text = "Student ID Number: " + studentSelected.student.studentID
+    cell.textLabel?.text = studentSelected?.student.name
+    cell.detailTextLabel?.text = "Student ID Number: " + (studentSelected?.student.studentID)!
     
     // Determine whether the cell is checked
-    toggleCellCheckbox(cell, isCompleted: studentSelected.arrived)
+    toggleCellCheckbox(cell, isCompleted: (studentSelected?.arrived)!)
     
     return cell
   }
@@ -105,7 +105,7 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
 
   override func tableView(tableView: UITableView, editActionsForRowAtIndexPath indexPath: NSIndexPath) -> [UITableViewRowAction]? {
             let more = UITableViewRowAction(style: .Normal, title: "More") { (action, indexPath) in
-            self.studentSelected = self.studentsWrapper[indexPath.row].student
+            self.studentSelected = self.studentsWrapper[self.keysForTable[indexPath.row]]
             self.performSegueWithIdentifier(self.ListToContactInfo, sender: nil)
         }
         
@@ -119,15 +119,15 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
       // Find the cell that user tapped using cellForRowAtIndexPath
       let cell = tableView.cellForRowAtIndexPath(indexPath)!
       // Get the corresponding GreoceryItem by using the index path's row
-      var studentSelected = studentsWrapper[indexPath.row]
+      let studentSelected = self.studentsWrapper[self.keysForTable[indexPath.row]]
     
       // Staff Only: Negate completed on the student to toggle the status
       if (self.isStaff == true){
-          let toggledCompletion = !studentSelected.arrived
+          let toggledCompletion = !studentSelected!.arrived
           // Call toggleCellCheckbox() update the visual properties of the cell
           toggleCellCheckbox(cell, isCompleted: toggledCompletion)
           // Passing a dictioary to update Firebase
-          studentSelected.ref?.updateChildValues(["arrived": toggledCompletion])
+          studentSelected?.ref!.updateChildValues([studentSelected!.student.studentID: toggledCompletion])
       }
     }
     
@@ -198,12 +198,12 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
             let nav = segue.destinationViewController as! ContactInfoViewController
             if (self.isStaff == true){
                 if (self.staff != nil) {
-                    nav.studentSelected = self.studentSelected
+     //TODO               nav.studentSelected = self.studentSelected
                     nav.staff = self.staff
                 }
             }else {
                 if (self.parent != nil){
-                    nav.studentSelected = self.studentSelected
+       //TODO             nav.studentSelected = self.studentSelected
                     nav.parent = self.parent
                 }
      
@@ -275,24 +275,22 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                 if (snapshot.hasChildren()){
                     print(snapshot.value)
                     let item = BusRoute(snapshot: snapshot as FDataSnapshot)
-                    var index = 0;
                     for s in item.students{
                         print(s.key)
-                        
+                        self.keysForTable.append(s.key as! String)
                         // go find actual student object
-                        // we use s.value in below query because that is how we currently store our students in DB
+                        // TODO we use s.value in below query because that is how we currently store our students in DB
                         self.dbComm.ref.childByAppendingPath(s.value as! String).observeEventType(.Value, withBlock: {
                             snapshot2 in
                             if (snapshot2.hasChildren()){
                                 let newStudent = Student(snapshot: snapshot2 as FDataSnapshot)
+                                let newStudentWpr = StudentWrapper(student: newStudent, arrived: false)
                                 newStudents.append(newStudent)
-                                
+                                self.studentsWrapper[newStudent.studentID] = newStudentWpr
                             }
                         })
                         // go find log
-                        self.loadStudentArvInfo(s.key as! String, indexInWrapper: index);
-                    
-                        index += 1
+                        self.loadStudentArvInfo(s.key as! String);
                     }
                 }
                 self.students = newStudents
@@ -322,7 +320,7 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
         }
     }
     
-    func loadStudentArvInfo(studentID: String, indexInWrapper: Int){
+    func loadStudentArvInfo(studentID: String){
         var currentLogRef = Firebase()
         
         if (isMorning == true){
@@ -334,15 +332,15 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
         if (self.isStaff == true){
             currentLogRef.childByAppendingPath(studentID).observeEventType(.Value, withBlock: {
                snapshot in
-                self.studentsWrapper[indexInWrapper].ref = currentLogRef.childByAppendingPath(studentID)
+                self.studentsWrapper[studentID]!.ref = currentLogRef.childByAppendingPath(studentID)
                 if (!snapshot.hasChildren()){
-                    self.studentsWrapper[indexInWrapper].ref!.setValue(false)
-                    self.studentsWrapper[indexInWrapper].arrived = false
+                    self.studentsWrapper[studentID]!.ref!.setValue(false)
+                    self.studentsWrapper[studentID]!.arrived = false
                 }else{
-                    self.studentsWrapper[indexInWrapper].arrived = snapshot.value[studentID] as! Bool
+                    self.studentsWrapper[studentID]!.arrived = snapshot.value[studentID] as! Bool
                 }
                 self.logExsits = true
-                //self.reloadTable()
+                self.reloadTable()
             })
         }else{
 //            // if the user is a parent other than a staff
@@ -365,41 +363,41 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
     }
     
     func reloadTable(){
-        var sWrapper = [StudentWrapper]()
-        if (self.students.count > 0 && self.studentArvInfo.count > 0){
-            if (self.isStaff == true){
-                // use the information from the log
-                for i in 1...self.studentArvInfo.count{
-                    for j in 1...self.students.count{
-                        if (self.students[j-1].studentID == self.studentArvInfo[i-1].studentID){
-                            let newSWrapper = StudentWrapper(student: self.students[j-1], studentArvInfo: self.studentArvInfo[i-1])
-                            sWrapper.append(newSWrapper)
-                        }
-                    }
-                }
-            }else{
-                // handle the case where staff have not yet logged in so some student Arv info is missing
-                for j in 1...self.students.count{
-                    var foundMatch = false
-                    for i in 1...self.studentArvInfo.count{
-                        if (self.students[j-1].studentID == self.studentArvInfo[i-1].studentID){
-                            foundMatch = true
-                            let newSWrapper = StudentWrapper(student: self.students[j-1], studentArvInfo: self.studentArvInfo[i-1])
-                            sWrapper.append(newSWrapper)
-                            continue
-                        }
-                    }
-                    if (foundMatch == false){
-                        // if we did not find matching student arv info we create local ones for parent to view 
-                        var fakeStudentArvInfo = StudentArvInfo(arrived: false, key:"", studentID: self.students[j-1].studentID, staffID: self.students[j-1].staffID)
-                        let newSWrapper = StudentWrapper(student: self.students[j-1], studentArvInfo: fakeStudentArvInfo)
-                        sWrapper.append(newSWrapper)
-                    }
-                }
-            }
-        
-        }
-        self.studentsWrapper = sWrapper
+//        var sWrapper = [StudentWrapper]()
+//        if (self.students.count > 0 && self.studentArvInfo.count > 0){
+//            if (self.isStaff == true){
+//                // use the information from the log
+//                for i in 1...self.studentArvInfo.count{
+//                    for j in 1...self.students.count{
+//                        if (self.students[j-1].studentID == self.studentArvInfo[i-1].studentID){
+//                            let newSWrapper = StudentWrapper(student: self.students[j-1], studentArvInfo: self.studentArvInfo[i-1])
+//                            sWrapper.append(newSWrapper)
+//                        }
+//                    }
+//                }
+//            }else{
+//                // handle the case where staff have not yet logged in so some student Arv info is missing
+//                for j in 1...self.students.count{
+//                    var foundMatch = false
+//                    for i in 1...self.studentArvInfo.count{
+//                        if (self.students[j-1].studentID == self.studentArvInfo[i-1].studentID){
+//                            foundMatch = true
+//                            let newSWrapper = StudentWrapper(student: self.students[j-1], studentArvInfo: self.studentArvInfo[i-1])
+//                            sWrapper.append(newSWrapper)
+//                            continue
+//                        }
+//                    }
+//                    if (foundMatch == false){
+//                        // if we did not find matching student arv info we create local ones for parent to view 
+//                        var fakeStudentArvInfo = StudentArvInfo(arrived: false, key:"", studentID: self.students[j-1].studentID, staffID: self.students[j-1].staffID)
+//                        let newSWrapper = StudentWrapper(student: self.students[j-1], studentArvInfo: fakeStudentArvInfo)
+//                        sWrapper.append(newSWrapper)
+//                    }
+//                }
+//            }
+//        
+//        }
+//        self.studentsWrapper = sWrapper
         self.tableView.reloadData()
     }
 }
