@@ -164,7 +164,10 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
         let mailComposerVC = MFMailComposeViewController()
         mailComposerVC.mailComposeDelegate = self
         mailComposerVC.setToRecipients(["someone@somewhere.com"])
-        mailComposerVC.setSubject("Sending you an in-app e-mail...")
+        mailComposerVC.setSubject("Active Transportation Bus Route")
+        
+//        String messageHeader = ("Active Transportation bus route " + self.busRouteToPass + " report for " + currentDate);
+//        String
         mailComposerVC.setMessageBody("Sending e-mail in-app is not so bad!", isHTML: false)
         
         return mailComposerVC
