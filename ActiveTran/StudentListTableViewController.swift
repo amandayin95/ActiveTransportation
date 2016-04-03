@@ -250,19 +250,28 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
     }
 
     func loadStudentInfo(){
-       
-        self.dbComm.ref.queryOrderedByChild(self.queryString).queryEqualToValue(self.user.uid).observeEventType(.Value, withBlock: {
-            snapshot in
-            var newStudents = [Student]()
-            if (snapshot.hasChildren()){
-            for item in snapshot.children {
-                let newStudent = Student(snapshot: item as! FDataSnapshot)
-                newStudents.append(newStudent)
-            }
-            }
-            self.students = newStudents
-            self.loadStudentArvInfo()
-        })
+        if(self.user.isStaff == true){
+            self.dbComm.routeRef.queryEqualToValue(self.user.routeID).observeEventType(.Value, withBlock: {
+                snapshot in
+                var newStudents = [Student]()
+                if (snapshot.hasChildren()){
+                    let item = BusRoute(snapshot: snapshot.children.nextObject() as! FDataSnapshot)
+                    for s in item.students{
+                        self.dbComm.ref.queryEqualToValue(s.key).observeEventType(.Value, withBlock: {
+                            snapshot in
+                            if (snapshot.hasChildren()){
+                                var newStudent = Student(snapshot: item as! FDataSnapshot)
+                                newStudents.append(newStudent)
+                            }
+                        })
+                    }
+                }
+                self.students = newStudents
+                self.loadStudentArvInfo()
+            })
+        }else{
+            
+        }
     }
     
     func loadStudentArvInfo(){

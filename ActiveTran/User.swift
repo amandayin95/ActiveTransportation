@@ -8,6 +8,7 @@ struct User {
   let contactInfo: String
   var routeID: String
   var isStaff: Bool!
+  //var childrenIDs: NSDictionary
  
   // Initialize from Firebase
     init(authData: FAuthData, name:String, contactInfo: String, routeID: String, isStaff: Bool) {
@@ -17,6 +18,7 @@ struct User {
     self.contactInfo = contactInfo
     self.routeID = routeID
     self.isStaff = isStaff
+   // self.childrenIDs = childrenIDs
   }
     
     init(snapshot: FDataSnapshot) {
@@ -26,6 +28,7 @@ struct User {
         routeID = snapshot.value["routeID"] as! String
         contactInfo = snapshot.value["contactInfo"] as! String
         isStaff = snapshot.value["isStaff"] as! Bool
+        
     }
   
   // Initialize from arbitrary data
@@ -39,6 +42,8 @@ struct User {
   }
     
     func toAnyObject() -> AnyObject {
+        
+
     return[
     "uid": uid,
     "name": name,
