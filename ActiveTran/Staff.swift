@@ -20,6 +20,11 @@ class Staff : User{
             contactInfo:snapshot.value["contactInfo"] as! String,
             isStaff:snapshot.value["isStaff"] as! Bool)
     }
+    
+    init(uid: String, name: String, email: String, contactInfo: String, isStaff: Bool, routeID: String) {
+        self.routeID = routeID
+        super.init(uid: uid, name: name, email: email, contactInfo: contactInfo, isStaff: isStaff)
+    }
 
     override
     func toAnyObject() -> AnyObject {

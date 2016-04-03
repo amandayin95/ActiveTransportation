@@ -21,6 +21,11 @@ class Parent : User{
             isStaff:snapshot.value["isStaff"] as! Bool)
     }
     
+    init(uid: String, name: String, email: String, contactInfo: String, isStaff: Bool, childrenIDs: NSDictionary) {
+        self.childrenIDs = childrenIDs
+        super.init(uid: uid, name: name, email: email, contactInfo: contactInfo, isStaff: isStaff)
+    }
+    
     override
     func toAnyObject() -> AnyObject {
         return[

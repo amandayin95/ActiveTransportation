@@ -26,12 +26,10 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
   var studentsWrapper = [StudentWrapper]()
   var students = [Student]()
   var studentArvInfo = [StudentArvInfo]()
-  // var user: User!
   var parent:Parent!
   var staff:Staff!
   var meetingInfoBarButtonItem: UIBarButtonItem!
-  var queryString: String!
-  var isStaff: Bool!
+  var isStaff = false
   // Mark: DbCommunicator
   var dbComm = DbCommunicator()
 
@@ -95,7 +93,7 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
     cell.detailTextLabel?.text = "Student ID Number: " + studentSelected.student.studentID
     
     // Determine whether the cell is checked
-    toggleCellCheckbox(cell, isCompleted: studentSelected.studentArvInfo.arrived)
+    toggleCellCheckbox(cell, isCompleted: studentSelected.arrived)
     
     return cell
   }
@@ -125,11 +123,11 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
     
       // Staff Only: Negate completed on the student to toggle the status
       if (self.isStaff == true){
-          let toggledCompletion = !studentSelected.studentArvInfo.arrived
+          let toggledCompletion = !studentSelected.arrived
           // Call toggleCellCheckbox() update the visual properties of the cell
           toggleCellCheckbox(cell, isCompleted: toggledCompletion)
           // Passing a dictioary to update Firebase
-          studentSelected.studentArvInfo.ref?.updateChildValues(["arrived": toggledCompletion])
+          studentSelected.ref?.updateChildValues(["arrived": toggledCompletion])
       }
     }
     
@@ -239,27 +237,25 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                     //1
                     self.dbComm.usersRef.childByAppendingPath(idCopy).observeEventType(.Value, withBlock: { snapshot in
                         if (snapshot.hasChildren()){
-                            for item in snapshot.children{
-                                let itemcast = item as! FDataSnapshot
-                                if (itemcast.value["isStaff"] as! Bool == true){
-                                    self.staff = Staff(snapshot: itemcast)
+                            print(snapshot.value)
+                                if (snapshot.value["isStaff"] as! Bool){
                                     self.isStaff = true
-                                } else {
-                                    self.parent = Parent(snapshot: itemcast)
-                                    self.isStaff = false
+                                    self.staff = Staff(uid:snapshot.value["uid"] as! String,
+                                        name:snapshot.value["name"] as! String,
+                                        email:snapshot.value["email"] as! String,
+                                        contactInfo:snapshot.value["contactInfo"] as! String,
+                                        isStaff:snapshot.value["isStaff"] as! Bool,
+                                        routeID: snapshot.value["routeID"] as! String)
+                                }else{
+                                    self.parent = Parent(uid:snapshot.value["uid"] as! String,
+                                        name:snapshot.value["name"] as! String,
+                                        email:snapshot.value["email"] as! String,
+                                        contactInfo:snapshot.value["contactInfo"] as! String,
+                                        isStaff:snapshot.value["isStaff"] as! Bool,
+                                        childrenIDs: snapshot.value["childrenIDs"] as! NSDictionary);
                                 }
-                            }
-                            // let item = snapshot.children.nextObject() as! FDataSnapshot
-    
                         }
-                        
-//                        if (self.user.isStaff == true){
-//                            self.queryString = "staffID"
-//                        }else{
-//                            self.queryString = "parentID"
-//                        }
-                        
-                        self.loadStudentInfo()
+                            self.loadStudentInfo()
                     })
                     // 3
                     self.dbComm.ref.unauth() // need this to switch between accounts
@@ -277,43 +273,56 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                 snapshot in
                 var newStudents = [Student]()
                 if (snapshot.hasChildren()){
-                    let item = BusRoute(snapshot: snapshot.children.nextObject() as! FDataSnapshot)
+                    print(snapshot.value)
+                    let item = BusRoute(snapshot: snapshot as FDataSnapshot)
+                    var index = 0;
                     for s in item.students{
-                        self.dbComm.ref.childByAppendingPath(s.key as! String).observeEventType(.Value, withBlock: {
-                            snapshot in
-                            if (snapshot.hasChildren()){
-                                var newStudent = Student(snapshot: item as! FDataSnapshot)
+                        print(s.key)
+                        
+                        // go find actual student object
+                        // we use s.value in below query because that is how we currently store our students in DB
+                        self.dbComm.ref.childByAppendingPath(s.value as! String).observeEventType(.Value, withBlock: {
+                            snapshot2 in
+                            if (snapshot2.hasChildren()){
+                                let newStudent = Student(snapshot: snapshot2 as FDataSnapshot)
                                 newStudents.append(newStudent)
+                                
                             }
                         })
+                        // go find log
+                        self.loadStudentArvInfo(s.key as! String, indexInWrapper: index);
+                    
+                        index += 1
                     }
                 }
                 self.students = newStudents
-                self.loadStudentArvInfo()
             })
         }else{
-            self.dbComm.usersRef.childByAppendingPath(self.parent.uid).childByAppendingPath("childrenIDs").observeEventType(.Value, withBlock: {
-                snapshot in
-                var newStudents = [Student]()
-                if (snapshot.hasChildren()){
-                    let item = NSDictionary(dictionary: snapshot.children.nextObject() as! NSDictionary)
-                    for s in item{
-                        self.dbComm.ref.childByAppendingPath(s.key as! String).observeEventType(.Value, withBlock: {
-                            snapshot in
-                            if (snapshot.hasChildren()){
-                                var newStudent = Student(snapshot: item as! FDataSnapshot)
-                                newStudents.append(newStudent)
-                            }
-                        })
-                    }
-                }
-                self.students = newStudents
-                self.loadStudentArvInfo()
-            })
+//            self.dbComm.usersRef.childByAppendingPath(self.parent.uid).childByAppendingPath("childrenIDs").observeEventType(.Value, withBlock: {
+//                snapshot in
+//                var newStudents = [Student]()
+//                if (snapshot.hasChildren()){
+//                    let item = NSDictionary(dictionary: snapshot.children.nextObject() as! NSDictionary)
+//                    for s in item{
+//                        // go find actual student object
+//                        self.dbComm.ref.childByAppendingPath(s.key as! String).observeEventType(.Value, withBlock: {
+//                            snapshot in
+//                            if (snapshot.hasChildren()){
+//                                let newStudent = Student(snapshot: snapshot.value as! FDataSnapshot)
+//                                newStudents.append(newStudent)
+//                            }
+//                        })
+//                        // go find log
+//                        self.loadStudentArvInfo(s.key as! String);
+//                    }
+//                    
+//                }
+//                self.students = newStudents
+//            })
         }
     }
     
-    func loadStudentArvInfo(){
+    func loadStudentArvInfo(studentID: String, indexInWrapper: Int){
         var currentLogRef = Firebase()
         
         if (isMorning == true){
@@ -323,46 +332,35 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
         }
         
         if (self.isStaff == true){
-            currentLogRef.queryOrderedByChild(self.queryString).queryEqualToValue(self.staff.uid).observeEventType(.Value, withBlock: {
-                snapshot in
-                var sArvInfo = [StudentArvInfo]()
+            currentLogRef.childByAppendingPath(studentID).observeEventType(.Value, withBlock: {
+               snapshot in
+                self.studentsWrapper[indexInWrapper].ref = currentLogRef.childByAppendingPath(studentID)
                 if (!snapshot.hasChildren()){
-                    for item in self.students{
-                        var newSArvInfo = StudentArvInfo(arrived: false, key: item.key, studentID: item.studentID, staffID: item.staffID )
-                        let studentLogRef = currentLogRef.childByAppendingPath(newSArvInfo.studentID)
-                        newSArvInfo.ref = studentLogRef
-                        studentLogRef.setValue(newSArvInfo.toAnyObject())
-                    }
-                    self.logExsits = true
-                    self.studentArvInfo = sArvInfo
+                    self.studentsWrapper[indexInWrapper].ref!.setValue(false)
+                    self.studentsWrapper[indexInWrapper].arrived = false
                 }else{
-                    for item in snapshot.children{
-                        let newSArvInfo = StudentArvInfo(snapshot: item as! FDataSnapshot)
-                        sArvInfo.append(newSArvInfo)
-                    }
-                    self.logExsits = true
-                    self.studentArvInfo = sArvInfo
-                    
+                    self.studentsWrapper[indexInWrapper].arrived = snapshot.value[studentID] as! Bool
                 }
-                self.reloadTable()
+                self.logExsits = true
+                //self.reloadTable()
             })
         }else{
-            // if the user is a parent other than a staff
-            for everyStudent in self.students{
-                currentLogRef.queryOrderedByChild("studentID").queryEqualToValue(everyStudent.studentID).observeEventType(.Value, withBlock: {
-                    snapshot in
-                    if (!snapshot.hasChildren()){
-                        self.logExsits = false
-                    }else{
-                        for item in snapshot.children{
-                            let newSArvInfo = StudentArvInfo(snapshot: item as! FDataSnapshot)
-                            self.studentArvInfo.append(newSArvInfo)
-                        }
-                        self.logExsits = true
-                    }
-                    self.reloadTable()
-                })
-            }
+//            // if the user is a parent other than a staff
+//            for everyStudent in self.students{
+//                currentLogRef.queryOrderedByChild("studentID").queryEqualToValue(everyStudent.studentID).observeEventType(.Value, withBlock: {
+//                    snapshot in
+//                    if (!snapshot.hasChildren()){
+//                        self.logExsits = false
+//                    }else{
+//                        for item in snapshot.children{
+//                            let newSArvInfo = StudentArvInfo(snapshot: item as! FDataSnapshot)
+//                            self.studentArvInfo.append(newSArvInfo)
+//                        }
+//                        self.logExsits = true
+//                    }
+//                    self.reloadTable()
+//                })
+//            }
         }
     }
     

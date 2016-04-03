@@ -6,7 +6,7 @@ class User {
   let name: String
   let email: String
   let contactInfo: String
-  var isStaff: Bool!
+  let isStaff: Bool!
   
  
   // Initialize from Firebase
@@ -15,7 +15,7 @@ class User {
     self.name = name
     self.email = authData.providerData["email"] as! String
     self.contactInfo = contactInfo
-    self.isStaff = isStaff
+    self.isStaff = isStaff 
    // self.childrenIDs = childrenIDs
   }
     
