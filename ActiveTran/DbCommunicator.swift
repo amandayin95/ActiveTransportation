@@ -12,7 +12,7 @@ struct DbCommunicator {
     init(){
         self.ref = Firebase(url: "https://activetransportation.firebaseio.com/students")
         self.usersRef = Firebase(url:"https://activetransportation.firebaseio.com/users")
-        self.routeRef = Firebase(url:"https://activetransportation.firebaseio.com/busroutes")
+        self.routeRef = Firebase(url:"https://activetransportation.firebaseio.com/routes")
         self.logRef = Firebase(url:"https://activetransportation.firebaseio.com/logs")
     }
     
