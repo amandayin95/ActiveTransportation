@@ -78,7 +78,7 @@ class MeetingInfoTableViewController: UITableViewController {
             if (self.students.count > 0 && self.busRoutes.count > 0){
                 for i in 1...self.busRoutes.count{
                     for j in 1...self.students.count{
-                        if (self.students[j-1].name == self.busRoutes[i-1].name){
+                        if (self.students[j-1].routeID == self.busRoutes[i-1].key){
                             let newInfoWrapper = MeetingInfoWrapper(student: self.students[j-1], busRoute: self.busRoutes[i-1])
                             mWrapper.append(newInfoWrapper)
                         }

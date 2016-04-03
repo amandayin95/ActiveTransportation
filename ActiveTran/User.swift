@@ -8,7 +8,7 @@ struct User {
   let contactInfo: String
   var routeID: String
   var isStaff: Bool!
-  //var childrenIDs: NSDictionary
+  
  
   // Initialize from Firebase
     init(authData: FAuthData, name:String, contactInfo: String, routeID: String, isStaff: Bool) {
@@ -42,8 +42,6 @@ struct User {
   }
     
     func toAnyObject() -> AnyObject {
-        
-
     return[
     "uid": uid,
     "name": name,
@@ -53,5 +51,4 @@ struct User {
     "isStaff": isStaff,
     ]
     }
-
 }
