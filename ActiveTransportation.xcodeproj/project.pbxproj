@@ -15,6 +15,7 @@
 		744334CA1C896B6800B4AD99 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 744334C91C896B6800B4AD99 /* Main.storyboard */; };
 		744334CE1C8970A200B4AD99 /* DbCommunicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 744334CD1C8970A200B4AD99 /* DbCommunicator.swift */; };
 		749EFAA11C8BEF340018D3F7 /* ContactInfoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 749EFAA01C8BEF340018D3F7 /* ContactInfoViewController.swift */; };
+		7C227E741CB0C3820071F20A /* Staff.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C227E731CB0C3820071F20A /* Staff.swift */; };
 		941A68C9047CFC613264BFB7 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F599D9265F4B40571F432E78 /* libPods.a */; };
 		BB2385621B3DD5AB0079CD01 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB2385611B3DD5AB0079CD01 /* AppDelegate.swift */; };
 		BB2385641B3DD5AB0079CD01 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB2385631B3DD5AB0079CD01 /* LoginViewController.swift */; };
@@ -35,6 +36,7 @@
 		744334C91C896B6800B4AD99 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		744334CD1C8970A200B4AD99 /* DbCommunicator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DbCommunicator.swift; sourceTree = "<group>"; };
 		749EFAA01C8BEF340018D3F7 /* ContactInfoViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactInfoViewController.swift; sourceTree = "<group>"; };
+		7C227E731CB0C3820071F20A /* Staff.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Staff.swift; sourceTree = "<group>"; };
 		9BA2A2DB5BA4733818152B9B /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 		A898E3AE11425E4495FAC93A /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 		BB23855C1B3DD5AB0079CD01 /* ActiveTransportation.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ActiveTransportation.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -152,6 +154,7 @@
 				03B206891C79526300FD7782 /* StudentWrapper.swift */,
 				744334CD1C8970A200B4AD99 /* DbCommunicator.swift */,
 				0336785B1C8C38D3002AD69C /* MeetingInfoWrapper.swift */,
+				7C227E731CB0C3820071F20A /* Staff.swift */,
 			);
 			name = Models;
 			sourceTree = "<group>";
@@ -292,6 +295,7 @@
 				03B2068A1C79526300FD7782 /* StudentWrapper.swift in Sources */,
 				BB7DA5111B42C8100018B530 /* User.swift in Sources */,
 				BB2385621B3DD5AB0079CD01 /* AppDelegate.swift in Sources */,
+				7C227E741CB0C3820071F20A /* Staff.swift in Sources */,
 				03B206881C792F2B00FD7782 /* StudentArvInfo.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

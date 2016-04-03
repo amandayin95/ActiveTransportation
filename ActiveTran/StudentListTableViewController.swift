@@ -248,13 +248,13 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
 
     func loadStudentInfo(){
         if(self.user.isStaff == true){
-            self.dbComm.routeRef.queryEqualToValue(self.user.routeID).observeEventType(.Value, withBlock: {
+            self.dbComm.routeRef.childByAppendingPath(self.user.routeID).observeEventType(.Value, withBlock: {
                 snapshot in
                 var newStudents = [Student]()
                 if (snapshot.hasChildren()){
                     let item = BusRoute(snapshot: snapshot.children.nextObject() as! FDataSnapshot)
                     for s in item.students{
-                        self.dbComm.ref.queryEqualToValue(s.key).observeEventType(.Value, withBlock: {
+                        self.dbComm.ref.childByAppendingPath(s.key as! String).observeEventType(.Value, withBlock: {
                             snapshot in
                             if (snapshot.hasChildren()){
                                 var newStudent = Student(snapshot: item as! FDataSnapshot)
