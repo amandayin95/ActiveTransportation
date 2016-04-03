@@ -12,7 +12,10 @@ class ContactInfoViewController: UITableViewController, MFMessageComposeViewCont
     
     // MARK: Property passed in through segue
     var studentSelected:Student!
-    var user:User!
+    var parent:Parent!
+    var staff:Staff!
+    var isStaff:Bool!
+    
     var queryString:String!
     // MARK: DbCommunicator
     var dbComm = DbCommunicator()
@@ -24,7 +27,7 @@ class ContactInfoViewController: UITableViewController, MFMessageComposeViewCont
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        if (self.user.isStaff == true){
+        if (self.isStaff == true){
             self.queryString = self.studentSelected.parentID
         } else {
             self.queryString = self.studentSelected.staffID
@@ -60,7 +63,7 @@ class ContactInfoViewController: UITableViewController, MFMessageComposeViewCont
         let cell = tableView.dequeueReusableCellWithIdentifier("ContactInfoCell")! as UITableViewCell
         
         var contactType : String!
-        if (self.user.isStaff == true){
+        if (self.isStaff == true){
             contactType = "Parent contact info "
         } else {
             contactType = "Staff contact info "

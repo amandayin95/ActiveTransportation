@@ -2,7 +2,6 @@
 import Foundation
 
 struct BusRoute {
-//    let name: String
     let staffID: String
     let students: NSDictionary
     let meetingTime: String
@@ -11,17 +10,15 @@ struct BusRoute {
     
     // Initialize from Firebase Snapshot
     init(snapshot: FDataSnapshot) {
-     //   name = snapshot.value["name"] as! String
         staffID = snapshot.value["staffID"] as! String
-        students = snapshot.value["studnets"] as! NSDictionary
+        students = snapshot.value["students"] as! NSDictionary
         meetingTime = snapshot.value["meetingTime"] as! String
         meetingLocation = snapshot.value["meetingLocation"] as! String
         key = snapshot.key
     }
     
     // Initialize from arbitrary data
-    init(name: String, staffID: String, students: NSDictionary, meetingTime: String, meetingLocation: String) {
-     //   self.name = name
+    init(staffID: String, students: NSDictionary, meetingTime: String, meetingLocation: String) {
         self.staffID = staffID
         self.students = students
         self.meetingTime = meetingTime
@@ -31,12 +28,10 @@ struct BusRoute {
     
     func toAnyObject() -> AnyObject {
         return[
-      //      "name": name,
-            "staffId": staffID,
+            "staffID": staffID,
             "students": students,
             "meetingTime": meetingTime,
-            "meetingLocation": meetingLocation,
-           // "key":key
+            "meetingLocation": meetingLocation
         ]
     }
     
