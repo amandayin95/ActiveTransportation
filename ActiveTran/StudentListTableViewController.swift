@@ -26,10 +26,12 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
   var studentsWrapper = [StudentWrapper]()
   var students = [Student]()
   var studentArvInfo = [StudentArvInfo]()
-  var user: User!
+  // var user: User!
+  var parent:Parent!
+  var staff:Staff!
   var meetingInfoBarButtonItem: UIBarButtonItem!
   var queryString: String!
-
+  var isStaff: Bool!
   // Mark: DbCommunicator
   var dbComm = DbCommunicator()
 
@@ -122,7 +124,7 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
       var studentSelected = studentsWrapper[indexPath.row]
     
       // Staff Only: Negate completed on the student to toggle the status
-      if (self.user.isStaff == true){
+      if (self.isStaff == true){
           let toggledCompletion = !studentSelected.studentArvInfo.arrived
           // Call toggleCellCheckbox() update the visual properties of the cell
           toggleCellCheckbox(cell, isCompleted: toggledCompletion)
@@ -183,56 +185,79 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject!) {
         if (segue.identifier == "ListToUsers") {
             let nav = segue.destinationViewController as! MeetingInfoTableViewController
-            if (self.user != nil){
-                nav.user = self.user
-                nav.students = self.students
+            if (self.isStaff == true){
+                if (self.staff != nil){
+                    nav.staff = self.staff
+                    nav.students = self.students
+                }
+            }else {
+                if (self.parent != nil){
+                    nav.parent = self.parent
+                    nav.students = self.students
+                }
             }
-        } else if (segue.identifier == "ListToContactInfo") {
+        }else if (segue.identifier == "ListToContactInfo") {
             let nav = segue.destinationViewController as! ContactInfoViewController
-            if (self.user != nil) {
-                nav.studentSelected = self.studentSelected
-                nav.user = self.user
-        }
+            if (self.isStaff == true){
+                if (self.staff != nil) {
+                    nav.studentSelected = self.studentSelected
+                    nav.staff = self.staff
+                }
+            }else {
+                if (self.parent != nil){
+                    nav.studentSelected = self.studentSelected
+                    nav.parent = self.parent
+                }
+     
+            }
         }
     }
-    
+
     func authenticateUser(){
         self.dbComm.ref.observeAuthEventWithBlock { authData in
             if authData != nil {
                 if (self.signUpMode == true){
-                    self.user = User(authData: authData, name:self.nameToPass, contactInfo: self.contactInfoToPass, routeID: "r3", isStaff: false )
-                    
-                    if (self.user.isStaff == true){
-                        self.queryString = "staffID"
-                    }else{
-                        self.queryString = "parentID"
-                    }
-                    
-                    //1
-                    let currentUserRef = self.dbComm.usersRef.childByAppendingPath(self.user.uid)
-                    //2
-                    currentUserRef.setValue(self.user.toAnyObject())
-                    // 3
-                    self.dbComm.ref.unauth() // need this to switch between accounts
-                    // unauth will not alter or remove the uid of the user
-                    // 4
-                    self.reloadTable();
+//                    self.user = User(authData: authData, name:self.nameToPass, contactInfo: self.contactInfoToPass, isStaff: false )
+//                    
+//                    if (self.user.isStaff == true){
+//                        self.queryString = "staffID"
+//                    }else{
+//                        self.queryString = "parentID"
+//                    }
+//                    
+//                    //1
+//                    let currentUserRef = self.dbComm.usersRef.childByAppendingPath(self.user.uid)
+//                    //2
+//                    currentUserRef.setValue(self.user.toAnyObject())
+//                    // 3
+//                    self.dbComm.ref.unauth() // need this to switch between accounts
+//                    // unauth will not alter or remove the uid of the user
+//                    // 4
+//                    self.reloadTable();
                 }else{
                     let idCopy = authData.uid.lowercaseString
                     //1
-                    self.dbComm.usersRef.queryOrderedByChild("uid").queryEqualToValue(idCopy).observeEventType(.Value, withBlock: { snapshot in
+                    self.dbComm.usersRef.childByAppendingPath(idCopy).observeEventType(.Value, withBlock: { snapshot in
                         if (snapshot.hasChildren()){
-                            for item in snapshot.children {
-                                self.user = User(snapshot: item as! FDataSnapshot)
-                                
+                            for item in snapshot.children{
+                                let itemcast = item as! FDataSnapshot
+                                if (itemcast.value["isStaff"] as! Bool == true){
+                                    self.staff = Staff(snapshot: itemcast)
+                                    self.isStaff = true
+                                } else {
+                                    self.parent = Parent(snapshot: itemcast)
+                                    self.isStaff = false
+                                }
                             }
+                            // let item = snapshot.children.nextObject() as! FDataSnapshot
+    
                         }
                         
-                        if (self.user.isStaff == true){
-                            self.queryString = "staffID"
-                        }else{
-                            self.queryString = "parentID"
-                        }
+//                        if (self.user.isStaff == true){
+//                            self.queryString = "staffID"
+//                        }else{
+//                            self.queryString = "parentID"
+//                        }
                         
                         self.loadStudentInfo()
                     })
@@ -247,8 +272,8 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
     }
 
     func loadStudentInfo(){
-        if(self.user.isStaff == true){
-            self.dbComm.routeRef.childByAppendingPath(self.user.routeID).observeEventType(.Value, withBlock: {
+        if(self.isStaff == true){
+            self.dbComm.routeRef.childByAppendingPath(self.staff.routeID).observeEventType(.Value, withBlock: {
                 snapshot in
                 var newStudents = [Student]()
                 if (snapshot.hasChildren()){
@@ -267,7 +292,24 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                 self.loadStudentArvInfo()
             })
         }else{
-            
+            self.dbComm.usersRef.childByAppendingPath(self.parent.uid).childByAppendingPath("childrenIDs").observeEventType(.Value, withBlock: {
+                snapshot in
+                var newStudents = [Student]()
+                if (snapshot.hasChildren()){
+                    let item = NSDictionary(dictionary: snapshot.children.nextObject() as! NSDictionary)
+                    for s in item{
+                        self.dbComm.ref.childByAppendingPath(s.key as! String).observeEventType(.Value, withBlock: {
+                            snapshot in
+                            if (snapshot.hasChildren()){
+                                var newStudent = Student(snapshot: item as! FDataSnapshot)
+                                newStudents.append(newStudent)
+                            }
+                        })
+                    }
+                }
+                self.students = newStudents
+                self.loadStudentArvInfo()
+            })
         }
     }
     
@@ -280,8 +322,8 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
             currentLogRef = self.dbComm.logRef.childByAppendingPath(self.currentDate).childByAppendingPath(AFTERNOON_PERIOD)
         }
         
-        if (self.user.isStaff == true){
-            currentLogRef.queryOrderedByChild(self.queryString).queryEqualToValue(self.user.uid).observeEventType(.Value, withBlock: {
+        if (self.isStaff == true){
+            currentLogRef.queryOrderedByChild(self.queryString).queryEqualToValue(self.staff.uid).observeEventType(.Value, withBlock: {
                 snapshot in
                 var sArvInfo = [StudentArvInfo]()
                 if (!snapshot.hasChildren()){
@@ -327,7 +369,7 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
     func reloadTable(){
         var sWrapper = [StudentWrapper]()
         if (self.students.count > 0 && self.studentArvInfo.count > 0){
-            if (user.isStaff == true){
+            if (self.isStaff == true){
                 // use the information from the log
                 for i in 1...self.studentArvInfo.count{
                     for j in 1...self.students.count{
