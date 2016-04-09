@@ -20,6 +20,16 @@ class Parent : User{
     }
     
     override
+    init(authData: FAuthData,name:String, contactInfo:String, isStaff:Bool){
+        self.childrenIDs = [:]
+        super.init(uid:authData.uid.lowercaseString,
+                   name:name,
+                   email:authData.providerData["email"] as! String,
+                   contactInfo:contactInfo,
+                   isStaff:false)
+    }
+    
+    override
     func toAnyObject() -> AnyObject {
         return[
             "uid": uid,

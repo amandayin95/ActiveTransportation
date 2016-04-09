@@ -18,8 +18,9 @@ class Staff : User{
         super.init(uid: uid, name: name, email: email, contactInfo: contactInfo, isStaff: isStaff)
     }
     
-    override
+    
     // Initialize Staff member from Firebase Authentication
+    override
     init(authData: FAuthData, name:String, contactInfo: String, isStaff: Bool) {
         // TODO How to handle the case if a staff has not been assigned a route yet?
         self.routeID = ""

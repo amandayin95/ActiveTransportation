@@ -14,6 +14,7 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
     var contactInfoToPass: String!
     var nameToPass: String!
     var busRouteToPass: String!
+    var isStaffToPass:Bool!
     var signUpMode = false
     var logExsits = false
     var isMorning = true
@@ -224,10 +225,16 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
             if authData != nil {
                 if (self.signUpMode == true){
                     // TODO Register staff
-                    self.staff = Staff(authData:authData, name:self.nameToPass, contactInfo:self.contactInfoToPass,
-                        isStaff:true)
-                    let currentUserRef = self.dbComm.newUserRef.childByAppendingPath(self.staff.uid)
+                    let currentUserRef = Firebase!(self.dbComm.newUserRef.childByAppendingPath(authData.uid))
+                    if (self.isStaff){
+                        self.staff = Staff(authData:authData, name:self.nameToPass, contactInfo:self.contactInfoToPass,
+                            isStaff:true)
                     currentUserRef.setValue(self.staff.toAnyObject())
+                    } else {
+                        self.parent = Parent(authData:authData, name:self.nameToPass, contactInfo:self.contactInfoToPass,
+                            isStaff:false)
+                    currentUserRef.setValue(self.parent.toAnyObject())
+                    }
                     self.dbComm.ref.unauth()
                     self.reloadTable()
                 } else{

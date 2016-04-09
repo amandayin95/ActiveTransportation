@@ -2,7 +2,7 @@
 import Foundation
 
 class User {
-  let uid: String
+  var uid: String
   let name: String
   let email: String
   let contactInfo: String
