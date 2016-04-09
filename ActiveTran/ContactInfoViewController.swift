@@ -11,6 +11,7 @@ import MessageUI
 class ContactInfoViewController: UITableViewController, MFMessageComposeViewControllerDelegate {
     
     // MARK: Property passed in through segue
+    var studentWprSelected: StudentWrapper!
     var studentSelected:Student!
     var parent:Parent!
     var staff:Staff!
@@ -26,7 +27,7 @@ class ContactInfoViewController: UITableViewController, MFMessageComposeViewCont
     // MARK: UIViewController Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        self.studentSelected = self.studentWprSelected.student
         if (self.isStaff == true){
             self.queryString = self.studentSelected.parentID
         } else {

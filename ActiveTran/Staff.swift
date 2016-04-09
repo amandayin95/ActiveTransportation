@@ -1,11 +1,3 @@
-//
-//  Staff.swift
-//  ActiveTransportation
-//
-//  Created by Amanda Yin on 4/2/16.
-//
-//
-
 import Foundation
 class Staff : User{
     var routeID:String
@@ -25,7 +17,19 @@ class Staff : User{
         self.routeID = routeID
         super.init(uid: uid, name: name, email: email, contactInfo: contactInfo, isStaff: isStaff)
     }
-
+    
+    override
+    // Initialize Staff member from Firebase Authentication
+    init(authData: FAuthData, name:String, contactInfo: String, isStaff: Bool) {
+        // TODO How to handle the case if a staff has not been assigned a route yet?
+        self.routeID = ""
+        super.init(uid: authData.uid.lowercaseString,
+                   name: name,
+                   email:authData.providerData["email"] as! String,
+                   contactInfo: contactInfo,
+                   isStaff: true)
+    }
+    
     override
     func toAnyObject() -> AnyObject {
         return[

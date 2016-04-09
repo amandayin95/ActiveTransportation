@@ -9,14 +9,13 @@ class User {
   let isStaff: Bool!
   
  
-  // Initialize from Firebase
+  // Initialize from Firebase Authentication
     init(authData: FAuthData, name:String, contactInfo: String, isStaff: Bool) {
     self.uid = authData.uid.lowercaseString
     self.name = name
     self.email = authData.providerData["email"] as! String
     self.contactInfo = contactInfo
     self.isStaff = isStaff 
-   // self.childrenIDs = childrenIDs
   }
     
     init(snapshot: FDataSnapshot) {

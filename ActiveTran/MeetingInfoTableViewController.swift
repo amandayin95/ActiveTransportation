@@ -20,9 +20,10 @@ class MeetingInfoTableViewController: UITableViewController {
         super.viewDidLoad()
         
         if (self.isStaff == true){
-            dbComm.routeRef.queryOrderedByChild("routeID").queryEqualToValue(self.staff.routeID).observeEventType(.Value, withBlock: {   snapshot in
+            dbComm.routeRef.queryOrderedByKey().queryEqualToValue(self.staff.routeID).observeEventType(.Value, withBlock: {   snapshot in
                 var busRoutesFromDB = [BusRoute]()
                 if (snapshot.hasChildren()){
+                    print ("staff found children")
                     for item in snapshot.children {
                         let routeFromDB = BusRoute(snapshot: item as! FDataSnapshot)
                         busRoutesFromDB.append(routeFromDB)

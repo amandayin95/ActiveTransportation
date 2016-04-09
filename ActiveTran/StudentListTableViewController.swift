@@ -4,38 +4,38 @@ import MessageUI
 
 class StudentListTableViewController: UITableViewController, MFMailComposeViewControllerDelegate{
 
-  // MARK: Constants
-  let ListToUsers = "ListToUsers"
-  let ListToContactInfo = "ListToContactInfo"
-  let MORNING_PERIOD = "morning"
-  let AFTERNOON_PERIOD = "afternoon"
+    // MARK: Constants
+    let ListToUsers = "ListToUsers"
+    let ListToContactInfo = "ListToContactInfo"
+    let MORNING_PERIOD = "morning"
+    let AFTERNOON_PERIOD = "afternoon"
     
-  // MARK: Data passed in from segue
-  var contactInfoToPass: String!
-  var nameToPass: String!
-  var busRouteToPass: String!
-  var signUpMode = false
-  var logExsits = false
-  var isMorning = true
-  var currentDate : String!
+    // MARK: Data passed in from segue
+    var contactInfoToPass: String!
+    var nameToPass: String!
+    var busRouteToPass: String!
+    var signUpMode = false
+    var logExsits = false
+    var isMorning = true
+    var currentDate : String!
   
-  // MARK: Selected student
-  var studentSelected: StudentWrapper!
+    // MARK: Selected student
+    var studentSelected: StudentWrapper!
     
-  // MARK: Properties
-  var studentsWrapper = [String:StudentWrapper]()
-  var students = [Student]()
-  var keysForTable = [String]()
-  var parent:Parent!
-  var staff:Staff!
-  var meetingInfoBarButtonItem: UIBarButtonItem!
+    // MARK: Properties
+    var studentsWrapper = [String:StudentWrapper]()
+    var students = [Student]()
+    var keysForTable = [String]()
+    var parent:Parent!
+    var staff:Staff!
+    var meetingInfoBarButtonItem: UIBarButtonItem!
     var isStaff = false
-  // Mark: DbCommunicator
-  var dbComm = DbCommunicator()
+    // Mark: DbCommunicator
+    var dbComm = DbCommunicator()
 
-  // MARK: UIViewController Lifecycle
+    // MARK: UIViewController Lifecycle
   
-  override func viewDidLoad() {
+    override func viewDidLoad() {
         super.viewDidLoad()
         
         let date = NSDate()
@@ -63,90 +63,93 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
         //TODO change font size
         meetingInfoBarButtonItem.tintColor = UIColor.whiteColor()
         navigationItem.leftBarButtonItem = meetingInfoBarButtonItem
+        
+        // Manually pushing new user class. Only for testing purposes.
+        
+        //                let newUserRef = self.dbComm.rootRef.childByAppendingPath("newUser")
+        //                let testChildrenIDs:NSDictionary = ["vinh111111":"VinhFirst","vinh2222222":"VinhSecond"]
+        //                let testParent = ["childrenID":testChildrenIDs, "name":"Vinh Hoang", "email":"vhoang@hmc.edu",
+        //                                  "contact":"1112223333","isStaff":false]
+        //                let userIDRef = newUserRef.childByAutoId()
+        //                userIDRef.setValue(testParent)
     }
     
-  override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         self.authenticateUser()
-  }
-   
-
+    }
     
-  override func viewDidDisappear(animated: Bool) {
-    super.viewDidDisappear(animated)
-    
-  }
+    override func viewDidDisappear(animated: Bool) {
+        super.viewDidDisappear(animated)
+    }
   
-  // MARK: UITableView Delegate methods
+    // MARK: UITableView Delegate methods
+    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return studentsWrapper.count
+    }
+    
+    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCellWithIdentifier("ItemCell")! as UITableViewCell
+        let studentSelected = studentsWrapper[keysForTable[indexPath.row]]
+    
+        cell.textLabel?.text = studentSelected?.student.name
+        cell.detailTextLabel?.text = "Student ID Number: " + (studentSelected?.student.studentID)!
+    
+        // Determine whether the cell is checked
+        toggleCellCheckbox(cell, isCompleted: (studentSelected?.arrived)!)
+    
+        return cell
+    }
   
-  override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    
-    return studentsWrapper.count
-
-  }
-  
-  override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-    let cell = tableView.dequeueReusableCellWithIdentifier("ItemCell")! as UITableViewCell
-    let studentSelected = studentsWrapper[keysForTable[indexPath.row]]
-    
-    cell.textLabel?.text = studentSelected?.student.name
-    cell.detailTextLabel?.text = "Student ID Number: " + (studentSelected?.student.studentID)!
-    
-    // Determine whether the cell is checked
-    toggleCellCheckbox(cell, isCompleted: (studentSelected?.arrived)!)
-    
-    return cell
-  }
-  
-  override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
-    return true
-  }
+    override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+        return true
+    }
     
 
-  override func tableView(tableView: UITableView, editActionsForRowAtIndexPath indexPath: NSIndexPath) -> [UITableViewRowAction]? {
-            let more = UITableViewRowAction(style: .Normal, title: "More") { (action, indexPath) in
+    override func tableView(tableView: UITableView, editActionsForRowAtIndexPath indexPath: NSIndexPath) -> [UITableViewRowAction]? {
+        let more = UITableViewRowAction(style: .Normal, title: "More") { (action, indexPath) in
             self.studentSelected = self.studentsWrapper[self.keysForTable[indexPath.row]]
             self.performSegueWithIdentifier(self.ListToContactInfo, sender: nil)
         }
         
         more.backgroundColor = UIColor.grayColor()
-        
         return [more]
     }
     
-  
-  override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-      // Find the cell that user tapped using cellForRowAtIndexPath
-      let cell = tableView.cellForRowAtIndexPath(indexPath)!
-      // Get the corresponding GreoceryItem by using the index path's row
-      let studentSelected = self.studentsWrapper[self.keysForTable[indexPath.row]]
     
-      // Staff Only: Negate completed on the student to toggle the status
-      if (self.isStaff == true){
-          let toggledCompletion = !studentSelected!.arrived
-          // Call toggleCellCheckbox() update the visual properties of the cell
-          toggleCellCheckbox(cell, isCompleted: toggledCompletion)
-          // Passing a dictioary to update Firebase
-          studentSelected?.ref!.updateChildValues([studentSelected!.student.studentID: toggledCompletion])
-      }
+    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        // Find the cell that user tapped using cellForRowAtIndexPath
+        let cell = tableView.cellForRowAtIndexPath(indexPath)!
+        // Get the corresponding GreoceryItem by using the index path's row
+        let studentSelected = self.studentsWrapper[self.keysForTable[indexPath.row]]
+
+        // Staff Only: Negate completed on the student to toggle the status
+        // Only staff has editing access
+        if (self.isStaff == true){
+            let toggledCompletion = !studentSelected!.arrived
+            // Call toggleCellCheckbox() update the visual properties of the cell
+            toggleCellCheckbox(cell, isCompleted: toggledCompletion)
+            // Passing a dictioary to update Firebase
+            studentSelected?.ref!.updateChildValues([studentSelected!.student.studentID: toggledCompletion])
+        }
     }
     
-  func toggleCellCheckbox(cell: UITableViewCell, isCompleted: Bool) {
-    if !isCompleted {
-      cell.accessoryType = UITableViewCellAccessoryType.None
-      cell.textLabel?.textColor = UIColor.blackColor()
-      cell.detailTextLabel?.textColor = UIColor.blackColor()
-    } else {
-      cell.accessoryType = UITableViewCellAccessoryType.Checkmark
-      cell.textLabel?.textColor = UIColor.grayColor()
-      cell.detailTextLabel?.textColor = UIColor.grayColor()
-    }
-  }
-  
-  // MARK: Add Item
-  // Button to email page
-  @IBAction func emailButtonDidTouch(sender: AnyObject) {
     
+    func toggleCellCheckbox(cell: UITableViewCell, isCompleted: Bool) {
+        if !isCompleted {
+            cell.accessoryType = UITableViewCellAccessoryType.None
+            cell.textLabel?.textColor = UIColor.blackColor()
+            cell.detailTextLabel?.textColor = UIColor.blackColor()
+        } else {
+            cell.accessoryType = UITableViewCellAccessoryType.Checkmark
+            cell.textLabel?.textColor = UIColor.grayColor()
+            cell.detailTextLabel?.textColor = UIColor.grayColor()
+        }
+    }
+  
+    // MARK: Add Item
+    // Button to email page
+    @IBAction func emailButtonDidTouch(sender: AnyObject) {
         let mailComposeViewController = configuredMailComposeViewController()
         if MFMailComposeViewController.canSendMail(){
             self.presentViewController(mailComposeViewController, animated: true, completion: nil)
@@ -165,9 +168,6 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
         mailComposerVC.mailComposeDelegate = self
         mailComposerVC.setToRecipients(["someone@somewhere.com"])
         mailComposerVC.setSubject("Active Transportation Bus Route")
-        
-//        String messageHeader = ("Active Transportation bus route " + self.busRouteToPass + " report for " + currentDate);
-//        String
         mailComposerVC.setMessageBody("Sending e-mail in-app is not so bad!", isHTML: false)
         
         return mailComposerVC
@@ -186,27 +186,32 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject!) {
         if (segue.identifier == "ListToUsers") {
             let nav = segue.destinationViewController as! MeetingInfoTableViewController
+            nav.isStaff = self.isStaff
             if (self.isStaff == true){
                 if (self.staff != nil){
                     nav.staff = self.staff
                     nav.students = self.students
+                    print (self.staff)
+                    print (self.students)
                 }
-            }else {
+            } else {
                 if (self.parent != nil){
                     nav.parent = self.parent
                     nav.students = self.students
                 }
             }
-        }else if (segue.identifier == "ListToContactInfo") {
+        } else if (segue.identifier == "ListToContactInfo") {
             let nav = segue.destinationViewController as! ContactInfoViewController
             if (self.isStaff == true){
                 if (self.staff != nil) {
-     //TODO               nav.studentSelected = self.studentSelected
+                    nav.isStaff = true
+                    nav.studentWprSelected = self.studentSelected
                     nav.staff = self.staff
                 }
             }else {
                 if (self.parent != nil){
-       //TODO             nav.studentSelected = self.studentSelected
+                    nav.isStaff = true
+                    nav.studentWprSelected = self.studentSelected
                     nav.parent = self.parent
                 }
      
@@ -218,27 +223,17 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
         self.dbComm.ref.observeAuthEventWithBlock { authData in
             if authData != nil {
                 if (self.signUpMode == true){
-//                    self.user = User(authData: authData, name:self.nameToPass, contactInfo: self.contactInfoToPass, isStaff: false )
-//                    
-//                    if (self.user.isStaff == true){
-//                        self.queryString = "staffID"
-//                    }else{
-//                        self.queryString = "parentID"
-//                    }
-//                    
-//                    //1
-//                    let currentUserRef = self.dbComm.usersRef.childByAppendingPath(self.user.uid)
-//                    //2
-//                    currentUserRef.setValue(self.user.toAnyObject())
-//                    // 3
-//                    self.dbComm.ref.unauth() // need this to switch between accounts
-//                    // unauth will not alter or remove the uid of the user
-//                    // 4
-//                    self.reloadTable();
-                }else{
+                    // TODO Register staff
+                    self.staff = Staff(authData:authData, name:self.nameToPass, contactInfo:self.contactInfoToPass,
+                        isStaff:true)
+                    let currentUserRef = self.dbComm.newUserRef.childByAppendingPath(self.staff.uid)
+                    currentUserRef.setValue(self.staff.toAnyObject())
+                    self.dbComm.ref.unauth()
+                    self.reloadTable()
+                } else{
                     let idCopy = authData.uid.lowercaseString
                     //1
-                    self.dbComm.usersRef.childByAppendingPath(idCopy).observeEventType(.Value, withBlock: { snapshot in
+                    self.dbComm.newUserRef.childByAppendingPath(idCopy).observeEventType(.Value, withBlock: { snapshot in
                         if (snapshot.hasChildren()){
                             print(snapshot.value)
                                 if (snapshot.value["isStaff"] as! Bool){
@@ -298,30 +293,36 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                 }
                 self.students = newStudents
             })
-        }else{
-//            self.dbComm.usersRef.childByAppendingPath(self.parent.uid).childByAppendingPath("childrenIDs").observeEventType(.Value, withBlock: {
-//                snapshot in
-//                var newStudents = [Student]()
-//                if (snapshot.hasChildren()){
-//                    let item = NSDictionary(dictionary: snapshot.children.nextObject() as! NSDictionary)
-//                    for s in item{
-//                        // go find actual student object
-//                        self.dbComm.ref.childByAppendingPath(s.key as! String).observeEventType(.Value, withBlock: {
-//                            snapshot in
-//                            if (snapshot.hasChildren()){
-//                                let newStudent = Student(snapshot: snapshot.value as! FDataSnapshot)
-//                                newStudents.append(newStudent)
-//                            }
-//                        })
-//                        // go find log
-//                        self.loadStudentArvInfo(s.key as! String);
-//                    }
-//                    
-//                }
-//                self.students = newStudents
-//            })
+        } else{
+            self.dbComm.newUserRef.childByAppendingPath(self.parent.uid).childByAppendingPath("childrenIDs").observeEventType(.Value,withBlock:{
+                snapshot in
+                var newStudents = [Student]()
+                if (snapshot.hasChildren()){
+                    print(snapshot.value)
+                    let childrenIDs = snapshot.children.nextObject() as! NSDictionary
+                    // each child is saved as a ID:name pair in childrenIDs
+                    for child in childrenIDs {
+                        // save the children's key (studentID) in the keysForTable array
+                        // for later display purposes
+                        self.keysForTable.append(child.key as! String)
+                        // go fetch the actual Student object
+                        self.dbComm.ref.childByAppendingPath(child.key as! String).observeEventType(.Value,withBlock:{
+                            snapshot2 in
+                            if (snapshot2.hasChildren()){
+                                let newStudent = Student(snapshot:snapshot2.value as! FDataSnapshot)
+                                let newStudentWpr = StudentWrapper(student:newStudent,arrived:false)
+                                newStudents.append(newStudent)
+                                self.studentsWrapper[newStudent.studentID] = newStudentWpr
+                            }
+                        })
+                        self.loadStudentArvInfo(child.key as! String)
+                    }
+                }
+                self.students = newStudents
+            })
         }
     }
+    
     
     func loadStudentArvInfo(studentID: String){
         var currentLogRef = Firebase()
@@ -333,6 +334,7 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
         }
         
         if (self.isStaff == true){
+            // For staff, create new log records for the day
             currentLogRef.childByAppendingPath(studentID).observeEventType(.Value, withBlock: {
                snapshot in
                 self.studentsWrapper[studentID]!.ref = currentLogRef.childByAppendingPath(studentID)
@@ -345,24 +347,37 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                 self.logExsits = true
                 self.reloadTable()
             })
-        }else{
-//            // if the user is a parent other than a staff
-//            for everyStudent in self.students{
-//                currentLogRef.queryOrderedByChild("studentID").queryEqualToValue(everyStudent.studentID).observeEventType(.Value, withBlock: {
-//                    snapshot in
-//                    if (!snapshot.hasChildren()){
-//                        self.logExsits = false
-//                    }else{
-//                        for item in snapshot.children{
-//                            let newSArvInfo = StudentArvInfo(snapshot: item as! FDataSnapshot)
-//                            self.studentArvInfo.append(newSArvInfo)
-//                        }
-//                        self.logExsits = true
-//                    }
-//                    self.reloadTable()
-//                })
-//            }
         }
+//        else{
+//            // For parents, siply display today's log records
+//            currentLogRef.childByAppendingPath(studentID).observeEventType(.Value,withBlock: {
+//                snapshot in
+//                self.studentsWrapper[studentID]!.ref = currentLogRef.childByAppendingPath(studentID)
+//                if (!snapshot.hasChildren()){
+//                    self.logExsits = false
+//                } else {
+//                    for item in snapshot.children{
+//                        self.studentsWrapper[studentID]!.arrived = false
+//                    }
+//                }
+//            })
+////            // if the user is a parent
+////            for everyStudent in self.students{
+////                currentLogRef.queryOrderedByChild("studentID").queryEqualToValue(everyStudent.studentID).observeEventType(.Value, withBlock: {
+////                    snapshot in
+////                    if (!snapshot.hasChildren()){
+////                        self.logExsits = false
+////                    }else{
+////                        for item in snapshot.children{
+////                            let newSArvInfo = StudentArvInfo(snapshot: item as! FDataSnapshot)
+////                            self.studentArvInfo.append(newSArvInfo)
+////                        }
+////                        self.logExsits = true
+////                    }
+////                    self.reloadTable()
+////                })
+////            }
+//        }
     }
     
     func reloadTable(){
