@@ -64,30 +64,6 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
         //TODO change font size
         meetingInfoBarButtonItem.tintColor = UIColor.whiteColor()
         navigationItem.leftBarButtonItem = meetingInfoBarButtonItem
-        
-        // Manually pushing new user class. Only for testing purposes.
-        
-        //                let newUserRef = self.dbComm.rootRef.childByAppendingPath("newUser")
-        //                let testChildrenIDs:NSDictionary = ["vinh111111":"VinhFirst","vinh2222222":"VinhSecond"]
-        //                let testParent = ["childrenID":testChildrenIDs, "name":"Vinh Hoang", "email":"vhoang@hmc.edu",
-        //                                  "contact":"1112223333","isStaff":false]
-        //                let userIDRef = newUserRef.childByAutoId()
-        //                userIDRef.setValue(testParent)
-        
-        // Manually pushing new routes.
-        //        let testChildrenList1:NSDictionary = ["Amanda11111":"AmandaFirst", "Amanda2222222":"AmandaSecond",
-        //                                              "Amanda3333333":"AmandaThird"]
-        //        let testRoute1 = ["meetingLocation":"Mudd Cafe", "meetingTime":"2016-03-30 09:00", "name":"TestRoute2",
-        //                          "staffID":"e199daf9-f2eb-4e41-8f3d-c8cc40002522","students": testChildrenList1]
-        //        
-        //        let testRoute1Ref = self.dbComm.routeRef.childByAutoId()
-        //        testRoute1Ref.setValue(testRoute1)
-        
-        // Manualy assigning students to parents
-        let testChildrenList2:NSDictionary = ["vinh111111":"VinhFirst","vinh2222222":"VinhSecond"]
-        var parentChildRef: Firebase!
-        parentChildRef = self.dbComm.newUserRef.childByAppendingPath("3b03b4b8-57da-46fc-817f-e54713571307").childByAppendingPath("childrenIDs")
-        parentChildRef.setValue(testChildrenList2 as [NSObject : AnyObject])
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -250,12 +226,9 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                     self.dbComm.ref.unauth()
                     self.reloadTable()
                 } else{
-                    let idCopy = authData.uid.lowercaseString
-                    //1
-                    
+                    let idCopy = authData.uid.lowercaseString                    
                     self.dbComm.newUserRef.childByAppendingPath(idCopy).observeEventType(.Value, withBlock: { snapshot in
                         if (snapshot.hasChildren()){
-                            print(snapshot.value)
                                 if (snapshot.value["isStaff"] as! Bool){
                                     self.isStaff = true
                                     self.staff = Staff(uid:snapshot.value["uid"] as! String,
@@ -289,12 +262,9 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
         if(self.isStaff == true){
             self.dbComm.routeRef.childByAppendingPath(self.staff.routeID).observeEventType(.Value, withBlock: {
                 snapshot in
-                // var newStudents = [Student]()
                 if (snapshot.hasChildren()){
-                    print(snapshot.value)
                     let item = BusRoute(snapshot: snapshot as FDataSnapshot)
                     for s in item.students{
-                        print(s.key)
                         self.keysForTable.append(s.key as! String)
                         // go find actual student object
                         // TODO we use s.value in below query because that is how we currently store our students in DB
@@ -311,14 +281,10 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                         self.loadStudentArvInfo(s.key as! String);
                     }
                 }
-//                print ("assigning newstudents to self.students")
-//                print (newStudents)
-//                self.students = newStudents
             })
         } else{
             self.dbComm.newUserRef.childByAppendingPath(self.parent.uid).childByAppendingPath("childrenIDs").observeEventType(.Value,withBlock:{
                 snapshot in
-                // var newStudents = [Student]()
                 if (snapshot.hasChildren()){
                     let childrenIDs = snapshot.value as! NSDictionary
                     // each child is saved as a ID:name pair in childrenIDs
@@ -331,11 +297,8 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                         self.dbComm.ref.childByAppendingPath(child.value as! String).observeEventType(.Value,withBlock:{
                             snapshot2 in
                             if (snapshot2.hasChildren()){
-                                print("found children")
-                                print (snapshot2.value)
                                 let newStudent = Student(snapshot: snapshot2 as FDataSnapshot)
                                 let newStudentWpr = StudentWrapper(student:newStudent,arrived:false)
-                                // newStudents.append(newStudent)
                                 self.students.append(newStudent)
                                 self.studentsWrapper[newStudent.studentID] = newStudentWpr
                             }
@@ -343,9 +306,6 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                         self.loadStudentArvInfo(child.key as! String)
                     }
                 }
-//                print ("assigning newstudents to self.students")
-//                print (newStudents)
-//                self.students = newStudents
             })
         }
     }
@@ -374,7 +334,6 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                 self.reloadTable()
             })
         } else {
-            print ("finding log record for parent")
             currentLogRef.childByAppendingPath(studentID).observeEventType(.Value,withBlock: {
                 snapshot in
                 if (!snapshot.hasChildren()){
@@ -392,3 +351,29 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
         self.tableView.reloadData()
     }
 }
+
+
+// Manually pushing new user class. Only for testing purposes.
+
+//                let newUserRef = self.dbComm.rootRef.childByAppendingPath("newUser")
+//                let testChildrenIDs:NSDictionary = ["vinh111111":"VinhFirst","vinh2222222":"VinhSecond"]
+//                let testParent = ["childrenID":testChildrenIDs, "name":"Vinh Hoang", "email":"vhoang@hmc.edu",
+//                                  "contact":"1112223333","isStaff":false]
+//                let userIDRef = newUserRef.childByAutoId()
+//                userIDRef.setValue(testParent)
+
+// Manually pushing new routes.
+//        let testChildrenList1:NSDictionary = ["Amanda11111":"AmandaFirst", "Amanda2222222":"AmandaSecond",
+//                                              "Amanda3333333":"AmandaThird"]
+//        let testRoute1 = ["meetingLocation":"Mudd Cafe", "meetingTime":"2016-03-30 09:00", "name":"TestRoute2",
+//                          "staffID":"e199daf9-f2eb-4e41-8f3d-c8cc40002522","students": testChildrenList1]
+//
+//        let testRoute1Ref = self.dbComm.routeRef.childByAutoId()
+//        testRoute1Ref.setValue(testRoute1)
+
+// Manualy assigning students to parents
+
+//        let testChildrenList2:NSDictionary = ["vinh111111":"VinhFirst","vinh2222222":"VinhSecond"]
+//        var parentChildRef: Firebase!
+//        parentChildRef = self.dbComm.newUserRef.childByAppendingPath("3b03b4b8-57da-46fc-817f-e54713571307").childByAppendingPath("childrenIDs")
+//        parentChildRef.setValue(testChildrenList2 as [NSObject : AnyObject])

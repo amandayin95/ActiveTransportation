@@ -32,16 +32,14 @@ class MeetingInfoTableViewController: UITableViewController {
             })
         } else {
             for student in self.students {
-                print(student)
-                dbComm.routeRef.queryOrderedByKey().queryEqualToValue(student.routeID).observeEventType(.Value, withBlock: {   snapshot in
-                    var busRoutesFromDB = [BusRoute]()
+                dbComm.routeRef.queryOrderedByKey().queryEqualToValue(student.routeID).observeEventType(.Value, withBlock: {
+                    snapshot in
                     if (snapshot.hasChildren()){
                         for item in snapshot.children {
                             let routeFromDB = BusRoute(snapshot: item as! FDataSnapshot)
-                            busRoutesFromDB.append(routeFromDB)
+                            self.busRoutes.append(routeFromDB)
                         }
                     }
-                    self.busRoutes = busRoutesFromDB
                     self.reloadTable()
                 })
             }
@@ -79,6 +77,7 @@ class MeetingInfoTableViewController: UITableViewController {
         if (self.isStaff == false){
             var mWrapper = [MeetingInfoWrapper]()
             if (self.students.count > 0 && self.busRoutes.count > 0){
+                
                 for i in 1...self.busRoutes.count{
                     for j in 1...self.students.count{
                         if (self.students[j-1].routeID == self.busRoutes[i-1].key){
