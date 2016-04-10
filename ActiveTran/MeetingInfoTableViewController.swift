@@ -18,12 +18,10 @@ class MeetingInfoTableViewController: UITableViewController {
     // MARK: UIViewController Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         if (self.isStaff == true){
             dbComm.routeRef.queryOrderedByKey().queryEqualToValue(self.staff.routeID).observeEventType(.Value, withBlock: {   snapshot in
                 var busRoutesFromDB = [BusRoute]()
                 if (snapshot.hasChildren()){
-                    print ("staff found children")
                     for item in snapshot.children {
                         let routeFromDB = BusRoute(snapshot: item as! FDataSnapshot)
                         busRoutesFromDB.append(routeFromDB)
@@ -32,16 +30,18 @@ class MeetingInfoTableViewController: UITableViewController {
                 self.busRoutes = busRoutesFromDB
                 self.reloadTable()
             })
-        }else if (self.isStaff == false){
-            for item in students {
-                dbComm.routeRef.queryOrderedByChild("routeID").queryEqualToValue(item.routeID).observeEventType(.Value, withBlock: {   snapshot in
-                    
+        } else {
+            for student in self.students {
+                print(student)
+                dbComm.routeRef.queryOrderedByKey().queryEqualToValue(student.routeID).observeEventType(.Value, withBlock: {   snapshot in
+                    var busRoutesFromDB = [BusRoute]()
                     if (snapshot.hasChildren()){
                         for item in snapshot.children {
                             let routeFromDB = BusRoute(snapshot: item as! FDataSnapshot)
-                            self.busRoutes.append(routeFromDB)
+                            busRoutesFromDB.append(routeFromDB)
                         }
                     }
+                    self.busRoutes = busRoutesFromDB
                     self.reloadTable()
                 })
             }

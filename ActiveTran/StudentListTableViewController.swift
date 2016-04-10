@@ -73,6 +73,21 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
         //                                  "contact":"1112223333","isStaff":false]
         //                let userIDRef = newUserRef.childByAutoId()
         //                userIDRef.setValue(testParent)
+        
+        // Manually pushing new routes.
+        //        let testChildrenList1:NSDictionary = ["Amanda11111":"AmandaFirst", "Amanda2222222":"AmandaSecond",
+        //                                              "Amanda3333333":"AmandaThird"]
+        //        let testRoute1 = ["meetingLocation":"Mudd Cafe", "meetingTime":"2016-03-30 09:00", "name":"TestRoute2",
+        //                          "staffID":"e199daf9-f2eb-4e41-8f3d-c8cc40002522","students": testChildrenList1]
+        //        
+        //        let testRoute1Ref = self.dbComm.routeRef.childByAutoId()
+        //        testRoute1Ref.setValue(testRoute1)
+        
+        // Manualy assigning students to parents
+        let testChildrenList2:NSDictionary = ["vinh111111":"VinhFirst","vinh2222222":"VinhSecond"]
+        var parentChildRef: Firebase!
+        parentChildRef = self.dbComm.newUserRef.childByAppendingPath("3b03b4b8-57da-46fc-817f-e54713571307").childByAppendingPath("childrenIDs")
+        parentChildRef.setValue(testChildrenList2 as [NSObject : AnyObject])
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -192,8 +207,6 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                 if (self.staff != nil){
                     nav.staff = self.staff
                     nav.students = self.students
-                    print (self.staff)
-                    print (self.students)
                 }
             } else {
                 if (self.parent != nil){
@@ -211,7 +224,7 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                 }
             }else {
                 if (self.parent != nil){
-                    nav.isStaff = true
+                    nav.isStaff = false
                     nav.studentWprSelected = self.studentSelected
                     nav.parent = self.parent
                 }
@@ -224,22 +237,22 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
         self.dbComm.ref.observeAuthEventWithBlock { authData in
             if authData != nil {
                 if (self.signUpMode == true){
-                    // TODO Register staff
                     let currentUserRef = Firebase!(self.dbComm.newUserRef.childByAppendingPath(authData.uid))
                     if (self.isStaff){
                         self.staff = Staff(authData:authData, name:self.nameToPass, contactInfo:self.contactInfoToPass,
                             isStaff:true)
-                    currentUserRef.setValue(self.staff.toAnyObject())
+                        currentUserRef.setValue(self.staff.toAnyObject())
                     } else {
                         self.parent = Parent(authData:authData, name:self.nameToPass, contactInfo:self.contactInfoToPass,
                             isStaff:false)
-                    currentUserRef.setValue(self.parent.toAnyObject())
+                        currentUserRef.setValue(self.parent.toAnyObject())
                     }
                     self.dbComm.ref.unauth()
                     self.reloadTable()
                 } else{
                     let idCopy = authData.uid.lowercaseString
                     //1
+                    
                     self.dbComm.newUserRef.childByAppendingPath(idCopy).observeEventType(.Value, withBlock: { snapshot in
                         if (snapshot.hasChildren()){
                             print(snapshot.value)
@@ -276,7 +289,7 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
         if(self.isStaff == true){
             self.dbComm.routeRef.childByAppendingPath(self.staff.routeID).observeEventType(.Value, withBlock: {
                 snapshot in
-                var newStudents = [Student]()
+                // var newStudents = [Student]()
                 if (snapshot.hasChildren()){
                     print(snapshot.value)
                     let item = BusRoute(snapshot: snapshot as FDataSnapshot)
@@ -290,7 +303,7 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                             if (snapshot2.hasChildren()){
                                 let newStudent = Student(snapshot: snapshot2 as FDataSnapshot)
                                 let newStudentWpr = StudentWrapper(student: newStudent, arrived: false)
-                                newStudents.append(newStudent)
+                                self.students.append(newStudent)
                                 self.studentsWrapper[newStudent.studentID] = newStudentWpr
                             }
                         })
@@ -298,34 +311,41 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                         self.loadStudentArvInfo(s.key as! String);
                     }
                 }
-                self.students = newStudents
+//                print ("assigning newstudents to self.students")
+//                print (newStudents)
+//                self.students = newStudents
             })
         } else{
             self.dbComm.newUserRef.childByAppendingPath(self.parent.uid).childByAppendingPath("childrenIDs").observeEventType(.Value,withBlock:{
                 snapshot in
-                var newStudents = [Student]()
+                // var newStudents = [Student]()
                 if (snapshot.hasChildren()){
-                    print(snapshot.value)
-                    let childrenIDs = snapshot.children.nextObject() as! NSDictionary
+                    let childrenIDs = snapshot.value as! NSDictionary
                     // each child is saved as a ID:name pair in childrenIDs
                     for child in childrenIDs {
                         // save the children's key (studentID) in the keysForTable array
                         // for later display purposes
                         self.keysForTable.append(child.key as! String)
                         // go fetch the actual Student object
-                        self.dbComm.ref.childByAppendingPath(child.key as! String).observeEventType(.Value,withBlock:{
+                        // TODO change to query child by key
+                        self.dbComm.ref.childByAppendingPath(child.value as! String).observeEventType(.Value,withBlock:{
                             snapshot2 in
                             if (snapshot2.hasChildren()){
-                                let newStudent = Student(snapshot:snapshot2.value as! FDataSnapshot)
+                                print("found children")
+                                print (snapshot2.value)
+                                let newStudent = Student(snapshot: snapshot2 as FDataSnapshot)
                                 let newStudentWpr = StudentWrapper(student:newStudent,arrived:false)
-                                newStudents.append(newStudent)
+                                // newStudents.append(newStudent)
+                                self.students.append(newStudent)
                                 self.studentsWrapper[newStudent.studentID] = newStudentWpr
                             }
                         })
                         self.loadStudentArvInfo(child.key as! String)
                     }
                 }
-                self.students = newStudents
+//                print ("assigning newstudents to self.students")
+//                print (newStudents)
+//                self.students = newStudents
             })
         }
     }
@@ -333,14 +353,13 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
     
     func loadStudentArvInfo(studentID: String){
         var currentLogRef = Firebase()
-        
         if (isMorning == true){
            currentLogRef  = self.dbComm.logRef.childByAppendingPath(self.currentDate).childByAppendingPath(MORNING_PERIOD)
         }else{
             currentLogRef = self.dbComm.logRef.childByAppendingPath(self.currentDate).childByAppendingPath(AFTERNOON_PERIOD)
         }
         
-        if (self.isStaff == true){
+        if (self.isStaff){
             // For staff, create new log records for the day
             currentLogRef.childByAppendingPath(studentID).observeEventType(.Value, withBlock: {
                snapshot in
@@ -354,75 +373,22 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                 self.logExsits = true
                 self.reloadTable()
             })
-        }
-//        else{
-//            // For parents, siply display today's log records
-//            currentLogRef.childByAppendingPath(studentID).observeEventType(.Value,withBlock: {
-//                snapshot in
-//                self.studentsWrapper[studentID]!.ref = currentLogRef.childByAppendingPath(studentID)
-//                if (!snapshot.hasChildren()){
-//                    self.logExsits = false
-//                } else {
-//                    for item in snapshot.children{
-//                        self.studentsWrapper[studentID]!.arrived = false
-//                    }
-//                }
-//            })
-////            // if the user is a parent
-////            for everyStudent in self.students{
-////                currentLogRef.queryOrderedByChild("studentID").queryEqualToValue(everyStudent.studentID).observeEventType(.Value, withBlock: {
-////                    snapshot in
-////                    if (!snapshot.hasChildren()){
-////                        self.logExsits = false
-////                    }else{
-////                        for item in snapshot.children{
-////                            let newSArvInfo = StudentArvInfo(snapshot: item as! FDataSnapshot)
-////                            self.studentArvInfo.append(newSArvInfo)
-////                        }
-////                        self.logExsits = true
-////                    }
-////                    self.reloadTable()
-////                })
-////            }
-//        }
+        } else {
+            print ("finding log record for parent")
+            currentLogRef.childByAppendingPath(studentID).observeEventType(.Value,withBlock: {
+                snapshot in
+                if (!snapshot.hasChildren()){
+                    self.logExsits = false
+                } else {
+                    self.studentsWrapper[studentID]!.arrived = snapshot.value[studentID] as! Bool
+                }
+                self.logExsits = true
+                self.reloadTable()
+            })
+            }
     }
     
     func reloadTable(){
-//        var sWrapper = [StudentWrapper]()
-//        if (self.students.count > 0 && self.studentArvInfo.count > 0){
-//            if (self.isStaff == true){
-//                // use the information from the log
-//                for i in 1...self.studentArvInfo.count{
-//                    for j in 1...self.students.count{
-//                        if (self.students[j-1].studentID == self.studentArvInfo[i-1].studentID){
-//                            let newSWrapper = StudentWrapper(student: self.students[j-1], studentArvInfo: self.studentArvInfo[i-1])
-//                            sWrapper.append(newSWrapper)
-//                        }
-//                    }
-//                }
-//            }else{
-//                // handle the case where staff have not yet logged in so some student Arv info is missing
-//                for j in 1...self.students.count{
-//                    var foundMatch = false
-//                    for i in 1...self.studentArvInfo.count{
-//                        if (self.students[j-1].studentID == self.studentArvInfo[i-1].studentID){
-//                            foundMatch = true
-//                            let newSWrapper = StudentWrapper(student: self.students[j-1], studentArvInfo: self.studentArvInfo[i-1])
-//                            sWrapper.append(newSWrapper)
-//                            continue
-//                        }
-//                    }
-//                    if (foundMatch == false){
-//                        // if we did not find matching student arv info we create local ones for parent to view 
-//                        var fakeStudentArvInfo = StudentArvInfo(arrived: false, key:"", studentID: self.students[j-1].studentID, staffID: self.students[j-1].staffID)
-//                        let newSWrapper = StudentWrapper(student: self.students[j-1], studentArvInfo: fakeStudentArvInfo)
-//                        sWrapper.append(newSWrapper)
-//                    }
-//                }
-//            }
-//        
-//        }
-//        self.studentsWrapper = sWrapper
         self.tableView.reloadData()
     }
 }

@@ -20,7 +20,6 @@ struct Student {
     self.parentID = parentID;
     self.staffID = staffID;
     self.routeID = routeID;
-    // self.ref = nil
   }
   
   init(snapshot: FDataSnapshot) {
