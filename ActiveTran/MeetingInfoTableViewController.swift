@@ -6,7 +6,9 @@ class MeetingInfoTableViewController: UITableViewController {
       
     var busRoutes = [BusRoute]()
     var students = [Student]()
-    var user: User!
+    var staff:Staff!
+    var parent:Parent!
+    var isStaff:Bool!
     
     var meetingInfoWrapperList = [MeetingInfoWrapper]()
     
@@ -16,9 +18,8 @@ class MeetingInfoTableViewController: UITableViewController {
     // MARK: UIViewController Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        if (self.user.isStaff == true){
-            dbComm.routeRef.queryOrderedByChild("routeID").queryEqualToValue(self.user.routeID).observeEventType(.Value, withBlock: {   snapshot in
+        if (self.isStaff == true){
+            dbComm.routeRef.queryOrderedByKey().queryEqualToValue(self.staff.routeID).observeEventType(.Value, withBlock: {   snapshot in
                 var busRoutesFromDB = [BusRoute]()
                 if (snapshot.hasChildren()){
                     for item in snapshot.children {
@@ -29,10 +30,10 @@ class MeetingInfoTableViewController: UITableViewController {
                 self.busRoutes = busRoutesFromDB
                 self.reloadTable()
             })
-        }else if (self.user.isStaff == false){
-            for item in students {
-                dbComm.routeRef.queryOrderedByChild("routeID").queryEqualToValue(item.routeID).observeEventType(.Value, withBlock: {   snapshot in
-                    
+        } else {
+            for student in self.students {
+                dbComm.routeRef.queryOrderedByKey().queryEqualToValue(student.routeID).observeEventType(.Value, withBlock: {
+                    snapshot in
                     if (snapshot.hasChildren()){
                         for item in snapshot.children {
                             let routeFromDB = BusRoute(snapshot: item as! FDataSnapshot)
@@ -59,8 +60,8 @@ class MeetingInfoTableViewController: UITableViewController {
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> MeetingInfoCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("MeetingInfoCell")! as! MeetingInfoCell
         
-        if (user.isStaff == true){
-            cell.infoOwnerLabel?.text = "Showing details for AcTran staff member: " + user.name
+        if (self.isStaff == true){
+            cell.infoOwnerLabel?.text = "Showing details for AcTran staff member: " + staff.name
             cell.meetingLocationLabel?.text = busRoutes[indexPath.row].meetingLocation
             cell.meetingTimeLabel?.text = busRoutes[indexPath.row].meetingTime
         }else{
@@ -73,12 +74,13 @@ class MeetingInfoTableViewController: UITableViewController {
 
     func reloadTable(){
         
-        if (user.isStaff == false){
+        if (self.isStaff == false){
             var mWrapper = [MeetingInfoWrapper]()
             if (self.students.count > 0 && self.busRoutes.count > 0){
+                
                 for i in 1...self.busRoutes.count{
                     for j in 1...self.students.count{
-                        if (self.students[j-1].routeID == self.busRoutes[i-1].routeID){
+                        if (self.students[j-1].routeID == self.busRoutes[i-1].key){
                             let newInfoWrapper = MeetingInfoWrapper(student: self.students[j-1], busRoute: self.busRoutes[i-1])
                             mWrapper.append(newInfoWrapper)
                         }

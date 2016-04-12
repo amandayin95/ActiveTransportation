@@ -11,8 +11,12 @@ import MessageUI
 class ContactInfoViewController: UITableViewController, MFMessageComposeViewControllerDelegate {
     
     // MARK: Property passed in through segue
+    var studentWprSelected: StudentWrapper!
     var studentSelected:Student!
-    var user:User!
+    var parent:Parent!
+    var staff:Staff!
+    var isStaff:Bool!
+    
     var queryString:String!
     // MARK: DbCommunicator
     var dbComm = DbCommunicator()
@@ -23,13 +27,18 @@ class ContactInfoViewController: UITableViewController, MFMessageComposeViewCont
     // MARK: UIViewController Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        if (self.user.isStaff == true){
+        self.studentSelected = self.studentWprSelected.student
+        if (self.isStaff == true){
             self.queryString = self.studentSelected.parentID
         } else {
-            self.queryString = self.studentSelected.staffID
+            // query for associated staffID
+            self.dbComm.routeRef.queryOrderedByKey().queryEqualToValue(self.studentSelected.routeID).observeEventType(.Value,withBlock: { snapshot in
+                if (snapshot.hasChildren()){
+                    let route = BusRoute(snapshot: snapshot as FDataSnapshot)
+                    self.queryString = route.staffID
+                }
+                })
         }
-
         
         dbComm.usersRef.queryOrderedByChild("uid").queryEqualToValue(self.queryString).observeEventType(.Value, withBlock:{ snapshot in
                 // a list to store the parents for the given student
@@ -60,7 +69,7 @@ class ContactInfoViewController: UITableViewController, MFMessageComposeViewCont
         let cell = tableView.dequeueReusableCellWithIdentifier("ContactInfoCell")! as UITableViewCell
         
         var contactType : String!
-        if (self.user.isStaff == true){
+        if (self.isStaff == true){
             contactType = "Parent contact info "
         } else {
             contactType = "Staff contact info "

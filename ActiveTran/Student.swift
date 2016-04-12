@@ -7,7 +7,7 @@ struct Student {
   let name: String!
   let studentID : String!
   let parentID : String!
-  let staffID: String!
+ // let staffID: String!
   let routeID: String!
   let school: String!
   
@@ -18,18 +18,15 @@ struct Student {
     self.studentID = studentID
     self.school = school
     self.parentID = parentID;
-    self.staffID = staffID;
     self.routeID = routeID;
-    // self.ref = nil
   }
   
   init(snapshot: FDataSnapshot) {
     key = snapshot.key
     name = snapshot.value["name"] as! String
-    studentID = snapshot.value["studentID"] as! String
+    studentID = snapshot.key as! String
     school = snapshot.value["school"] as! String
     parentID = snapshot.value["parentID"] as! String
-    staffID = snapshot.value["staffID"] as! String
     routeID = snapshot.value["routeID"] as! String
   }
   
@@ -39,7 +36,6 @@ struct Student {
       "studentID": studentID,
       "school": school,
       "parentID": parentID,
-      "staffID": staffID,
       "routeID": routeID,
     ]
   }
