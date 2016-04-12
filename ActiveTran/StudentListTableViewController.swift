@@ -64,6 +64,7 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
         //TODO change font size
         meetingInfoBarButtonItem.tintColor = UIColor.whiteColor()
         navigationItem.leftBarButtonItem = meetingInfoBarButtonItem
+        
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -210,10 +211,10 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
     }
 
     func authenticateUser(){
-        self.dbComm.ref.observeAuthEventWithBlock { authData in
+        self.dbComm.studentsRef.observeAuthEventWithBlock { authData in
             if authData != nil {
                 if (self.signUpMode == true){
-                    let currentUserRef = Firebase!(self.dbComm.newUserRef.childByAppendingPath(authData.uid))
+                    let currentUserRef = Firebase!(self.dbComm.usersRef.childByAppendingPath(authData.uid))
                     if (self.isStaff){
                         self.staff = Staff(authData:authData, name:self.nameToPass, contactInfo:self.contactInfoToPass,
                             isStaff:true)
@@ -223,22 +224,23 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                             isStaff:false)
                         currentUserRef.setValue(self.parent.toAnyObject())
                     }
-                    self.dbComm.ref.unauth()
+                    self.dbComm.studentsRef.unauth()
                     self.reloadTable()
                 } else{
                     let idCopy = authData.uid.lowercaseString                    
-                    self.dbComm.newUserRef.childByAppendingPath(idCopy).observeEventType(.Value, withBlock: { snapshot in
+                    self.dbComm.usersRef.childByAppendingPath(idCopy).observeEventType(.Value, withBlock: { snapshot in
                         if (snapshot.hasChildren()){
+                                print (snapshot.value)
                                 if (snapshot.value["isStaff"] as! Bool){
                                     self.isStaff = true
-                                    self.staff = Staff(uid:snapshot.value["uid"] as! String,
+                                    self.staff = Staff(uid:snapshot.key as! String,
                                         name:snapshot.value["name"] as! String,
                                         email:snapshot.value["email"] as! String,
                                         contactInfo:snapshot.value["contactInfo"] as! String,
                                         isStaff:snapshot.value["isStaff"] as! Bool,
                                         routeID: snapshot.value["routeID"] as! String)
                                 }else{
-                                    self.parent = Parent(uid:snapshot.value["uid"] as! String,
+                                    self.parent = Parent(uid:snapshot.key as! String,
                                         name:snapshot.value["name"] as! String,
                                         email:snapshot.value["email"] as! String,
                                         contactInfo:snapshot.value["contactInfo"] as! String,
@@ -248,8 +250,7 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                         }
                             self.loadStudentInfo()
                     })
-                    // 3
-                    self.dbComm.ref.unauth() // need this to switch between accounts
+                    self.dbComm.studentsRef.unauth() // need this to switch between accounts
                     // unauth will not alter or remove the uid of the user
                     
                 }
@@ -267,10 +268,11 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                     for s in item.students{
                         self.keysForTable.append(s.key as! String)
                         // go find actual student object
-                        // TODO we use s.value in below query because that is how we currently store our students in DB
-                        self.dbComm.ref.childByAppendingPath(s.value as! String).observeEventType(.Value, withBlock: {
+                        self.dbComm.studentsRef.childByAppendingPath(s.key as! String).observeEventType(.Value, withBlock: {
                             snapshot2 in
                             if (snapshot2.hasChildren()){
+                                print(self.dbComm.studentsRef.childByAppendingPath(s.key as! String))
+                                print (snapshot2)
                                 let newStudent = Student(snapshot: snapshot2 as FDataSnapshot)
                                 let newStudentWpr = StudentWrapper(student: newStudent, arrived: false)
                                 self.students.append(newStudent)
@@ -283,7 +285,7 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                 }
             })
         } else{
-            self.dbComm.newUserRef.childByAppendingPath(self.parent.uid).childByAppendingPath("childrenIDs").observeEventType(.Value,withBlock:{
+            self.dbComm.usersRef.childByAppendingPath(self.parent.uid).childByAppendingPath("childrenIDs").observeEventType(.Value,withBlock:{
                 snapshot in
                 if (snapshot.hasChildren()){
                     let childrenIDs = snapshot.value as! NSDictionary
@@ -293,8 +295,7 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                         // for later display purposes
                         self.keysForTable.append(child.key as! String)
                         // go fetch the actual Student object
-                        // TODO change to query child by key
-                        self.dbComm.ref.childByAppendingPath(child.value as! String).observeEventType(.Value,withBlock:{
+                        self.dbComm.studentsRef.childByAppendingPath(child.key as! String).observeEventType(.Value,withBlock:{
                             snapshot2 in
                             if (snapshot2.hasChildren()){
                                 let newStudent = Student(snapshot: snapshot2 as FDataSnapshot)
@@ -353,27 +354,61 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
 }
 
 
-// Manually pushing new user class. Only for testing purposes.
 
-//                let newUserRef = self.dbComm.rootRef.childByAppendingPath("newUser")
-//                let testChildrenIDs:NSDictionary = ["vinh111111":"VinhFirst","vinh2222222":"VinhSecond"]
-//                let testParent = ["childrenID":testChildrenIDs, "name":"Vinh Hoang", "email":"vhoang@hmc.edu",
-//                                  "contact":"1112223333","isStaff":false]
-//                let userIDRef = newUserRef.childByAutoId()
-//                userIDRef.setValue(testParent)
 
-// Manually pushing new routes.
-//        let testChildrenList1:NSDictionary = ["Amanda11111":"AmandaFirst", "Amanda2222222":"AmandaSecond",
-//                                              "Amanda3333333":"AmandaThird"]
-//        let testRoute1 = ["meetingLocation":"Mudd Cafe", "meetingTime":"2016-03-30 09:00", "name":"TestRoute2",
-//                          "staffID":"e199daf9-f2eb-4e41-8f3d-c8cc40002522","students": testChildrenList1]
+//        // Manually create users.
+//        // Manually pushing new user class. Only for testing purposes.
 //
-//        let testRoute1Ref = self.dbComm.routeRef.childByAutoId()
-//        testRoute1Ref.setValue(testRoute1)
+//
+//                let xiaoyang = ["name":"Xiaoyang Qian", "email":"xqian17@cmc.edu",
+//                                                  "contactInfo":"9093446722","isStaff":true,"routeID":"-KF09HvYLPB6oBhffoW2","uid":"31a427d4-9d1a-426a-8497-49b8a73f5230"]
+//
+//                let userIDRef1 = self.dbComm.usersRef.childByAppendingPath("31a427d4-9d1a-426a-8497-49b8a73f5230")
+//                userIDRef1.setValue(xiaoyang)
+//
+//                let vinhChildrenIDs:NSDictionary = ["-KEz2UzvRd-yp2puQ4Ro":"Xiaoyang_Student1","-KEz2UzvRd-yp2puQ4Rp":"Xiaoyang_Student2","-KEz2UzvRd-yp2puQ4Rq":"Xiaoyang_Student3"]
+//                let vinh = ["childrenIDs":vinhChildrenIDs, "name":"Vinh Hoang", "email":"vhoang@hmc.edu",
+//                                                  "contactInfo":"1112223333","isStaff":false,"uid":"435879da-a963-4489-9b22-5e2e4b6515ca"]
+//                let userIDRef2 = self.dbComm.usersRef.childByAppendingPath("435879da-a963-4489-9b22-5e2e4b6515ca")
+//                userIDRef2.setValue(vinh)
 
-// Manualy assigning students to parents
+//
+//        // Manually pushing new routes.
+//                let testChildrenList1:NSDictionary = ["-KEz2UzvRd-yp2puQ4Ro":"Xiaoyang_Student1", "-KEz2UzvRd-yp2puQ4Rp":"Xiaoyang_Student2","-KEz2UzvRd-yp2puQ4Rq":"Xiaoyang_Student3"]
+//                let testRoute1 = ["meetingLocation":"Mudd Cafe", "meetingTime":"2016-03-30 09:00", "name":"Route1",
+//                                  "staffID":"31a427d4-9d1a-426a-8497-49b8a73f5230","students": testChildrenList1]
+//
+//                let testRoute1Ref = self.dbComm.routeRef.childByAutoId()
+//                testRoute1Ref.setValue(testRoute1)
 
-//        let testChildrenList2:NSDictionary = ["vinh111111":"VinhFirst","vinh2222222":"VinhSecond"]
-//        var parentChildRef: Firebase!
-//        parentChildRef = self.dbComm.newUserRef.childByAppendingPath("3b03b4b8-57da-46fc-817f-e54713571307").childByAppendingPath("childrenIDs")
-//        parentChildRef.setValue(testChildrenList2 as [NSObject : AnyObject])
+//
+
+// Manually create students.
+//                let student1Ref = self.dbComm.studentsRef.childByAutoId()
+//                let testStudent1 = ["name":"Xiaoyang_Student1","school":"CMC","parentID":"435879da-a963-4489-9b22-5e2e4b6515ca","routeID":"-KEz6ud-0zlbKaDi6mH-","uid":"-KEz2UzvRd-yp2puQ4Ro"]
+//                student1Ref.setValue(testStudent1)
+//
+//                let student2Ref = self.dbComm.studentsRef.childByAutoId()
+//                let testStudent2 = ["name":"Xiaoyang_Student2","school":"CMC","parentID":"435879da-a963-4489-9b22-5e2e4b6515ca","routeID":"-KEz6ud-0zlbKaDi6mH-","uid":"-KEz2UzvRd-yp2puQ4Rp"]
+//                student2Ref.setValue(testStudent2)
+//
+//                let student3Ref = self.dbComm.studentsRef.childByAutoId()
+//                let testStudent3 = ["name":"Xiaoyang_Student3","school":"CMC","parentID":"435879da-a963-4489-9b22-5e2e4b6515ca","routeID":"-KEz6ud-0zlbKaDi6mH-","uid":"-KEz2UzvRd-yp2puQ4Rq"]
+//                student3Ref.setValue(testStudent3)
+//
+//                let student4Ref = self.dbComm.studentsRef.childByAutoId()
+//                let testStudent4 = ["name":"Vinh_Child1","school":"Mudd","parentID":"435879da-a963-4489-9b22-5e2e4b6515ca","routeID":"-KEz6ud-0zlbKaDi6mH-","uid":"-KEzApViahDjYR1v1ZkF"]
+//                student4Ref.setValue(testStudent4)
+//
+//                let student5Ref = self.dbComm.studentsRef.childByAutoId()
+//                let testStudent5 = ["name":"Vinh_Child2","school":"Mudd","parentID":"435879da-a963-4489-9b22-5e2e4b6515ca","routeID":"-KEz6ud-0zlbKaDi6mH-","uid":"-KEzApViahDjYR1v1ZkF"]
+//                student5Ref.setValue(testStudent5)
+
+
+//        // Manually pushing new routes.
+//                let testChildrenList1:NSDictionary = ["-KF083fV9L_FzSGTeCXI":"Xiaoyang_Student1", "-KF083fV9L_FzSGTeCXJ":"Xiaoyang_Student2","-KF083fV9L_FzSGTeCXK":"Xiaoyang_Student3"]
+//                let testRoute1 = ["meetingLocation":"Mudd Cafe", "meetingTime":"2016-03-30 09:00", "name":"Route1",
+//                                  "staffID":"31a427d4-9d1a-426a-8497-49b8a73f5230","students": testChildrenList1]
+//
+//                let testRoute1Ref = self.dbComm.routeRef.childByAutoId()
+//                testRoute1Ref.setValue(testRoute1)

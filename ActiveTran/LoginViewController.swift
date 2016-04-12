@@ -30,7 +30,7 @@ class LoginViewController: UIViewController {
     override func viewDidAppear(animated: Bool) {
        signUpMode = false
         // Create an authentication observer
-        dbComm.ref.observeAuthEventWithBlock { (authData) -> Void in
+        dbComm.studentsRef.observeAuthEventWithBlock { (authData) -> Void in
             // Block passed the authData parameter
             if authData != nil {
                 // On successful authentication, perform the segue. Pass nil as the sender.
@@ -44,7 +44,7 @@ class LoginViewController: UIViewController {
 
     // MARK: Actions
     @IBAction func loginDidTouch(sender: AnyObject) {
-        dbComm.ref.authUser(textFieldLoginEmail.text, password: textFieldLoginPassword.text,
+        dbComm.rootRef.authUser(textFieldLoginEmail.text, password: textFieldLoginPassword.text,
             withCompletionBlock: { (error, auth) in
                 
         })
@@ -53,8 +53,8 @@ class LoginViewController: UIViewController {
     @IBAction func signUpDidTouch(sender: AnyObject) {
         signUpMode = true
         let alert = UIAlertController(title: "Sign Up",
-                                  message: "Sign Up for Active Transporation",
-                                  preferredStyle: .Alert)
+                                      message: "Sign Up for Active Transporation",
+                                      preferredStyle: .Alert)
         
         let saveAction = UIAlertAction(title: "Save",
                                        style: .Default)
@@ -70,58 +70,63 @@ class LoginViewController: UIViewController {
             
             self.nameToPass = nameField.text
             self.contactInfoToPass = contactInfoField.text
-            print (isStaffField.text)
-            print (isStaffField.text?.lowercaseString)
-            print (isStaffField.text?.lowercaseString.containsString("yes"))
             self.isStaffToPass = (isStaffField.text?.lowercaseString.containsString("yes"))
-            self.dbComm.rootRef.createUser(emailField.text, password: passwordField.text) { (error: NSError!) in
+            
+            // Manually create students.
+//            let student1Ref = self.dbComm.studentsRef.childByAutoId()
+//            let testStudent1 = ["name":"Amanda_Student1","school":"Pomona"]
+//            student1Ref.setValue(testStudent1)
+            
+            print (emailField.text)
+            print (passwordField.text)
+            
+            self.dbComm.studentsRef.createUser(emailField.text, password: passwordField.text) { (error: NSError!) in
                 if error == nil {
-                    print ("Creating user")
                     self.dbComm.rootRef.authUser(emailField.text, password: passwordField.text,
-                    withCompletionBlock: { (error, auth) -> Void in
-                    self.performSegueWithIdentifier(self.LoginToList, sender: nil)
+                                                 withCompletionBlock: { (error, auth) -> Void in
+                                                    self.performSegueWithIdentifier(self.LoginToList, sender: nil)
                     })
                 }
             }
         }
         
-
-    let cancelAction = UIAlertAction(title: "Cancel",
-      style: .Default) { (action: UIAlertAction) -> Void in
-    }
-
-    alert.addTextFieldWithConfigurationHandler {
-      (textEmail) -> Void in
-      textEmail.placeholder = "Enter your email"
-    }
-
-    alert.addTextFieldWithConfigurationHandler {
-      (textPassword) -> Void in
-      textPassword.secureTextEntry = true
-      textPassword.placeholder = "Enter your password"
-    }
-
-    alert.addTextFieldWithConfigurationHandler {
-        (textName) -> Void in
-        textName.placeholder = "Enter your name"
-    }
-
-    alert.addTextFieldWithConfigurationHandler {
-        (textInfo) -> Void in
-        textInfo.placeholder = "Enter your contact information"
-    }
-
-    alert.addTextFieldWithConfigurationHandler {
-        (textInfo) -> Void in
-        textInfo.placeholder = "Enter Yes if Staff, No if Parent"
-    }
-
-    alert.addAction(saveAction)
-    alert.addAction(cancelAction)
-
-    presentViewController(alert,
-      animated: true,
-      completion: nil)
+        
+        let cancelAction = UIAlertAction(title: "Cancel",
+                                         style: .Default) { (action: UIAlertAction) -> Void in
+        }
+        
+        alert.addTextFieldWithConfigurationHandler {
+            (textEmail) -> Void in
+            textEmail.placeholder = "Enter your email"
+        }
+        
+        alert.addTextFieldWithConfigurationHandler {
+            (textPassword) -> Void in
+            textPassword.secureTextEntry = true
+            textPassword.placeholder = "Enter your password"
+        }
+        
+        alert.addTextFieldWithConfigurationHandler {
+            (textName) -> Void in
+            textName.placeholder = "Enter your name"
+        }
+        
+        alert.addTextFieldWithConfigurationHandler {
+            (textInfo) -> Void in
+            textInfo.placeholder = "Enter your contact information"
+        }
+        
+        alert.addTextFieldWithConfigurationHandler {
+            (textInfo) -> Void in
+            textInfo.placeholder = "Enter Yes if Staff, No if Parent"
+        }
+        
+        alert.addAction(saveAction)
+        alert.addAction(cancelAction)
+        
+        presentViewController(alert,
+                              animated: true,
+                              completion: nil)
     }
 
 

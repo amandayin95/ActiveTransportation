@@ -31,9 +31,14 @@ class ContactInfoViewController: UITableViewController, MFMessageComposeViewCont
         if (self.isStaff == true){
             self.queryString = self.studentSelected.parentID
         } else {
-            self.queryString = self.studentSelected.staffID
+            // query for associated staffID
+            self.dbComm.routeRef.queryOrderedByKey().queryEqualToValue(self.studentSelected.routeID).observeEventType(.Value,withBlock: { snapshot in
+                if (snapshot.hasChildren()){
+                    let route = BusRoute(snapshot: snapshot as FDataSnapshot)
+                    self.queryString = route.staffID
+                }
+                })
         }
-
         
         dbComm.usersRef.queryOrderedByChild("uid").queryEqualToValue(self.queryString).observeEventType(.Value, withBlock:{ snapshot in
                 // a list to store the parents for the given student

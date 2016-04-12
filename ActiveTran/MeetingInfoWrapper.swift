@@ -1,10 +1,3 @@
-//
-//  MeetingInfoWrapper.swift
-//  ActiveTransportation
-//
-//  Created by shuopeng yin on 3/6/16.
-//
-//
 
 import Foundation
 
