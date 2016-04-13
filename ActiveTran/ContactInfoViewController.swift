@@ -30,17 +30,7 @@ class ContactInfoViewController: UITableViewController, MFMessageComposeViewCont
         self.studentSelected = self.studentWprSelected.student
         if (self.isStaff == true){
             self.queryString = self.studentSelected.parentID
-        } else {
-            // query for associated staffID
-            self.dbComm.routeRef.queryOrderedByKey().queryEqualToValue(self.studentSelected.routeID).observeEventType(.Value,withBlock: { snapshot in
-                if (snapshot.hasChildren()){
-                    let route = BusRoute(snapshot: snapshot as FDataSnapshot)
-                    self.queryString = route.staffID
-                }
-                })
-        }
-        
-        dbComm.usersRef.queryOrderedByChild("uid").queryEqualToValue(self.queryString).observeEventType(.Value, withBlock:{ snapshot in
+            self.dbComm.usersRef.queryOrderedByKey().queryEqualToValue(self.queryString).observeEventType(.Value, withBlock:{ snapshot in
                 // a list to store the parents for the given student
                 if (snapshot.hasChildren()){
                     for item in snapshot.children {
@@ -48,7 +38,29 @@ class ContactInfoViewController: UITableViewController, MFMessageComposeViewCont
                         self.users.append(user)
                     }
                 }
+            })
+        } else {
+            // query for associated staffID
+            self.dbComm.routeRef.queryOrderedByKey().queryEqualToValue(self.studentSelected.routeID).observeEventType(.Value,withBlock: { snapshot in
+                if (snapshot.hasChildren()){
+                    let item = snapshot.children.nextObject()
+                    let route = BusRoute(snapshot: item as! FDataSnapshot)
+                    self.queryString = route.staffID
+                }
+                
+                
+                self.dbComm.usersRef.queryOrderedByKey().queryEqualToValue(self.queryString).observeEventType(.Value, withBlock:{ snapshot in
+                    // a list to store the parents for the given student
+                    if (snapshot.hasChildren()){
+                        for item in snapshot.children {
+                            let user = User(snapshot: item as! FDataSnapshot)
+                            self.users.append(user)
+                        }
+                    }
                 })
+                
+                })
+        }
     }
 
     
