@@ -65,6 +65,10 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
         meetingInfoBarButtonItem.tintColor = UIColor.whiteColor()
         navigationItem.leftBarButtonItem = meetingInfoBarButtonItem
         
+                let student1Ref = self.dbComm.studentsRef.childByAppendingPath("-KF083fV9L_FzSGTeCXI")
+                let testStudent1 = ["name":"Xiaoyang_Student1","school":"CMC","parentID":"435879da-a963-4489-9b22-5e2e4b6515ca","routeID":"-KF09HvYLPB6oBhffoW2","uid":"-KF083fV9L_FzSGTeCXI"]
+                student1Ref.setValue(testStudent1)
+        
     }
     
     override func viewDidAppear(animated: Bool) {
