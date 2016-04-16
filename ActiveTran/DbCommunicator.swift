@@ -8,6 +8,7 @@ struct DbCommunicator {
     let usersRef: Firebase!
     let routeRef: Firebase!
     let logRef: Firebase!
+    var currentLogRef: Firebase!
     
     init(){
         self.rootRef = Firebase(url:"https://walkingschoolbus.firebaseio.com")
@@ -15,6 +16,7 @@ struct DbCommunicator {
         self.usersRef = Firebase(url:"https://walkingschoolbus.firebaseio.com/users")
         self.routeRef = Firebase(url:"https://walkingschoolbus.firebaseio.com/routes")
         self.logRef = Firebase(url:"https://walkingschoolbus.firebaseio.com/logs")
+        self.currentLogRef = self.logRef
     }
     
     

@@ -48,11 +48,17 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
         }else{
             isMorning = false
         }
-
-        
         let dateFormatter = NSDateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
         self.currentDate =  dateFormatter.stringFromDate(date)
+        if (isMorning == true){
+            self.dbComm.currentLogRef = self.dbComm.currentLogRef.childByAppendingPath(self.currentDate).childByAppendingPath(MORNING_PERIOD)
+            print ("load studnet arv info moring ")
+            print( self.dbComm.currentLogRef)
+        }else{
+            self.dbComm.currentLogRef = self.dbComm.currentLogRef.childByAppendingPath(self.currentDate).childByAppendingPath(AFTERNOON_PERIOD)
+        }
+
         
         // Set up swipe to delete  
         // TODO what does this have to do with delete?
@@ -64,10 +70,6 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
         //TODO change font size
         meetingInfoBarButtonItem.tintColor = UIColor.whiteColor()
         navigationItem.leftBarButtonItem = meetingInfoBarButtonItem
-        
-                let student1Ref = self.dbComm.studentsRef.childByAppendingPath("-KF083fV9L_FzSGTeCXI")
-                let testStudent1 = ["name":"Xiaoyang_Student1","school":"CMC","parentID":"435879da-a963-4489-9b22-5e2e4b6515ca","routeID":"-KF09HvYLPB6oBhffoW2","uid":"-KF083fV9L_FzSGTeCXI"]
-                student1Ref.setValue(testStudent1)
         
     }
     
@@ -123,11 +125,14 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
         // Staff Only: Negate completed on the student to toggle the status
         // Only staff has editing access
         if (self.isStaff == true){
-            let toggledCompletion = !studentSelected!.arrived
+            let toggleCompletion = !studentSelected!.arrived
             // Call toggleCellCheckbox() update the visual properties of the cell
-            toggleCellCheckbox(cell, isCompleted: toggledCompletion)
+            toggleCellCheckbox(cell, isCompleted: toggleCompletion)
             // Passing a dictioary to update Firebase
-            studentSelected?.ref!.updateChildValues([studentSelected!.student.studentID: toggledCompletion])
+            print("toggle table view print ref ")
+            print (self.dbComm.currentLogRef)
+            self.dbComm.currentLogRef.updateChildValues([studentSelected!.student.studentID : toggleCompletion])
+            
         }
     }
     
@@ -215,7 +220,7 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
     }
 
     func authenticateUser(){
-        self.dbComm.studentsRef.observeAuthEventWithBlock { authData in
+        self.dbComm.rootRef.observeAuthEventWithBlock { authData in
             if authData != nil {
                 if (self.signUpMode == true){
                     let currentUserRef = Firebase!(self.dbComm.usersRef.childByAppendingPath(authData.uid))
@@ -228,7 +233,7 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                             isStaff:false)
                         currentUserRef.setValue(self.parent.toAnyObject())
                     }
-                    self.dbComm.studentsRef.unauth()
+                    self.dbComm.rootRef.unauth()
                     self.reloadTable()
                 } else{
                     let idCopy = authData.uid.lowercaseString                    
@@ -254,7 +259,7 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                         }
                             self.loadStudentInfo()
                     })
-                    self.dbComm.studentsRef.unauth() // need this to switch between accounts
+                    self.dbComm.rootRef.unauth() // need this to switch between accounts
                     // unauth will not alter or remove the uid of the user
                     
                 }
@@ -275,8 +280,8 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                         self.dbComm.studentsRef.childByAppendingPath(s.key as! String).observeEventType(.Value, withBlock: {
                             snapshot2 in
                             if (snapshot2.hasChildren()){
-                                print(self.dbComm.studentsRef.childByAppendingPath(s.key as! String))
-                                print (snapshot2)
+//                                print(self.dbComm.studentsRef.childByAppendingPath(s.key as! String))
+//                                print (snapshot2)
                                 let newStudent = Student(snapshot: snapshot2 as FDataSnapshot)
                                 let newStudentWpr = StudentWrapper(student: newStudent, arrived: false)
                                 self.students.append(newStudent)
@@ -317,20 +322,15 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
     
     
     func loadStudentArvInfo(studentID: String){
-        var currentLogRef = Firebase()
-        if (isMorning == true){
-           currentLogRef  = self.dbComm.logRef.childByAppendingPath(self.currentDate).childByAppendingPath(MORNING_PERIOD)
-        }else{
-            currentLogRef = self.dbComm.logRef.childByAppendingPath(self.currentDate).childByAppendingPath(AFTERNOON_PERIOD)
-        }
         
         if (self.isStaff){
             // For staff, create new log records for the day
-            currentLogRef.childByAppendingPath(studentID).observeEventType(.Value, withBlock: {
+            print("loard student arv info current log ref: ")
+            print(self.dbComm.currentLogRef)
+            self.dbComm.currentLogRef.observeEventType(.Value, withBlock: {
                snapshot in
-                self.studentsWrapper[studentID]!.ref = currentLogRef.childByAppendingPath(studentID)
                 if (!snapshot.hasChildren()){
-                    self.studentsWrapper[studentID]!.ref!.setValue(false)
+                   self.dbComm.currentLogRef.updateChildValues([studentID : false])
                     self.studentsWrapper[studentID]!.arrived = false
                 }else{
                     self.studentsWrapper[studentID]!.arrived = snapshot.value[studentID] as! Bool
@@ -339,14 +339,14 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                 self.reloadTable()
             })
         } else {
-            currentLogRef.childByAppendingPath(studentID).observeEventType(.Value,withBlock: {
+            self.dbComm.currentLogRef.childByAppendingPath(studentID).observeEventType(.Value,withBlock: {
                 snapshot in
                 if (!snapshot.hasChildren()){
                     self.logExsits = false
                 } else {
                     self.studentsWrapper[studentID]!.arrived = snapshot.value[studentID] as! Bool
+                    self.logExsits = true
                 }
-                self.logExsits = true
                 self.reloadTable()
             })
             }
