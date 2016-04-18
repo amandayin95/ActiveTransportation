@@ -1,25 +1,27 @@
-
 import Foundation
-
+/**
+ *  User
+ *  User class is extended by both Staff and Parent classes.
+ */
 class User {
-  var uid: String
-  let name: String
-  let email: String
-  let contactInfo: String
-  let isStaff: Bool!
-  
- 
-  // Initialize from Firebase Authentication
+    var key: String
+    let name: String
+    let email: String
+    let contactInfo: String
+    let isStaff: Bool!
+
+    // Initialize from Firebase Authentication data
     init(authData: FAuthData, name:String, contactInfo: String, isStaff: Bool) {
-    self.uid = authData.uid.lowercaseString
-    self.name = name
-    self.email = authData.providerData["email"] as! String
-    self.contactInfo = contactInfo
-    self.isStaff = isStaff 
-  }
+        self.key = authData.uid.lowercaseString
+        self.name = name
+        self.email = authData.providerData["email"] as! String
+        self.contactInfo = contactInfo
+        self.isStaff = isStaff 
+    }
     
+    // Initialize from Firebase snapshot data
     init(snapshot: FDataSnapshot) {
-        uid = snapshot.value["uid"] as! String
+        key = snapshot.key
         name = snapshot.value["name"] as! String
         email = snapshot.value["email"] as! String
         contactInfo = snapshot.value["contactInfo"] as! String
@@ -27,22 +29,22 @@ class User {
         
     }
   
-  // Initialize from arbitrary data
-    init(uid: String, name: String, email: String, contactInfo: String, isStaff: Bool) {
-    self.uid = uid
-    self.name = name
-    self.email = email
-    self.contactInfo = contactInfo
-    self.isStaff = isStaff
-  }
+    // Initialize from arbitrary data
+    init(key: String, name: String, email: String, contactInfo: String, isStaff: Bool) {
+        self.key = key
+        self.name = name
+        self.email = email
+        self.contactInfo = contactInfo
+        self.isStaff = isStaff
+    }
     
+    // Convert to JSON object for pushing onto Firebase
     func toAnyObject() -> AnyObject {
-    return[
-    "uid": uid,
-    "name": name,
-    "email": email,
-    "contactInfo": contactInfo,
-    "isStaff": isStaff,
-    ]
+        return[
+            "name": name,
+            "email": email,
+            "contactInfo": contactInfo,
+            "isStaff": isStaff
+            ]
     }
 }

@@ -1,9 +1,14 @@
 
 import UIKit
-
+/*
+ *  MeetingInfoViewController: Controller for meeting information view
+ *  Connected by segue from SutdentListTableViewController.
+ *  A staff and a user are passed in by segue.
+ *  Connects to Firebase to query busRoute meeting information.
+ */
 class MeetingInfoTableViewController: UITableViewController {
     
-      
+    // MARK: Properties
     var busRoutes = [BusRoute]()
     var students = [Student]()
     var staff:Staff!
@@ -12,7 +17,7 @@ class MeetingInfoTableViewController: UITableViewController {
     
     var meetingInfoWrapperList = [MeetingInfoWrapper]()
     
-    // Mark: DbCommunicator
+    // MARK: DbCommunicator
     var dbComm = DbCommunicator()
     
     // MARK: UIViewController Lifecycle
@@ -46,17 +51,18 @@ class MeetingInfoTableViewController: UITableViewController {
         }
     }
     
+    // MARK: ViewDidAppear
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
     }
 
 
     // MARK: UITableView Delegate methods
-  
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return busRoutes.count
     }
-  
+    
+    // MARK: Display information depending on user type
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> MeetingInfoCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("MeetingInfoCell")! as! MeetingInfoCell
         
@@ -71,13 +77,14 @@ class MeetingInfoTableViewController: UITableViewController {
         }
         return cell
     }
-
+    
+    // MARK: Reload table pairs up students with their meeting information for display
     func reloadTable(){
-        
+        // For parents, find out the meeting information for all children
         if (self.isStaff == false){
             var mWrapper = [MeetingInfoWrapper]()
             if (self.students.count > 0 && self.busRoutes.count > 0){
-                
+                // Loop throuh to pair up students with their busroute
                 for i in 1...self.busRoutes.count{
                     for j in 1...self.students.count{
                         if (self.students[j-1].routeID == self.busRoutes[i-1].key){

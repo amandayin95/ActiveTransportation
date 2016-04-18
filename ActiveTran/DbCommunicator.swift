@@ -1,6 +1,9 @@
 
 import Foundation
-
+/**
+ *  DbCommunicator
+ *  DbCommunicator class saves the Refs that communicates with the database
+ */
 struct DbCommunicator {
     
     let studentsRef: Firebase!
@@ -10,6 +13,7 @@ struct DbCommunicator {
     let logRef: Firebase!
     var currentLogRef: Firebase!
     
+    // Points to the current Firebase backend
     init(){
         self.rootRef = Firebase(url:"https://walkingschoolbus.firebaseio.com")
         self.studentsRef = Firebase(url: "https://walkingschoolbus.firebaseio.com/students")

@@ -1,6 +1,8 @@
-
 import Foundation
-
+/**
+ *  BusRoute Class
+ *  Both students and staff store busRoutes that match them together
+ */
 struct BusRoute {
     let staffID: String
     let students: NSDictionary
@@ -26,6 +28,7 @@ struct BusRoute {
         self.key = ""
     }
     
+    // Convert to JSON object for pushing onto Firebase
     func toAnyObject() -> AnyObject {
         return[
             "staffID": staffID,

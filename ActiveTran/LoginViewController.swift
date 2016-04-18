@@ -2,33 +2,36 @@
 import UIKit
 import QuartzCore
 
+/**
+ *  LoginViewController: Controller for user login and registering.
+ *  First View the user encounters. 
+ *  Segues to StudentListTableViewController.
+ *  Login View Controller manages the login and registering functions.
+ *  
+ */
 class LoginViewController: UIViewController {
 
-    // MARK: Constants
+    // MARK: Flag for segue identifier
     let LoginToList = "LoginToList"
-
-    // MARK: Data passed to StudentListTableView
+    var signUpMode = false
+    
+    // MARK: Data passed through Segue to StudentListTableView
     var contactInfoToPass: String!
     var nameToPass: String!
     var routeIDToPass: String!
     var isStaffToPass:Bool!
 
-    // MARK: flag for segue identifier
-    var signUpMode = false
-
     // Mark: Communicator with Firebase
     var dbComm = DbCommunicator()
-
 
     // MARK: Outlets
     @IBOutlet weak var textFieldLoginEmail: UITextField!
     @IBOutlet weak var textFieldLoginPassword: UITextField!
 
-    // MARK: Properties
-
     // MARK: UIViewController Lifecycle
     override func viewDidAppear(animated: Bool) {
        signUpMode = false
+        
         // Create an authentication observer
         dbComm.studentsRef.observeAuthEventWithBlock { (authData) -> Void in
             // Block passed the authData parameter
@@ -49,7 +52,8 @@ class LoginViewController: UIViewController {
                 
         })
     }
-
+    
+    // MARK: Actions
     @IBAction func signUpDidTouch(sender: AnyObject) {
         signUpMode = true
         let alert = UIAlertController(title: "Sign Up",
@@ -71,11 +75,6 @@ class LoginViewController: UIViewController {
             self.nameToPass = nameField.text
             self.contactInfoToPass = contactInfoField.text
             self.isStaffToPass = (isStaffField.text?.lowercaseString.containsString("yes"))
-            
-            // Manually create students.
-//            let student1Ref = self.dbComm.studentsRef.childByAutoId()
-//            let testStudent1 = ["name":"Amanda_Student1","school":"Pomona"]
-//            student1Ref.setValue(testStudent1)
             
             print (emailField.text)
             print (passwordField.text)
@@ -129,7 +128,8 @@ class LoginViewController: UIViewController {
                               completion: nil)
     }
 
-
+    
+    // Segue to StudentListTableViewController
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject!) {
         if (segue.identifier == "LoginToList") {
             let nav = segue.destinationViewController as! UINavigationController
