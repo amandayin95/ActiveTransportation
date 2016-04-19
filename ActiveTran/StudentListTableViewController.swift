@@ -244,9 +244,8 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                         }
                         self.loadStudentInfo()
                     })
-                    self.dbComm.rootRef.unauth() // need this to switch between accounts
-                    // unauth will not alter or remove the uid of the user
-                    
+                    // need this to switch between accounts
+                    self.dbComm.rootRef.unauth()
                 }
                 
             }
@@ -305,7 +304,6 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
     
     
     func loadStudentArvInfo(studentID: String){
-        
         if (self.isStaff){
             // For staff, create new log records for the day
             self.dbComm.currentLogRef.observeEventType(.Value, withBlock: {

@@ -17,6 +17,8 @@ class Parent : User{
     override
     init(snapshot:FDataSnapshot){
         self.childrenIDs = [:]
+        // On intialization, parents may not have their children
+        // assigned to them yet. In this case, set up an empty dictionary
         if ((snapshot.value.objectForKey("childrenIDs")) != nil){
             self.childrenIDs = snapshot.value["childrenIDs"] as! NSDictionary
         }

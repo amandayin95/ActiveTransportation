@@ -15,7 +15,12 @@ class Staff : User{
     // Initialize from Firebase snapshot data
     override
     init(snapshot:FDataSnapshot){
-        self.routeID = snapshot.value["routeID"] as! String
+        // On intialization, staff may not have their route
+        // assigned to them yet. In this case, set up an empty string
+        self.routeID = ""
+        if ((snapshot.value.objectForKey("routeID")) != nil){
+            self.routeID = snapshot.value["routeID"] as! String
+        }
         super.init(
             key:snapshot.key,
             name:snapshot.value["name"] as! String,
@@ -27,7 +32,6 @@ class Staff : User{
     // Initialize from Firebase Authentication data
     override
     init(authData: FAuthData, name:String, contactInfo: String, isStaff: Bool) {
-        // TODO How to handle the case if a staff has not been assigned a route yet?
         self.routeID = ""
         super.init(key: authData.uid.lowercaseString,
                    name: name,
