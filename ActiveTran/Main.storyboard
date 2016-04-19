@@ -264,7 +264,7 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Student List" id="OJg-kh-Sh2">
-                        <barButtonItem key="rightBarButtonItem" title="Email" id="VRu-qJ-MwT">
+                        <barButtonItem key="rightBarButtonItem" title="Notify" id="VRu-qJ-MwT" userLabel="Notify">
                             <connections>
                                 <action selector="emailButtonDidTouch:" destination="WRG-qR-ebT" id="sp7-81-N9h"/>
                             </connections>
