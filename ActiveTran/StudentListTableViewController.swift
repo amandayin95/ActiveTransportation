@@ -273,6 +273,8 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                         // go find log
                         self.loadStudentArvInfo(s.key as! String);
                     }
+                } else {
+                    self.nullDataAlert()
                 }
             })
         } else{
@@ -297,11 +299,36 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                         })
                         self.loadStudentArvInfo(child.key as! String)
                     }
+                } else {
+                    self.nullDataAlert()
                 }
             })
         }
     }
     
+    
+    func nullDataAlert(){
+        let alertTitle = "No record found"
+        var alertMessage = ""
+        if (self.isStaff){
+            alertMessage = "No student record for \(self.staff.name) is found. Contact system admin for details."
+        } else {
+            alertMessage = "No children record for \(self.parent.name) is found. Contact system admin for details."
+        }
+        
+        // show an alert and ask whether to call the parent/staff or not
+        let alert = UIAlertController(title: alertTitle,
+                                      message: alertMessage ,
+                                      preferredStyle: .Alert)
+        
+        let okAction = UIAlertAction(title: "OK",
+                                     style: .Default) { (action: UIAlertAction) -> Void in
+        }
+        
+        alert.addAction(okAction)
+        
+        self.presentViewController(alert, animated: true,completion: nil)
+    }
     
     func loadStudentArvInfo(studentID: String){
         if (self.isStaff){
