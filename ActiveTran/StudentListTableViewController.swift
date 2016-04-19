@@ -229,6 +229,7 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                     }
                     self.dbComm.rootRef.unauth()
                     self.reloadTable()
+                    self.nullDataAlert()
                 } else{
                     let idCopy = authData.uid.lowercaseString
                     self.dbComm.usersRef.childByAppendingPath(idCopy).observeEventType(.Value, withBlock: { snapshot in
