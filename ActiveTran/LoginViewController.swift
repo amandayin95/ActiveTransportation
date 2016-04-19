@@ -75,10 +75,7 @@ class LoginViewController: UIViewController {
             self.nameToPass = nameField.text
             self.contactInfoToPass = contactInfoField.text
             self.isStaffToPass = (isStaffField.text?.lowercaseString.containsString("yes"))
-            
-            print (emailField.text)
-            print (passwordField.text)
-            
+                     
             self.dbComm.studentsRef.createUser(emailField.text, password: passwordField.text) { (error: NSError!) in
                 if error == nil {
                     self.dbComm.rootRef.authUser(emailField.text, password: passwordField.text,

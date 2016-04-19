@@ -30,10 +30,10 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
     var staff:Staff!
     var meetingInfoBarButtonItem: UIBarButtonItem!
     var isStaff = false
+    
     // Mark: DbCommunicator
     var dbComm = DbCommunicator()
     
-    // MARK: UIViewController Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -58,7 +58,6 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
         
         
         // Set up swipe to delete
-        // TODO what does this have to do with delete?
         tableView.allowsMultipleSelectionDuringEditing = false
         
         // meeting info display
@@ -125,8 +124,9 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
             let toggleCompletion = !studentSelected!.arrived
             // Call toggleCellCheckbox() update the visual properties of the cell
             toggleCellCheckbox(cell, isCompleted: toggleCompletion)
-            // Passing a dictionary to update Firebase
+            // Passing a dictioary to update Firebase
             self.dbComm.currentLogRef.updateChildValues([studentSelected!.student.key : toggleCompletion])
+            
         }
     }
     
@@ -236,19 +236,10 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                             print (snapshot.value)
                             if (snapshot.value["isStaff"] as! Bool){
                                 self.isStaff = true
-                                self.staff = Staff(key:snapshot.key as! String,
-                                    name:snapshot.value["name"] as! String,
-                                    email:snapshot.value["email"] as! String,
-                                    contactInfo:snapshot.value["contactInfo"] as! String,
-                                    isStaff:snapshot.value["isStaff"] as! Bool,
-                                    routeID: snapshot.value["routeID"] as! String)
+                                self.staff = Staff(snapshot: snapshot)
                             }else{
-                                self.parent = Parent(key:snapshot.key as! String,
-                                    name:snapshot.value["name"] as! String,
-                                    email:snapshot.value["email"] as! String,
-                                    contactInfo:snapshot.value["contactInfo"] as! String,
-                                    isStaff:snapshot.value["isStaff"] as! Bool,
-                                    childrenIDs: snapshot.value["childrenIDs"] as! NSDictionary);
+                                self.isStaff = false
+                                self.parent = Parent(snapshot: snapshot)
                             }
                         }
                         self.loadStudentInfo()
@@ -293,7 +284,7 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                     // each child is saved as a ID:name pair in childrenIDs
                     for child in childrenIDs {
                         // save the children's key (studentID) in the keysForTable array
-                        //for later display purposes
+                        // for later display purposes
                         self.keysForTable.append(child.key as! String)
                         // go fetch the actual Student object
                         self.dbComm.studentsRef.childByAppendingPath(child.key as! String).observeEventType(.Value,withBlock:{

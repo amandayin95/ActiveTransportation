@@ -16,7 +16,10 @@ class Parent : User{
     // Initialize from Firebase snapshot data
     override
     init(snapshot:FDataSnapshot){
-        self.childrenIDs = snapshot.value["childrenIDs"] as! NSDictionary
+        self.childrenIDs = [:]
+        if ((snapshot.value.objectForKey("childrenIDs")) != nil){
+            self.childrenIDs = snapshot.value["childrenIDs"] as! NSDictionary
+        }
         super.init(
             key:snapshot.key,
             name:snapshot.value["name"] as! String,
