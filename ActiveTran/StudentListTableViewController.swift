@@ -311,7 +311,7 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
         let alertTitle = "No record found"
         var alertMessage = ""
         if (self.isStaff){
-            alertMessage = "No student record for \(self.staff.name) is found. Contact system admin for details."
+            alertMessage = "No assigned route record for \(self.staff.name) is found. Contact system admin for details."
         } else {
             alertMessage = "No children record for \(self.parent.name) is found. Contact system admin for details."
         }
