@@ -124,7 +124,6 @@ class LoginViewController: UIViewController {
                               animated: true,
                               completion: nil)
     }
-
     
     // Segue to StudentListTableViewController
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject!) {
