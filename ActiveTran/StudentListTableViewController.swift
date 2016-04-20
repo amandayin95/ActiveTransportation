@@ -234,7 +234,6 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                     let idCopy = authData.uid.lowercaseString
                     self.dbComm.usersRef.childByAppendingPath(idCopy).observeEventType(.Value, withBlock: { snapshot in
                         if (snapshot.hasChildren()){
-                            print (snapshot.value)
                             if (snapshot.value["isStaff"] as! Bool){
                                 self.isStaff = true
                                 self.staff = Staff(snapshot: snapshot)
@@ -270,9 +269,9 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                                 self.students.append(newStudent)
                                 self.studentsWrapper[newStudent.key] = newStudentWpr
                             }
+                            self.loadStudentArvInfo(s.key as! String);
                         })
                         // go find log
-                        self.loadStudentArvInfo(s.key as! String);
                     }
                 } else {
                     self.nullDataAlert()
@@ -336,7 +335,9 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
             // For staff, create new log records for the day
             self.dbComm.currentLogRef.observeEventType(.Value, withBlock: {
                 snapshot in
+                print (snapshot.value)
                 if (snapshot.value.objectForKey(studentID) == nil){
+                    print ("pushed false")
                     self.dbComm.currentLogRef.updateChildValues([studentID : false])
                     self.studentsWrapper[studentID]!.arrived = false
                 }else{
