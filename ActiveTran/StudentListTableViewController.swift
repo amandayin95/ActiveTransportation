@@ -156,29 +156,36 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                                       message: alertMessage ,
                                       preferredStyle: .Alert)
         
-        let groupMessageAction = UIAlertAction(title: "Send Text Message To All",
-                                       style: .Default) { (action: UIAlertAction) -> Void in
-                                        // get an array of parent's phone numbers, then send group message
-                                        var phoneNum = [String]()
-                                        for s in self.students{
-                                            self.dbComm.usersRef.childByAppendingPath(s.parentID).observeSingleEventOfType(.Value, withBlock: {
-                                                snapshot in
-                                                print(snapshot.value)
-                                                if (snapshot.hasChildren()){
-                                                    let parent = Parent(snapshot:snapshot)
-                                                    if (!phoneNum.contains(parent.contactInfo)){
-                                                        phoneNum.append(parent.contactInfo)
-                                                    }
-                                                }
-                                                // Async function call helper
-                                                self.groupMessagePrep += 1
-                                                if (self.groupMessagePrep == self.students.count-1){
-                                                    self.operation(phoneNum)
-                                                    // reset
-                                                    self.groupMessagePrep = 0
-                                                }
-                                            })
-                                        }
+        let groupMessageAction = UIAlertAction(title: "Send Text Message To All", style: .Default) { (action: UIAlertAction)
+            -> Void in
+            // get an array of parent's phone numbers, then send group message
+            var phoneNum = [String]()
+            for s in self.students{
+                self.dbComm.usersRef.childByAppendingPath(s.parentID).observeSingleEventOfType(.Value, withBlock: {
+                    snapshot in
+                    print(snapshot.value)
+                    if (snapshot.hasChildren()){
+                        if (self.isStaff == true){
+                            let parent = Parent(snapshot:snapshot)
+                            if (!phoneNum.contains(parent.contactInfo)){
+                                phoneNum.append(parent.contactInfo)
+                            }
+                        }else{
+                            let staff = Staff(snapshot:snapshot)
+                            if (!phoneNum.contains(staff.contactInfo)){
+                                phoneNum.append(staff.contactInfo)
+                            }
+                        }
+                    }
+                    // Async function call helper
+                    self.groupMessagePrep += 1
+                    if (self.groupMessagePrep == self.students.count-1){
+                        self.operation(phoneNum)
+                        // reset
+                        self.groupMessagePrep = 0
+                    }
+                })
+            }
         }
         
         let emailAction = UIAlertAction(title: "Send Email To School/System Admin", style: .Default) { (action: UIAlertAction) -> Void in
@@ -296,7 +303,6 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                     // need this to switch between accounts
                     self.dbComm.rootRef.unauth()
                 }
-                
             }
         }
     }
@@ -413,23 +419,7 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
     
     // MARK: Function for carrying out the group messaging operations
     private func operation(phoneNumber:[String]) {
-//        var phoneNumber = pn
-//        // check if the phone number string is valid
-//        var valid = true
-//        for index in 1...phoneNumber.count{
-//            valid = true
-//            for c in phoneNumber[phoneNumber.count - index].characters{
-//                if ((c >= "0" && c <= "9")) {
-//                    valid = false
-//                    break
-//                }
-//            }
-//            if (!valid){
-//                phoneNumber.removeAtIndex(phoneNumber.count - index)
-//            }
-//            
-//        }
-        
+      var phoneNumberOpSafe = checkPhoneNumber(phoneNumber)
       //  if (valid){
             let alert = UIAlertController(title: "Sending Group Text Message",
                                         message: "Please enter the text message content below." ,
@@ -441,7 +431,7 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                 
                 if MFMessageComposeViewController.canSendText(){
                     let msg:MFMessageComposeViewController=MFMessageComposeViewController()
-                    msg.recipients=phoneNumber
+                    msg.recipients=phoneNumberOpSafe
                     msg.body=textField.text
                     msg.messageComposeDelegate = self
                     self.presentViewController(msg,animated:true,completion:nil)
@@ -477,6 +467,23 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
 //                                  animated: true,
 //                                  completion: nil)
 //        }
+    }
+    
+    private func checkPhoneNumber(phoneNum:[String]) -> [String]{
+        var temp = phoneNum
+        for index in 0...phoneNum.count-1{
+            var valid = true
+            for c in phoneNum[index].characters{
+                if (!(c >= "0" && c <= "9")) {
+                    valid = false
+                    break
+                }
+            }
+            if (valid == false){
+                temp.removeAtIndex(index)
+            }
+        }
+        return temp
     }
     
     // MARK
