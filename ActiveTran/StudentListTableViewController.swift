@@ -1,9 +1,8 @@
-
 import UIKit
 import MessageUI
 
-class StudentListTableViewController: UITableViewController, MFMailComposeViewControllerDelegate{
-
+class StudentListTableViewController: UITableViewController, MFMailComposeViewControllerDelegate, MFMessageComposeViewControllerDelegate {
+    
     // MARK: Constants
     let ListToUsers = "ListToUsers"
     let ListToContactInfo = "ListToContactInfo"
@@ -19,7 +18,7 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
     var logExsits = false
     var isMorning = true
     var currentDate : String!
-  
+    
     // MARK: Selected student
     var studentSelected: StudentWrapper!
     
@@ -31,11 +30,12 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
     var staff:Staff!
     var meetingInfoBarButtonItem: UIBarButtonItem!
     var isStaff = false
+    var groupMessagePrep = 0
+    
     // Mark: DbCommunicator
     var dbComm = DbCommunicator()
-
-    // MARK: UIViewController Lifecycle
-  
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -48,14 +48,16 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
         }else{
             isMorning = false
         }
-
-        
         let dateFormatter = NSDateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
         self.currentDate =  dateFormatter.stringFromDate(date)
+        if (isMorning == true){
+            self.dbComm.currentLogRef = self.dbComm.currentLogRef.childByAppendingPath(self.currentDate).childByAppendingPath(MORNING_PERIOD)
+        }else{
+            self.dbComm.currentLogRef = self.dbComm.currentLogRef.childByAppendingPath(self.currentDate).childByAppendingPath(AFTERNOON_PERIOD)
+        }
         
-        // Set up swipe to delete  
-        // TODO what does this have to do with delete?
+        // Set up swipe to delete
         tableView.allowsMultipleSelectionDuringEditing = false
         
         // meeting info display
@@ -64,10 +66,6 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
         //TODO change font size
         meetingInfoBarButtonItem.tintColor = UIColor.whiteColor()
         navigationItem.leftBarButtonItem = meetingInfoBarButtonItem
-        
-                let student1Ref = self.dbComm.studentsRef.childByAppendingPath("-KF083fV9L_FzSGTeCXI")
-                let testStudent1 = ["name":"Xiaoyang_Student1","school":"CMC","parentID":"435879da-a963-4489-9b22-5e2e4b6515ca","routeID":"-KF09HvYLPB6oBhffoW2","uid":"-KF083fV9L_FzSGTeCXI"]
-                student1Ref.setValue(testStudent1)
         
     }
     
@@ -79,7 +77,7 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
     override func viewDidDisappear(animated: Bool) {
         super.viewDidDisappear(animated)
     }
-  
+    
     // MARK: UITableView Delegate methods
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return studentsWrapper.count
@@ -88,21 +86,21 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("ItemCell")! as UITableViewCell
         let studentSelected = studentsWrapper[keysForTable[indexPath.row]]
-    
+        
         cell.textLabel?.text = studentSelected?.student.name
-        cell.detailTextLabel?.text = "Student ID Number: " + (studentSelected?.student.studentID)!
-    
+        cell.detailTextLabel?.text = "Student ID Number: " + (studentSelected?.student.key)!
+        
         // Determine whether the cell is checked
         toggleCellCheckbox(cell, isCompleted: (studentSelected?.arrived)!)
-    
+        
         return cell
     }
-  
+    
     override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
         return true
     }
     
-
+    
     override func tableView(tableView: UITableView, editActionsForRowAtIndexPath indexPath: NSIndexPath) -> [UITableViewRowAction]? {
         let more = UITableViewRowAction(style: .Normal, title: "More") { (action, indexPath) in
             self.studentSelected = self.studentsWrapper[self.keysForTable[indexPath.row]]
@@ -119,15 +117,16 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
         let cell = tableView.cellForRowAtIndexPath(indexPath)!
         // Get the corresponding GreoceryItem by using the index path's row
         let studentSelected = self.studentsWrapper[self.keysForTable[indexPath.row]]
-
+        
         // Staff Only: Negate completed on the student to toggle the status
         // Only staff has editing access
         if (self.isStaff == true){
-            let toggledCompletion = !studentSelected!.arrived
+            let toggleCompletion = !studentSelected!.arrived
             // Call toggleCellCheckbox() update the visual properties of the cell
-            toggleCellCheckbox(cell, isCompleted: toggledCompletion)
+            toggleCellCheckbox(cell, isCompleted: toggleCompletion)
             // Passing a dictioary to update Firebase
-            studentSelected?.ref!.updateChildValues([studentSelected!.student.studentID: toggledCompletion])
+            self.dbComm.currentLogRef.updateChildValues([studentSelected!.student.key : toggleCompletion])
+            
         }
     }
     
@@ -143,21 +142,97 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
             cell.detailTextLabel?.textColor = UIColor.grayColor()
         }
     }
-  
+    
     // MARK: Add Item
-    // Button to email page
+    // Button to email or group message page
     @IBAction func emailButtonDidTouch(sender: AnyObject) {
-        let mailComposeViewController = configuredMailComposeViewController()
-        if MFMailComposeViewController.canSendMail(){
-            self.presentViewController(mailComposeViewController, animated: true, completion: nil)
-        } else {
-            self.showSendMailErrorAlert()
+        
+        let alertTitle = "Notify All"
+        let alertMessage = "Who do you wish to notify?"
+        
+        // show an alert and ask whether to call the parent/staff or not
+        let alert = UIAlertController(title: alertTitle,
+                                      message: alertMessage ,
+                                      preferredStyle: .Alert)
+        
+        let groupMessageAction = UIAlertAction(title: "Send Text Message To All", style: .Default) { (action: UIAlertAction)
+            -> Void in
+            // get an array of parent's phone numbers, then send group message
+            var phoneNum = [String]()
+            if (self.isStaff == true){
+                for s in self.students{
+                    self.dbComm.usersRef.childByAppendingPath(s.parentID).observeSingleEventOfType(.Value, withBlock: {
+                        snapshot in
+                        print(snapshot.value)
+                        if (snapshot.hasChildren()){
+                            let parent = Parent(snapshot:snapshot)
+                            if (!phoneNum.contains(parent.contactInfo)){
+                                phoneNum.append(parent.contactInfo)
+                            }
+                        }
+                        // Async function call helper
+                        self.groupMessagePrep += 1
+                        if (self.groupMessagePrep == self.students.count-1){
+                            self.operation(phoneNum)
+                            // reset
+                            self.groupMessagePrep = 0
+                        }
+                    })
+                }
+            }else {
+                for s in self.students{
+                    self.dbComm.routeRef.childByAppendingPath(s.routeID).observeSingleEventOfType(.Value, withBlock: {
+                        snapshot in
+                        print(snapshot.value)
+                        if (snapshot.hasChildren()){
+                            let staffID = snapshot.value["staffID"] as! String
+                            self.dbComm.usersRef.childByAppendingPath(staffID).observeEventType(.Value, withBlock: {
+                                snapshot2 in
+                                if(snapshot2.hasChildren()){
+                                    let staff = Staff(snapshot:snapshot2)
+                                    if (!phoneNum.contains(staff.contactInfo)){
+                                        phoneNum.append(staff.contactInfo)
+                                    }
+                                }
+                                // Async function call helper
+                                self.groupMessagePrep += 1
+                                if (self.groupMessagePrep == self.students.count-1){
+                                    self.operation(phoneNum)
+                                    // reset
+                                    self.groupMessagePrep = 0
+                                }
+                            })
+                        }
+                    })
+                }
+            }
         }
+        
+        let emailAction = UIAlertAction(title: "Send Email To School Admin", style: .Default) { (action: UIAlertAction) -> Void in
+            let mailComposeViewController = self.configuredMailComposeViewController()
+            if MFMailComposeViewController.canSendMail(){
+                self.presentViewController(mailComposeViewController, animated: true, completion: nil)
+            } else {
+                self.showSendMailErrorAlert()
+            }
+        }
+        
+        let cancelAction = UIAlertAction(title: "Cancel",
+                                         style: .Default) { (action: UIAlertAction) -> Void in
+        }
+        
+        alert.addAction(groupMessageAction)
+        alert.addAction(emailAction)
+        alert.addAction(cancelAction)
+        
+        presentViewController(alert,
+                              animated: true,
+                              completion: nil)
     }
     
     func showSendMailErrorAlert(){
         let sendMailErrorAlert = UIAlertView(title:"Could Not Send Email", message:"Your device could not send e-mail.  Please check e-mail configuration and try again.", delegate: self, cancelButtonTitle: "OK")
-            sendMailErrorAlert.show()
+        sendMailErrorAlert.show()
     }
     
     func configuredMailComposeViewController() -> MFMailComposeViewController {
@@ -174,7 +249,7 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
     func mailComposeController(controller: MFMailComposeViewController!, didFinishWithResult result: MFMailComposeResult, error: NSError!) {
         controller.dismissViewControllerAnimated(true, completion: nil)
     }
-  
+    
     func meetingInfoButtonDidTouch() {
         performSegueWithIdentifier(self.ListToUsers, sender: nil)
     }
@@ -209,13 +284,13 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                     nav.studentWprSelected = self.studentSelected
                     nav.parent = self.parent
                 }
-     
+                
             }
         }
     }
-
+    
     func authenticateUser(){
-        self.dbComm.studentsRef.observeAuthEventWithBlock { authData in
+        self.dbComm.rootRef.observeAuthEventWithBlock { authData in
             if authData != nil {
                 if (self.signUpMode == true){
                     let currentUserRef = Firebase!(self.dbComm.usersRef.childByAppendingPath(authData.uid))
@@ -228,43 +303,32 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                             isStaff:false)
                         currentUserRef.setValue(self.parent.toAnyObject())
                     }
-                    self.dbComm.studentsRef.unauth()
+                    self.dbComm.rootRef.unauth()
                     self.reloadTable()
+                    self.nullDataAlert()
                 } else{
-                    let idCopy = authData.uid.lowercaseString                    
+                    let idCopy = authData.uid.lowercaseString
                     self.dbComm.usersRef.childByAppendingPath(idCopy).observeEventType(.Value, withBlock: { snapshot in
                         if (snapshot.hasChildren()){
-                                print (snapshot.value)
-                                if (snapshot.value["isStaff"] as! Bool){
-                                    self.isStaff = true
-                                    self.staff = Staff(uid:snapshot.key as! String,
-                                        name:snapshot.value["name"] as! String,
-                                        email:snapshot.value["email"] as! String,
-                                        contactInfo:snapshot.value["contactInfo"] as! String,
-                                        isStaff:snapshot.value["isStaff"] as! Bool,
-                                        routeID: snapshot.value["routeID"] as! String)
-                                }else{
-                                    self.parent = Parent(uid:snapshot.key as! String,
-                                        name:snapshot.value["name"] as! String,
-                                        email:snapshot.value["email"] as! String,
-                                        contactInfo:snapshot.value["contactInfo"] as! String,
-                                        isStaff:snapshot.value["isStaff"] as! Bool,
-                                        childrenIDs: snapshot.value["childrenIDs"] as! NSDictionary);
-                                }
+                            if (snapshot.value["isStaff"] as! Bool){
+                                self.isStaff = true
+                                self.staff = Staff(snapshot: snapshot)
+                            }else{
+                                self.isStaff = false
+                                self.parent = Parent(snapshot: snapshot)
+                            }
                         }
-                            self.loadStudentInfo()
+                        self.loadStudentInfo()
                     })
-                    self.dbComm.studentsRef.unauth() // need this to switch between accounts
-                    // unauth will not alter or remove the uid of the user
-                    
+                    // need this to switch between accounts
+                    self.dbComm.rootRef.unauth()
                 }
-                
             }
         }
     }
-
+    
     func loadStudentInfo(){
-        if(self.isStaff == true){
+        if(self.isStaff == true && self.staff.routeID != ""){
             self.dbComm.routeRef.childByAppendingPath(self.staff.routeID).observeEventType(.Value, withBlock: {
                 snapshot in
                 if (snapshot.hasChildren()){
@@ -275,21 +339,21 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                         self.dbComm.studentsRef.childByAppendingPath(s.key as! String).observeEventType(.Value, withBlock: {
                             snapshot2 in
                             if (snapshot2.hasChildren()){
-                                print(self.dbComm.studentsRef.childByAppendingPath(s.key as! String))
-                                print (snapshot2)
                                 let newStudent = Student(snapshot: snapshot2 as FDataSnapshot)
                                 let newStudentWpr = StudentWrapper(student: newStudent, arrived: false)
                                 self.students.append(newStudent)
-                                self.studentsWrapper[newStudent.studentID] = newStudentWpr
+                                self.studentsWrapper[newStudent.key] = newStudentWpr
                             }
+                            // go find log
+                            self.loadStudentArvInfo(s.key as! String);
                         })
-                        // go find log
-                        self.loadStudentArvInfo(s.key as! String);
                     }
+                } else {
+                    self.nullDataAlert()
                 }
             })
-        } else{
-            self.dbComm.usersRef.childByAppendingPath(self.parent.uid).childByAppendingPath("childrenIDs").observeEventType(.Value,withBlock:{
+        } else if(self.isStaff == false && self.parent.childrenIDs.count > 0){
+            self.dbComm.usersRef.childByAppendingPath(self.parent.key).childByAppendingPath("childrenIDs").observeEventType(.Value,withBlock:{
                 snapshot in
                 if (snapshot.hasChildren()){
                     let childrenIDs = snapshot.value as! NSDictionary
@@ -305,32 +369,69 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                                 let newStudent = Student(snapshot: snapshot2 as FDataSnapshot)
                                 let newStudentWpr = StudentWrapper(student:newStudent,arrived:false)
                                 self.students.append(newStudent)
-                                self.studentsWrapper[newStudent.studentID] = newStudentWpr
+                                self.studentsWrapper[newStudent.key] = newStudentWpr
                             }
+                            self.loadStudentArvInfo(child.key as! String)
                         })
-                        self.loadStudentArvInfo(child.key as! String)
                     }
+                } else {
+                    self.nullDataAlert()
                 }
             })
+        }else{
+            self.nullDataAlert()
         }
     }
     
     
-    func loadStudentArvInfo(studentID: String){
-        var currentLogRef = Firebase()
-        if (isMorning == true){
-           currentLogRef  = self.dbComm.logRef.childByAppendingPath(self.currentDate).childByAppendingPath(MORNING_PERIOD)
-        }else{
-            currentLogRef = self.dbComm.logRef.childByAppendingPath(self.currentDate).childByAppendingPath(AFTERNOON_PERIOD)
+    func nullDataAlert(){
+        let alertTitle = "No record found"
+        var alertMessage = ""
+        if (self.isStaff){
+            alertMessage = "No assigned route record for \(self.staff.name) is found. Contact system admin for details."
+        } else {
+            alertMessage = "No children record for \(self.parent.name) is found. Contact system admin for details."
         }
         
+        // show an alert and ask whether to call the parent/staff or not
+        let alert = UIAlertController(title: alertTitle,
+                                      message: alertMessage ,
+                                      preferredStyle: .Alert)
+        
+        let okAction = UIAlertAction(title: "OK",
+                                     style: .Default) { (action: UIAlertAction) -> Void in
+        }
+        
+        alert.addAction(okAction)
+        
+        self.presentViewController(alert, animated: true,completion: nil)
+    }
+    
+    func groupMessageFailureAlert(){
+        let alertTitle = "Group Message Failure"
+        var alertMessage = "Unable to send group message, please check for errors in contact information."
+        
+        // show an alert and ask whether to call the parent/staff or not
+        let alert = UIAlertController(title: alertTitle,
+                                      message: alertMessage ,
+                                      preferredStyle: .Alert)
+        
+        let okAction = UIAlertAction(title: "OK",
+                                     style: .Default) { (action: UIAlertAction) -> Void in
+        }
+        
+        alert.addAction(okAction)
+        
+        self.presentViewController(alert, animated: true,completion: nil)
+    }
+    
+    func loadStudentArvInfo(studentID: String){
         if (self.isStaff){
             // For staff, create new log records for the day
-            currentLogRef.childByAppendingPath(studentID).observeEventType(.Value, withBlock: {
-               snapshot in
-                self.studentsWrapper[studentID]!.ref = currentLogRef.childByAppendingPath(studentID)
-                if (!snapshot.hasChildren()){
-                    self.studentsWrapper[studentID]!.ref!.setValue(false)
+            self.dbComm.currentLogRef.observeEventType(.Value, withBlock: {
+                snapshot in
+                if (snapshot.value.objectForKey(studentID) is NSNull){
+                    self.dbComm.currentLogRef.updateChildValues([studentID : false])
                     self.studentsWrapper[studentID]!.arrived = false
                 }else{
                     self.studentsWrapper[studentID]!.arrived = snapshot.value[studentID] as! Bool
@@ -339,80 +440,93 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                 self.reloadTable()
             })
         } else {
-            currentLogRef.childByAppendingPath(studentID).observeEventType(.Value,withBlock: {
+            self.dbComm.currentLogRef.childByAppendingPath(studentID).observeEventType(.Value,withBlock: {
                 snapshot in
-                if (!snapshot.hasChildren()){
+                if (snapshot.value is NSNull){
                     self.logExsits = false
                 } else {
-                    self.studentsWrapper[studentID]!.arrived = snapshot.value[studentID] as! Bool
+                    self.studentsWrapper[studentID]!.arrived = snapshot.value as! Bool
+                    self.logExsits = true
                 }
-                self.logExsits = true
                 self.reloadTable()
             })
-            }
+        }
     }
     
     func reloadTable(){
         self.tableView.reloadData()
     }
+    
+    // MARK: Function for carrying out the group messaging operations
+    private func operation(phoneNumber:[String]) {
+      var phoneNumberOpSafe = checkPhoneNumber(phoneNumber)
+        if (phoneNumberOpSafe.count>0){
+            let alert = UIAlertController(title: "Sending Group Text Message",
+                                        message: "Please enter the text message content below." ,
+                                        preferredStyle: .Alert)
+                
+            let sendAction = UIAlertAction(title: "Send", style: .Default) { (action: UIAlertAction) -> Void in
+                // Get the text field from the alert controller
+                let textField = alert.textFields![0]
+                
+                if MFMessageComposeViewController.canSendText(){
+                    let msg:MFMessageComposeViewController=MFMessageComposeViewController()
+                    msg.recipients=phoneNumberOpSafe
+                    msg.body=textField.text
+                    msg.messageComposeDelegate = self
+                    self.presentViewController(msg,animated:true,completion:nil)
+                } else {
+                    print ("Sending group text message failed")
+                }
+            }
+            let cancelAction = UIAlertAction(title: "Cancel",
+                                             style: .Default) { (action: UIAlertAction) -> Void in
+            }
+            
+            alert.addTextFieldWithConfigurationHandler {
+                (textField: UITextField!) -> Void in
+            }
+            alert.addAction(sendAction)
+            alert.addAction(cancelAction)
+            
+            presentViewController(alert,
+                                  animated: true,
+                                  completion: nil)
+            
+     }else{
+        self.groupMessageFailureAlert()
+    }
+   }
+    
+    private func checkPhoneNumber(phoneNum:[String]) -> [String]{
+        var temp = phoneNum
+        for index in 0...phoneNum.count-1{
+            var valid = true
+            for c in phoneNum[index].characters{
+                if (!(c >= "0" && c <= "9")) {
+                    valid = false
+                    break
+                }
+            }
+            if (valid == false){
+                temp.removeAtIndex(index)
+            }
+        }
+        return temp
+    }
+    
+    // MARK
+    func messageComposeViewController(controller: MFMessageComposeViewController, didFinishWithResult result: MessageComposeResult){
+        switch result.rawValue {
+        case MessageComposeResultCancelled.rawValue:
+            controller.dismissViewControllerAnimated(true, completion: nil)
+        case MessageComposeResultFailed.rawValue:
+            controller.dismissViewControllerAnimated(true, completion: nil)
+        case MessageComposeResultSent.rawValue:
+            controller.dismissViewControllerAnimated(false, completion: nil)
+            
+        default:
+            break
+        }
+    }
 }
-
-
-
-
-//        // Manually create users.
-//        // Manually pushing new user class. Only for testing purposes.
-//
-//
-//                let xiaoyang = ["name":"Xiaoyang Qian", "email":"xqian17@cmc.edu",
-//                                                  "contactInfo":"9093446722","isStaff":true,"routeID":"-KF09HvYLPB6oBhffoW2","uid":"31a427d4-9d1a-426a-8497-49b8a73f5230"]
-//
-//                let userIDRef1 = self.dbComm.usersRef.childByAppendingPath("31a427d4-9d1a-426a-8497-49b8a73f5230")
-//                userIDRef1.setValue(xiaoyang)
-//
-//                let vinhChildrenIDs:NSDictionary = ["-KEz2UzvRd-yp2puQ4Ro":"Xiaoyang_Student1","-KEz2UzvRd-yp2puQ4Rp":"Xiaoyang_Student2","-KEz2UzvRd-yp2puQ4Rq":"Xiaoyang_Student3"]
-//                let vinh = ["childrenIDs":vinhChildrenIDs, "name":"Vinh Hoang", "email":"vhoang@hmc.edu",
-//                                                  "contactInfo":"1112223333","isStaff":false,"uid":"435879da-a963-4489-9b22-5e2e4b6515ca"]
-//                let userIDRef2 = self.dbComm.usersRef.childByAppendingPath("435879da-a963-4489-9b22-5e2e4b6515ca")
-//                userIDRef2.setValue(vinh)
-
-//
-//        // Manually pushing new routes.
-//                let testChildrenList1:NSDictionary = ["-KEz2UzvRd-yp2puQ4Ro":"Xiaoyang_Student1", "-KEz2UzvRd-yp2puQ4Rp":"Xiaoyang_Student2","-KEz2UzvRd-yp2puQ4Rq":"Xiaoyang_Student3"]
-//                let testRoute1 = ["meetingLocation":"Mudd Cafe", "meetingTime":"2016-03-30 09:00", "name":"Route1",
-//                                  "staffID":"31a427d4-9d1a-426a-8497-49b8a73f5230","students": testChildrenList1]
-//
-//                let testRoute1Ref = self.dbComm.routeRef.childByAutoId()
-//                testRoute1Ref.setValue(testRoute1)
-
-//
-
-// Manually create students.
-//                let student1Ref = self.dbComm.studentsRef.childByAutoId()
-//                let testStudent1 = ["name":"Xiaoyang_Student1","school":"CMC","parentID":"435879da-a963-4489-9b22-5e2e4b6515ca","routeID":"-KEz6ud-0zlbKaDi6mH-","uid":"-KEz2UzvRd-yp2puQ4Ro"]
-//                student1Ref.setValue(testStudent1)
-//
-//                let student2Ref = self.dbComm.studentsRef.childByAutoId()
-//                let testStudent2 = ["name":"Xiaoyang_Student2","school":"CMC","parentID":"435879da-a963-4489-9b22-5e2e4b6515ca","routeID":"-KEz6ud-0zlbKaDi6mH-","uid":"-KEz2UzvRd-yp2puQ4Rp"]
-//                student2Ref.setValue(testStudent2)
-//
-//                let student3Ref = self.dbComm.studentsRef.childByAutoId()
-//                let testStudent3 = ["name":"Xiaoyang_Student3","school":"CMC","parentID":"435879da-a963-4489-9b22-5e2e4b6515ca","routeID":"-KEz6ud-0zlbKaDi6mH-","uid":"-KEz2UzvRd-yp2puQ4Rq"]
-//                student3Ref.setValue(testStudent3)
-//
-//                let student4Ref = self.dbComm.studentsRef.childByAutoId()
-//                let testStudent4 = ["name":"Vinh_Child1","school":"Mudd","parentID":"435879da-a963-4489-9b22-5e2e4b6515ca","routeID":"-KEz6ud-0zlbKaDi6mH-","uid":"-KEzApViahDjYR1v1ZkF"]
-//                student4Ref.setValue(testStudent4)
-//
-//                let student5Ref = self.dbComm.studentsRef.childByAutoId()
-//                let testStudent5 = ["name":"Vinh_Child2","school":"Mudd","parentID":"435879da-a963-4489-9b22-5e2e4b6515ca","routeID":"-KEz6ud-0zlbKaDi6mH-","uid":"-KEzApViahDjYR1v1ZkF"]
-//                student5Ref.setValue(testStudent5)
-
-
-//        // Manually pushing new routes.
-//                let testChildrenList1:NSDictionary = ["-KF083fV9L_FzSGTeCXI":"Xiaoyang_Student1", "-KF083fV9L_FzSGTeCXJ":"Xiaoyang_Student2","-KF083fV9L_FzSGTeCXK":"Xiaoyang_Student3"]
-//                let testRoute1 = ["meetingLocation":"Mudd Cafe", "meetingTime":"2016-03-30 09:00", "name":"Route1",
-//                                  "staffID":"31a427d4-9d1a-426a-8497-49b8a73f5230","students": testChildrenList1]
-//
-//                let testRoute1Ref = self.dbComm.routeRef.childByAutoId()
-//                testRoute1Ref.setValue(testRoute1)

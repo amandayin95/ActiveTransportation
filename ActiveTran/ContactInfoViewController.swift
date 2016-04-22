@@ -63,20 +63,19 @@ class ContactInfoViewController: UITableViewController, MFMessageComposeViewCont
         }
     }
 
-    
+    // MARK: viewDidAppear
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         self.tableView.reloadData()
         
     }
     
-    
     // MARK: UITableView Delegate methods
-    
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return users.count
     }
     
+    // MARK: tableView method to construct ContactInfoCell based on user type
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("ContactInfoCell")! as UITableViewCell
         
@@ -93,16 +92,16 @@ class ContactInfoViewController: UITableViewController, MFMessageComposeViewCont
         
     }
     
-    
+    // MARK: On user selecting a contactInfoCell, show menu for contact actions
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         // Find the cell that user tapped using cellForRowAtIndexPath
         let cell = tableView.cellForRowAtIndexPath(indexPath)!
         // Get the corresponding GreoceryItem by using the index path's row
-        var userSelected = users[indexPath.row]
+        let userSelected = users[indexPath.row]
         
         
-        var alertTitle = "Contact \(userSelected.name.capitalizedString)"
-        var alertMessage = "How do you want to contact \(userSelected.contactInfo)?"
+        let alertTitle = "Contact \(userSelected.name.capitalizedString)"
+        let alertMessage = "How do you want to contact \(userSelected.contactInfo)?"
         
         // show an alert and ask whether to call the parent/staff or not
         let alert = UIAlertController(title: alertTitle,
@@ -132,6 +131,7 @@ class ContactInfoViewController: UITableViewController, MFMessageComposeViewCont
             completion: nil)
     }
     
+    // MARK: Function for carrying out the contact operations
     private func operation(phoneNumber:String, operation:String) {
         // check if the phone number string is valid
         var valid = true
@@ -149,7 +149,7 @@ class ContactInfoViewController: UITableViewController, MFMessageComposeViewCont
                 if (application.canOpenURL(phoneCallURL)) {
                     application.openURL(phoneCallURL);
                 }
-            }else if (operation == "Text"){
+            } else if (operation == "Text"){
                 let alert = UIAlertController(title: "Sending Text Message to \(phoneNumber)",
                     message: "Please enter the text message content below." ,
                     preferredStyle: .Alert)
@@ -157,7 +157,7 @@ class ContactInfoViewController: UITableViewController, MFMessageComposeViewCont
                 let sendAction = UIAlertAction(title: "Send",
                     style: .Default) { (action: UIAlertAction) -> Void in
                         // Get the text field from the alert controller
-                        let textField = alert.textFields![0] as! UITextField
+                        let textField = alert.textFields![0] 
                         
                         if MFMessageComposeViewController.canSendText(){
                             let msg:MFMessageComposeViewController=MFMessageComposeViewController()
@@ -165,61 +165,54 @@ class ContactInfoViewController: UITableViewController, MFMessageComposeViewCont
                             msg.body=textField.text
                             msg.messageComposeDelegate = self
                             self.presentViewController(msg,animated:true,completion:nil)
-                            
                         } else {
                             print ("cannot send text")
                         }
                 }
-                        
                 
                 let cancelAction = UIAlertAction(title: "Cancel",
                     style: .Default) { (action: UIAlertAction) -> Void in
                 }
 
-                
                 alert.addTextFieldWithConfigurationHandler {
                     (textField: UITextField!) -> Void in
                 }
-
-                
                 alert.addAction(sendAction)
                 alert.addAction(cancelAction)
                 
                 presentViewController(alert,
-                    animated: true,
-                    completion: nil)
+                                      animated: true,
+                                      completion: nil)
 
             }
-        }else{
+        } else{
             let alert = UIAlertController(title: "Error",
                 message: "The contact information is not valid, please check with system administrator." ,
                 preferredStyle: .Alert)
             
             let okAction = UIAlertAction(title: "OK",
-                style: .Default) { (action: UIAlertAction) -> Void in
-            }
+                style: .Default) { (action: UIAlertAction) -> Void in}
             
             alert.addAction(okAction)
             
             presentViewController(alert,
-                animated: true,
-                completion: nil)
-
+                                  animated: true,
+                                  completion: nil)
         }
     }
     
-    
-    func messageComposeViewController(controller: MFMessageComposeViewController!, didFinishWithResult result: MessageComposeResult){
+    // MARK
+    func messageComposeViewController(controller: MFMessageComposeViewController, didFinishWithResult result: MessageComposeResult){
         switch result.rawValue {
-        case MessageComposeResultCancelled.rawValue:
-            controller.dismissViewControllerAnimated(true, completion: nil)
-        case MessageComposeResultFailed.rawValue:
-            controller.dismissViewControllerAnimated(true, completion: nil)
-        case MessageComposeResultSent.rawValue:
-            controller.dismissViewControllerAnimated(false, completion: nil)
-            
-        default:
-            break
+            case MessageComposeResultCancelled.rawValue:
+                controller.dismissViewControllerAnimated(true, completion: nil)
+            case MessageComposeResultFailed.rawValue:
+                controller.dismissViewControllerAnimated(true, completion: nil)
+            case MessageComposeResultSent.rawValue:
+                controller.dismissViewControllerAnimated(false, completion: nil)
+                
+            default:
+                break
         }
-}
+    }
 }

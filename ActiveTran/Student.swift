@@ -1,43 +1,41 @@
-
 import Foundation
-
+/**
+ * Student Class
+ */
 struct Student {
+    
+    let key: String!
+    let name: String!
+    let parentID : String!
+    let routeID: String!
+    let school: String!
   
-  let key: String!
-  let name: String!
-  let studentID : String!
-  let parentID : String!
- // let staffID: String!
-  let routeID: String!
-  let school: String!
-  
-  // Initialize from arbitrary data
+    
+    // Initialization from given data
     init(name: String, studentID: String, school: String, key: String = "", parentID : String, staffID : String, routeID: String) {
-    self.key = key
-    self.name = name
-    self.studentID = studentID
-    self.school = school
-    self.parentID = parentID;
-    self.routeID = routeID;
+        self.key = key
+        self.name = name
+        self.school = school
+        self.parentID = parentID;
+        self.routeID = routeID;
   }
-  
-  init(snapshot: FDataSnapshot) {
-    key = snapshot.key
-    name = snapshot.value["name"] as! String
-    studentID = snapshot.key as! String
-    school = snapshot.value["school"] as! String
-    parentID = snapshot.value["parentID"] as! String
-    routeID = snapshot.value["routeID"] as! String
-  }
-  
-  func toAnyObject() -> AnyObject {
-    return [
-      "name": name,
-      "studentID": studentID,
-      "school": school,
-      "parentID": parentID,
-      "routeID": routeID,
-    ]
-  }
-  
+    
+    // Initialization from Firebase snapshot data
+    init(snapshot: FDataSnapshot) {
+        key = snapshot.key
+        name = snapshot.value["name"] as! String
+        school = snapshot.value["school"] as! String
+        parentID = snapshot.value["parentID"] as! String
+        routeID = snapshot.value["routeID"] as! String
+    }
+    
+    // Convert to JSON object for pushing onto Firebase
+    func toAnyObject() -> AnyObject {
+        return [
+          "name": name,
+          "school": school,
+          "parentID": parentID,
+          "routeID": routeID,
+        ]
+    }
 }

@@ -213,7 +213,7 @@
 				TargetAttributes = {
 					BB23855B1B3DD5AB0079CD01 = {
 						CreatedOnToolsVersion = 6.3.1;
-						DevelopmentTeam = YA6UNQYBH6;
+						DevelopmentTeam = JZLJ7Y2PQS;
 					};
 				};
 			};
@@ -414,7 +414,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.davideast.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = ActiveTransportation;
 				PROVISIONING_PROFILE = "";
-				SWIFT_OBJC_BRIDGING_HEADER = "/Users/XiaoyangQian/Documents/2015-2016/School/Spring2016/CS121/codebase/ActiveTransportation/ActiveTran/ActiveTran-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "/Users/amandayin/Documents/ActiveTran-starter/ActiveTran/ActiveTran-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -434,7 +434,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.davideast.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = ActiveTransportation;
 				PROVISIONING_PROFILE = "";
-				SWIFT_OBJC_BRIDGING_HEADER = "/Users/XiaoyangQian/Documents/2015-2016/School/Spring2016/CS121/codebase/ActiveTransportation/ActiveTran/ActiveTran-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "/Users/amandayin/Documents/ActiveTran-starter/ActiveTran/ActiveTran-Bridging-Header.h";
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;

@@ -1,35 +1,34 @@
-
 import Foundation
-
+/**
+ *  Student Arv Info Class
+ *  Separating Student Arv Info from Student object to avoid repeatedly
+ *  refreshing Student objects on Firebase.
+ *  Locally wrapped together with Student to form StudentWrapper
+ */
 struct StudentArvInfo {
     
     let key: String!
-    let studentID : String!
     let staffID: String!
     var arrived: Bool!
-    var ref: Firebase?
     
     // Initialize from arbitrary data
-    init(arrived: Bool, key: String , studentID : String, staffID: String!) {
+    init(arrived: Bool, key: String, staffID: String!) {
         self.key = key
-        self.studentID = studentID
         self.arrived = arrived
         self.staffID = staffID
-        self.ref = nil
     }
     
+    // Initialize from Firebase snapshot data
     init(snapshot: FDataSnapshot) {
         key = snapshot.key
         arrived = snapshot.value["arrived"] as! Bool
-        studentID = snapshot.value["studentID"] as! String
         staffID = snapshot.value["staffID"] as! String
-        ref = snapshot.ref
     }
-
+    
+    // Convert to JSON object for pushing onto Firebase
     func toAnyObject() -> AnyObject {
         return [
             "key": key,
-            "studentID": studentID,
             "arrived": arrived,
             "staffID": staffID,
         ]

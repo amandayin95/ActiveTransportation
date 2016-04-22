@@ -1,6 +1,9 @@
 
 import Foundation
-
+/**
+ *  MeetingInfoWrapper
+ *  MeetingInfoWrapper class is locally created to populate the meetingInfoView cells.
+ */
 struct MeetingInfoWrapper {
     
     let student: Student!

@@ -1,23 +1,23 @@
-
 import Foundation
-
+/**
+ *  StudentWrapper
+ *  StudentWrapper class is used in the program to combine Student and StudentArvInfo
+ *  pulled down from Firebase.
+ */
 struct StudentWrapper {
     
     var student: Student!
     var arrived: Bool!
-    var ref: Firebase?
     
     // Initialize from arbitrary data
     init(student: Student, arrived: Bool) {
         self.student = student
         self.arrived = arrived
-        self.ref = Firebase(url: "https://activetransportation.firebaseio.com/students")
     }
     
-    // Empty Initializer
+    // Deafult Initializer
     init() {
         self.student = nil
         self.arrived = nil
-        self.ref = nil
     }
 }
