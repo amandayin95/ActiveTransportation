@@ -160,31 +160,52 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
             -> Void in
             // get an array of parent's phone numbers, then send group message
             var phoneNum = [String]()
-            for s in self.students{
-                self.dbComm.usersRef.childByAppendingPath(s.parentID).observeSingleEventOfType(.Value, withBlock: {
-                    snapshot in
-                    print(snapshot.value)
-                    if (snapshot.hasChildren()){
-                        if (self.isStaff == true){
+            if (self.isStaff == true){
+                for s in self.students{
+                    self.dbComm.usersRef.childByAppendingPath(s.parentID).observeSingleEventOfType(.Value, withBlock: {
+                        snapshot in
+                        print(snapshot.value)
+                        if (snapshot.hasChildren()){
                             let parent = Parent(snapshot:snapshot)
                             if (!phoneNum.contains(parent.contactInfo)){
                                 phoneNum.append(parent.contactInfo)
                             }
-                        }else{
-                            let staff = Staff(snapshot:snapshot)
-                            if (!phoneNum.contains(staff.contactInfo)){
-                                phoneNum.append(staff.contactInfo)
-                            }
                         }
-                    }
-                    // Async function call helper
-                    self.groupMessagePrep += 1
-                    if (self.groupMessagePrep == self.students.count-1){
-                        self.operation(phoneNum)
-                        // reset
-                        self.groupMessagePrep = 0
-                    }
-                })
+                        // Async function call helper
+                        self.groupMessagePrep += 1
+                        if (self.groupMessagePrep == self.students.count-1){
+                            self.operation(phoneNum)
+                            // reset
+                            self.groupMessagePrep = 0
+                        }
+                    })
+                }
+            }else {
+                for s in self.students{
+                    self.dbComm.routeRef.childByAppendingPath(s.routeID).observeSingleEventOfType(.Value, withBlock: {
+                        snapshot in
+                        print(snapshot.value)
+                        if (snapshot.hasChildren()){
+                            let staffID = snapshot.value["staffID"] as! String
+                            self.dbComm.usersRef.childByAppendingPath(staffID).observeEventType(.Value, withBlock: {
+                                snapshot2 in
+                                if(snapshot2.hasChildren()){
+                                    let staff = Staff(snapshot:snapshot2)
+                                    if (!phoneNum.contains(staff.contactInfo)){
+                                        phoneNum.append(staff.contactInfo)
+                                    }
+                                }
+                                // Async function call helper
+                                self.groupMessagePrep += 1
+                                if (self.groupMessagePrep == self.students.count-1){
+                                    self.operation(phoneNum)
+                                    // reset
+                                    self.groupMessagePrep = 0
+                                }
+                            })
+                        }
+                    })
+                }
             }
         }
         
@@ -509,5 +530,4 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
             break
         }
     }
-    
 }
