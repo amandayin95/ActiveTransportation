@@ -329,7 +329,7 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
     }
     
     func loadStudentInfo(){
-        if(self.isStaff == true && self.staff.routeID != ""){
+        if(self.isStaff && self.staff.routeID != ""){
             self.dbComm.routeRef.childByAppendingPath(self.staff.routeID).observeEventType(.Value, withBlock: {
                 snapshot in
                 if (snapshot.hasChildren()){
@@ -353,7 +353,7 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                     self.nullDataAlert()
                 }
             })
-        } else if(self.isStaff == false && self.parent.childrenIDs.count > 0){
+        } else if(!self.isStaff && self.parent.childrenIDs.count > 0){
             self.dbComm.usersRef.childByAppendingPath(self.parent.key).childByAppendingPath("childrenIDs").observeEventType(.Value,withBlock:{
                 snapshot in
                 if (snapshot.hasChildren()){
@@ -443,9 +443,11 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
         } else {
             self.dbComm.currentLogRef.childByAppendingPath(studentID).observeEventType(.Value,withBlock: {
                 snapshot in
-                if (snapshot == nil){
+                if (snapshot.value is NSNull){
                     self.logExsits = false
                 } else {
+                    print ("snapshot")
+                    print (snapshot.value)
                     self.studentsWrapper[studentID]!.arrived = snapshot.value as! Bool
                     self.logExsits = true
                 }
