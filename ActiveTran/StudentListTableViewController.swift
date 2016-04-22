@@ -430,7 +430,7 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
             // For staff, create new log records for the day
             self.dbComm.currentLogRef.observeEventType(.Value, withBlock: {
                 snapshot in
-                if (snapshot.value.objectForKey(studentID) == nil){
+                if (snapshot.value.objectForKey(studentID) is NSNull){
                     self.dbComm.currentLogRef.updateChildValues([studentID : false])
                     self.studentsWrapper[studentID]!.arrived = false
                 }else{
@@ -442,7 +442,7 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
         } else {
             self.dbComm.currentLogRef.childByAppendingPath(studentID).observeEventType(.Value,withBlock: {
                 snapshot in
-                if (snapshot == nil){
+                if (snapshot.value is NSNull){
                     self.logExsits = false
                 } else {
                     self.studentsWrapper[studentID]!.arrived = snapshot.value as! Bool
