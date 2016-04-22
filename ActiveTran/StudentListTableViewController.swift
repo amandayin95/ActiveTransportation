@@ -1,7 +1,8 @@
+
 import UIKit
 import MessageUI
 
-class StudentListTableViewController: UITableViewController, MFMailComposeViewControllerDelegate{
+class StudentListTableViewController: UITableViewController, MFMailComposeViewControllerDelegate, MFMessageComposeViewControllerDelegate {
     
     // MARK: Constants
     let ListToUsers = "ListToUsers"
@@ -30,6 +31,7 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
     var staff:Staff!
     var meetingInfoBarButtonItem: UIBarButtonItem!
     var isStaff = false
+    var groupMessagePrep = 0
     
     // Mark: DbCommunicator
     var dbComm = DbCommunicator()
@@ -55,7 +57,6 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
         }else{
             self.dbComm.currentLogRef = self.dbComm.currentLogRef.childByAppendingPath(self.currentDate).childByAppendingPath(AFTERNOON_PERIOD)
         }
-        
         
         // Set up swipe to delete
         tableView.allowsMultipleSelectionDuringEditing = false
@@ -144,14 +145,69 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
     }
     
     // MARK: Add Item
-    // Button to email page
+    // Button to email or group message page
     @IBAction func emailButtonDidTouch(sender: AnyObject) {
-        let mailComposeViewController = configuredMailComposeViewController()
-        if MFMailComposeViewController.canSendMail(){
-            self.presentViewController(mailComposeViewController, animated: true, completion: nil)
-        } else {
-            self.showSendMailErrorAlert()
+        
+        let alertTitle = "Notify All"
+        let alertMessage = "Who do you wish to notify?"
+        
+        // show an alert and ask whether to call the parent/staff or not
+        let alert = UIAlertController(title: alertTitle,
+                                      message: alertMessage ,
+                                      preferredStyle: .Alert)
+        
+        let groupMessageAction = UIAlertAction(title: "Send Text Message To All", style: .Default) { (action: UIAlertAction)
+            -> Void in
+            // get an array of parent's phone numbers, then send group message
+            var phoneNum = [String]()
+            for s in self.students{
+                self.dbComm.usersRef.childByAppendingPath(s.parentID).observeSingleEventOfType(.Value, withBlock: {
+                    snapshot in
+                    print(snapshot.value)
+                    if (snapshot.hasChildren()){
+                        if (self.isStaff == true){
+                            let parent = Parent(snapshot:snapshot)
+                            if (!phoneNum.contains(parent.contactInfo)){
+                                phoneNum.append(parent.contactInfo)
+                            }
+                        }else{
+                            let staff = Staff(snapshot:snapshot)
+                            if (!phoneNum.contains(staff.contactInfo)){
+                                phoneNum.append(staff.contactInfo)
+                            }
+                        }
+                    }
+                    // Async function call helper
+                    self.groupMessagePrep += 1
+                    if (self.groupMessagePrep == self.students.count-1){
+                        self.operation(phoneNum)
+                        // reset
+                        self.groupMessagePrep = 0
+                    }
+                })
+            }
         }
+        
+        let emailAction = UIAlertAction(title: "Send Email To School Admin", style: .Default) { (action: UIAlertAction) -> Void in
+            let mailComposeViewController = self.configuredMailComposeViewController()
+            if MFMailComposeViewController.canSendMail(){
+                self.presentViewController(mailComposeViewController, animated: true, completion: nil)
+            } else {
+                self.showSendMailErrorAlert()
+            }
+        }
+        
+        let cancelAction = UIAlertAction(title: "Cancel",
+                                         style: .Default) { (action: UIAlertAction) -> Void in
+        }
+        
+        alert.addAction(groupMessageAction)
+        alert.addAction(emailAction)
+        alert.addAction(cancelAction)
+        
+        presentViewController(alert,
+                              animated: true,
+                              completion: nil)
     }
     
     func showSendMailErrorAlert(){
@@ -247,13 +303,12 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                     // need this to switch between accounts
                     self.dbComm.rootRef.unauth()
                 }
-                
             }
         }
     }
     
     func loadStudentInfo(){
-        if(self.isStaff == true){
+        if(self.isStaff == true && self.staff.routeID != ""){
             self.dbComm.routeRef.childByAppendingPath(self.staff.routeID).observeEventType(.Value, withBlock: {
                 snapshot in
                 if (snapshot.hasChildren()){
@@ -269,15 +324,15 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                                 self.students.append(newStudent)
                                 self.studentsWrapper[newStudent.key] = newStudentWpr
                             }
+                            // go find log
                             self.loadStudentArvInfo(s.key as! String);
                         })
-                        // go find log
                     }
                 } else {
                     self.nullDataAlert()
                 }
             })
-        } else{
+        } else if(self.isStaff == false && self.parent.childrenIDs.count > 0){
             self.dbComm.usersRef.childByAppendingPath(self.parent.key).childByAppendingPath("childrenIDs").observeEventType(.Value,withBlock:{
                 snapshot in
                 if (snapshot.hasChildren()){
@@ -296,13 +351,15 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                                 self.students.append(newStudent)
                                 self.studentsWrapper[newStudent.key] = newStudentWpr
                             }
+                            self.loadStudentArvInfo(child.key as! String)
                         })
-                        self.loadStudentArvInfo(child.key as! String)
                     }
                 } else {
                     self.nullDataAlert()
                 }
             })
+        }else{
+            self.nullDataAlert()
         }
     }
     
@@ -330,14 +387,30 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
         self.presentViewController(alert, animated: true,completion: nil)
     }
     
+    func groupMessageFailureAlert(){
+        let alertTitle = "Group Message Failure"
+        var alertMessage = "Unable to send group message, please check for errors in contact information."
+        
+        // show an alert and ask whether to call the parent/staff or not
+        let alert = UIAlertController(title: alertTitle,
+                                      message: alertMessage ,
+                                      preferredStyle: .Alert)
+        
+        let okAction = UIAlertAction(title: "OK",
+                                     style: .Default) { (action: UIAlertAction) -> Void in
+        }
+        
+        alert.addAction(okAction)
+        
+        self.presentViewController(alert, animated: true,completion: nil)
+    }
+    
     func loadStudentArvInfo(studentID: String){
         if (self.isStaff){
             // For staff, create new log records for the day
             self.dbComm.currentLogRef.observeEventType(.Value, withBlock: {
                 snapshot in
-                print (snapshot.value)
                 if (snapshot.value.objectForKey(studentID) == nil){
-                    print ("pushed false")
                     self.dbComm.currentLogRef.updateChildValues([studentID : false])
                     self.studentsWrapper[studentID]!.arrived = false
                 }else{
@@ -363,4 +436,78 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
     func reloadTable(){
         self.tableView.reloadData()
     }
+    
+    // MARK: Function for carrying out the group messaging operations
+    private func operation(phoneNumber:[String]) {
+        var phoneNumberOpSafe = checkPhoneNumber(phoneNumber)
+        if (phoneNumberOpSafe.count>0){
+            let alert = UIAlertController(title: "Sending Group Text Message",
+                                          message: "Please enter the text message content below." ,
+                                          preferredStyle: .Alert)
+            
+            let sendAction = UIAlertAction(title: "Send", style: .Default) { (action: UIAlertAction) -> Void in
+                // Get the text field from the alert controller
+                let textField = alert.textFields![0]
+                
+                if MFMessageComposeViewController.canSendText(){
+                    let msg:MFMessageComposeViewController=MFMessageComposeViewController()
+                    msg.recipients=phoneNumberOpSafe
+                    msg.body=textField.text
+                    msg.messageComposeDelegate = self
+                    self.presentViewController(msg,animated:true,completion:nil)
+                } else {
+                    print ("Sending group text message failed")
+                }
+            }
+            let cancelAction = UIAlertAction(title: "Cancel",
+                                             style: .Default) { (action: UIAlertAction) -> Void in
+            }
+            
+            alert.addTextFieldWithConfigurationHandler {
+                (textField: UITextField!) -> Void in
+            }
+            alert.addAction(sendAction)
+            alert.addAction(cancelAction)
+            
+            presentViewController(alert,
+                                  animated: true,
+                                  completion: nil)
+            
+        }else{
+            self.groupMessageFailureAlert()
+        }
+    }
+    
+    private func checkPhoneNumber(phoneNum:[String]) -> [String]{
+        var temp = phoneNum
+        for index in 0...phoneNum.count-1{
+            var valid = true
+            for c in phoneNum[index].characters{
+                if (!(c >= "0" && c <= "9")) {
+                    valid = false
+                    break
+                }
+            }
+            if (valid == false){
+                temp.removeAtIndex(index)
+            }
+        }
+        return temp
+    }
+    
+    // MARK
+    func messageComposeViewController(controller: MFMessageComposeViewController, didFinishWithResult result: MessageComposeResult){
+        switch result.rawValue {
+        case MessageComposeResultCancelled.rawValue:
+            controller.dismissViewControllerAnimated(true, completion: nil)
+        case MessageComposeResultFailed.rawValue:
+            controller.dismissViewControllerAnimated(true, completion: nil)
+        case MessageComposeResultSent.rawValue:
+            controller.dismissViewControllerAnimated(false, completion: nil)
+            
+        default:
+            break
+        }
+    }
+    
 }

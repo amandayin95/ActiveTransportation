@@ -1,16 +1,15 @@
-
 import UIKit
 import QuartzCore
 
 /**
  *  LoginViewController: Controller for user login and registering.
- *  First View the user encounters. 
+ *  First View the user encounters.
  *  Segues to StudentListTableViewController.
  *  Login View Controller manages the login and registering functions.
- *  
+ *
  */
 class LoginViewController: UIViewController {
-
+    
     // MARK: Flag for segue identifier
     let LoginToList = "LoginToList"
     var signUpMode = false
@@ -20,17 +19,17 @@ class LoginViewController: UIViewController {
     var nameToPass: String!
     var routeIDToPass: String!
     var isStaffToPass:Bool!
-
+    
     // Mark: Communicator with Firebase
     var dbComm = DbCommunicator()
-
+    
     // MARK: Outlets
     @IBOutlet weak var textFieldLoginEmail: UITextField!
     @IBOutlet weak var textFieldLoginPassword: UITextField!
-
+    
     // MARK: UIViewController Lifecycle
     override func viewDidAppear(animated: Bool) {
-       signUpMode = false
+        signUpMode = false
         
         // Create an authentication observer
         dbComm.studentsRef.observeAuthEventWithBlock { (authData) -> Void in
@@ -44,12 +43,12 @@ class LoginViewController: UIViewController {
         
         super.viewDidAppear(animated)
     }
-
+    
     // MARK: Actions
     @IBAction func loginDidTouch(sender: AnyObject) {
         dbComm.rootRef.authUser(textFieldLoginEmail.text, password: textFieldLoginPassword.text,
-            withCompletionBlock: { (error, auth) in
-                
+                                withCompletionBlock: { (error, auth) in
+                                    
         })
     }
     
@@ -75,7 +74,7 @@ class LoginViewController: UIViewController {
             self.nameToPass = nameField.text
             self.contactInfoToPass = contactInfoField.text
             self.isStaffToPass = (isStaffField.text?.lowercaseString.containsString("yes"))
-                     
+            
             self.dbComm.studentsRef.createUser(emailField.text, password: passwordField.text) { (error: NSError!) in
                 if error == nil {
                     self.dbComm.rootRef.authUser(emailField.text, password: passwordField.text,
@@ -124,7 +123,6 @@ class LoginViewController: UIViewController {
                               animated: true,
                               completion: nil)
     }
-
     
     // Segue to StudentListTableViewController
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject!) {
@@ -140,6 +138,5 @@ class LoginViewController: UIViewController {
             }
         }
     }
-
+    
 }
-
