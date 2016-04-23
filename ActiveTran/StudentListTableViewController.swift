@@ -164,7 +164,6 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                 for s in self.students{
                     self.dbComm.usersRef.childByAppendingPath(s.parentID).observeSingleEventOfType(.Value, withBlock: {
                         snapshot in
-                        print(snapshot.value)
                         if (snapshot.hasChildren()){
                             let parent = Parent(snapshot:snapshot)
                             if (!phoneNum.contains(parent.contactInfo)){
@@ -184,7 +183,6 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                 for s in self.students{
                     self.dbComm.routeRef.childByAppendingPath(s.routeID).observeSingleEventOfType(.Value, withBlock: {
                         snapshot in
-                        print(snapshot.value)
                         if (snapshot.hasChildren()){
                             let staffID = snapshot.value["staffID"] as! String
                             self.dbComm.usersRef.childByAppendingPath(staffID).observeEventType(.Value, withBlock: {
@@ -431,7 +429,9 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
             // For staff, create new log records for the day
             self.dbComm.currentLogRef.observeEventType(.Value, withBlock: {
                 snapshot in
-                if (snapshot.value.objectForKey(studentID) is NSNull){
+                // If the staff is the first one logging in on that day,
+                // or if the log for that particular student hasn't been created yet
+                if (!snapshot.exists() || snapshot.value.objectForKey(studentID) is NSNull){
                     self.dbComm.currentLogRef.updateChildValues([studentID : false])
                     self.studentsWrapper[studentID]!.arrived = false
                 }else{
@@ -446,8 +446,6 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                 if (snapshot.value is NSNull){
                     self.logExsits = false
                 } else {
-                    print ("snapshot")
-                    print (snapshot.value)
                     self.studentsWrapper[studentID]!.arrived = snapshot.value as! Bool
                     self.logExsits = true
                 }
