@@ -435,6 +435,8 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                     self.dbComm.currentLogRef.updateChildValues([studentID : false])
                     self.studentsWrapper[studentID]!.arrived = false
                 }else{
+                    print (self.dbComm.currentLogRef)
+                    print (snapshot.value)
                     self.studentsWrapper[studentID]!.arrived = snapshot.value[studentID] as! Bool
                 }
                 self.logExsits = true
@@ -530,4 +532,6 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
             break
         }
     }
+    
+
 }
