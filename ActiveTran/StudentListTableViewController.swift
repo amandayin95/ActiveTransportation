@@ -431,7 +431,7 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                 snapshot in
                 // If the staff is the first one logging in on that day,
                 // or if the log for that particular student hasn't been created yet
-                if (!snapshot.exists() || snapshot.value.objectForKey(studentID) is NSNull){
+                if (!snapshot.exists() || snapshot.value.objectForKey(studentID) == nil){
                     self.dbComm.currentLogRef.updateChildValues([studentID : false])
                     self.studentsWrapper[studentID]!.arrived = false
                 }else{
