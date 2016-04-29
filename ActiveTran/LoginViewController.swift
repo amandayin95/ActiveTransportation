@@ -20,7 +20,6 @@ class LoginViewController: UIViewController {
     var routeIDToPass: String!
     var isStaffToPass:Bool!
     
-    var unwindExecuted = true
     // Mark: Communicator with Firebase
     var dbComm = DbCommunicator()
     
@@ -35,9 +34,8 @@ class LoginViewController: UIViewController {
         // Create an authentication observer
         dbComm.studentsRef.observeAuthEventWithBlock { (authData) -> Void in
             // Block passed the authData parameter
-            if authData != nil && (self.unwindExecuted){
+            if authData != nil {
                 // On successful authentication, perform the segue. Pass nil as the sender.
-                self.unwindExecuted = false
                 self.performSegueWithIdentifier(self.LoginToList, sender: nil)
             }
         }
@@ -128,6 +126,7 @@ class LoginViewController: UIViewController {
     // Segue to StudentListTableViewController
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject!) {
         if (segue.identifier == "LoginToList") {
+            print ("segue called")
             let nav = segue.destinationViewController as! UINavigationController
             let svc = nav.topViewController as! StudentListTableViewController
             if (self.signUpMode == true){
@@ -139,8 +138,5 @@ class LoginViewController: UIViewController {
             }
         }
     }
-    
-    @IBAction func unwindToLogin(segue: UIStoryboardSegue) {
-        self.unwindExecuted = true
-    }
+
 }

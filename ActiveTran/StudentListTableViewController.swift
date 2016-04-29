@@ -38,8 +38,6 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
     
     
     override func viewDidLoad() {
-        super.viewDidLoad()
-        
         let date = NSDate()
         let calendar:NSCalendar = NSCalendar.currentCalendar()
         let components = calendar.components([.Hour], fromDate: date)
@@ -67,12 +65,13 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
         //TODO change font size
         meetingInfoBarButtonItem.tintColor = UIColor.whiteColor()
         navigationItem.leftBarButtonItem = meetingInfoBarButtonItem
+        super.viewDidLoad()
         
     }
     
     override func viewDidAppear(animated: Bool) {
-        super.viewDidAppear(animated)
         self.authenticateUser()
+        super.viewDidAppear(animated)
     }
     
     override func viewDidDisappear(animated: Bool) {
@@ -435,8 +434,6 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                     self.dbComm.currentLogRef.updateChildValues([studentID : false])
                     self.studentsWrapper[studentID]!.arrived = false
                 }else{
-//                    print (self.dbComm.currentLogRef)
-//                    print (snapshot.value)
                     self.studentsWrapper[studentID]!.arrived = snapshot.value[studentID] as! Bool
                 }
                 self.logExsits = true
