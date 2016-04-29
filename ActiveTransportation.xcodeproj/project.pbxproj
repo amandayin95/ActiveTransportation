@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		0336785C1C8C38D3002AD69C /* MeetingInfoWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0336785B1C8C38D3002AD69C /* MeetingInfoWrapper.swift */; };
 		03B206861C78225B00FD7782 /* BusRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03B206851C78225B00FD7782 /* BusRoute.swift */; };
-		03B206881C792F2B00FD7782 /* StudentArvInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03B206871C792F2B00FD7782 /* StudentArvInfo.swift */; };
 		03B2068A1C79526300FD7782 /* StudentWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03B206891C79526300FD7782 /* StudentWrapper.swift */; };
 		03C64ED61C8C1B3300626E0E /* MeetingInfoCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03C64ED51C8C1B3300626E0E /* MeetingInfoCell.swift */; };
 		744334CA1C896B6800B4AD99 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 744334C91C896B6800B4AD99 /* Main.storyboard */; };
@@ -31,7 +30,6 @@
 /* Begin PBXFileReference section */
 		0336785B1C8C38D3002AD69C /* MeetingInfoWrapper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeetingInfoWrapper.swift; sourceTree = "<group>"; };
 		03B206851C78225B00FD7782 /* BusRoute.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BusRoute.swift; sourceTree = "<group>"; };
-		03B206871C792F2B00FD7782 /* StudentArvInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StudentArvInfo.swift; sourceTree = "<group>"; };
 		03B206891C79526300FD7782 /* StudentWrapper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StudentWrapper.swift; sourceTree = "<group>"; };
 		03C64ED51C8C1B3300626E0E /* MeetingInfoCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeetingInfoCell.swift; sourceTree = "<group>"; };
 		744334C91C896B6800B4AD99 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
@@ -152,7 +150,6 @@
 				BB2385891B3DD9640079CD01 /* Student.swift */,
 				BB7DA5101B42C8100018B530 /* User.swift */,
 				03B206851C78225B00FD7782 /* BusRoute.swift */,
-				03B206871C792F2B00FD7782 /* StudentArvInfo.swift */,
 				03B206891C79526300FD7782 /* StudentWrapper.swift */,
 				744334CD1C8970A200B4AD99 /* DbCommunicator.swift */,
 				0336785B1C8C38D3002AD69C /* MeetingInfoWrapper.swift */,
@@ -213,7 +210,7 @@
 				TargetAttributes = {
 					BB23855B1B3DD5AB0079CD01 = {
 						CreatedOnToolsVersion = 6.3.1;
-						DevelopmentTeam = JZLJ7Y2PQS;
+						DevelopmentTeam = YA6UNQYBH6;
 					};
 				};
 			};
@@ -299,7 +296,6 @@
 				BB7DA5111B42C8100018B530 /* User.swift in Sources */,
 				BB2385621B3DD5AB0079CD01 /* AppDelegate.swift in Sources */,
 				7C227E741CB0C3820071F20A /* Staff.swift in Sources */,
-				03B206881C792F2B00FD7782 /* StudentArvInfo.swift in Sources */,
 				7C227E761CB0CA9E0071F20A /* Parent.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -414,7 +410,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.davideast.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = ActiveTransportation;
 				PROVISIONING_PROFILE = "";
-				SWIFT_OBJC_BRIDGING_HEADER = "/Users/amandayin/Documents/ActiveTran-starter/ActiveTran/ActiveTran-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "/Users/XiaoyangQian/Documents/2015-2016/School/Spring2016/CS121/codebase/ActiveTransportation/ActiveTran/ActiveTran-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -434,7 +430,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.davideast.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = ActiveTransportation;
 				PROVISIONING_PROFILE = "";
-				SWIFT_OBJC_BRIDGING_HEADER = "/Users/amandayin/Documents/ActiveTran-starter/ActiveTran/ActiveTran-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "/Users/XiaoyangQian/Documents/2015-2016/School/Spring2016/CS121/codebase/ActiveTransportation/ActiveTran/ActiveTran-Bridging-Header.h";
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;

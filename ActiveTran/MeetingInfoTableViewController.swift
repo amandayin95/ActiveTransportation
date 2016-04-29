@@ -33,7 +33,7 @@ class MeetingInfoTableViewController: UITableViewController {
                     }
                 }
                 self.busRoutes = busRoutesFromDB
-                self.reloadTable()
+                self.tableView.reloadData()
             })
         } else {
             for student in self.students {
@@ -43,9 +43,10 @@ class MeetingInfoTableViewController: UITableViewController {
                         for item in snapshot.children {
                             let routeFromDB = BusRoute(snapshot: item as! FDataSnapshot)
                             self.busRoutes.append(routeFromDB)
+                            self.meetingInfoWrapperList.append(MeetingInfoWrapper(student: student,busRoute: routeFromDB))
                         }
                     }
-                    self.reloadTable()
+                    self.tableView.reloadData()
                 })
             }
         }
@@ -76,27 +77,5 @@ class MeetingInfoTableViewController: UITableViewController {
             cell.meetingTimeLabel?.text = meetingInfoWrapperList[indexPath.row].busRoute.meetingTime
         }
         return cell
-    }
-    
-    // MARK: Reload table pairs up students with their meeting information for display
-    func reloadTable(){
-        // For parents, find out the meeting information for all children
-        if (self.isStaff == false){
-            var mWrapper = [MeetingInfoWrapper]()
-            if (self.students.count > 0 && self.busRoutes.count > 0){
-                // Loop throuh to pair up students with their busroute
-                for i in 1...self.busRoutes.count{
-                    for j in 1...self.students.count{
-                        if (self.students[j-1].routeID == self.busRoutes[i-1].key){
-                            let newInfoWrapper = MeetingInfoWrapper(student: self.students[j-1], busRoute: self.busRoutes[i-1])
-                            mWrapper.append(newInfoWrapper)
-                        }
-                        continue
-                    }
-                }
-            }
-            self.meetingInfoWrapperList = mWrapper
-        }
-        self.tableView.reloadData()
     }
 }

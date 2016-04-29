@@ -1,3 +1,4 @@
+
 import UIKit
 import MessageUI
 
@@ -37,8 +38,6 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
     
     
     override func viewDidLoad() {
-        super.viewDidLoad()
-        
         let date = NSDate()
         let calendar:NSCalendar = NSCalendar.currentCalendar()
         let components = calendar.components([.Hour], fromDate: date)
@@ -66,12 +65,13 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
         //TODO change font size
         meetingInfoBarButtonItem.tintColor = UIColor.whiteColor()
         navigationItem.leftBarButtonItem = meetingInfoBarButtonItem
+        super.viewDidLoad()
         
     }
     
     override func viewDidAppear(animated: Bool) {
-        super.viewDidAppear(animated)
         self.authenticateUser()
+        super.viewDidAppear(animated)
     }
     
     override func viewDidDisappear(animated: Bool) {
@@ -163,7 +163,6 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                 for s in self.students{
                     self.dbComm.usersRef.childByAppendingPath(s.parentID).observeSingleEventOfType(.Value, withBlock: {
                         snapshot in
-                        print(snapshot.value)
                         if (snapshot.hasChildren()){
                             let parent = Parent(snapshot:snapshot)
                             if (!phoneNum.contains(parent.contactInfo)){
@@ -183,7 +182,6 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                 for s in self.students{
                     self.dbComm.routeRef.childByAppendingPath(s.routeID).observeSingleEventOfType(.Value, withBlock: {
                         snapshot in
-                        print(snapshot.value)
                         if (snapshot.hasChildren()){
                             let staffID = snapshot.value["staffID"] as! String
                             self.dbComm.usersRef.childByAppendingPath(staffID).observeEventType(.Value, withBlock: {
@@ -328,7 +326,7 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
     }
     
     func loadStudentInfo(){
-        if(self.isStaff == true && self.staff.routeID != ""){
+        if(self.isStaff && self.staff.routeID != ""){
             self.dbComm.routeRef.childByAppendingPath(self.staff.routeID).observeEventType(.Value, withBlock: {
                 snapshot in
                 if (snapshot.hasChildren()){
@@ -352,7 +350,7 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                     self.nullDataAlert()
                 }
             })
-        } else if(self.isStaff == false && self.parent.childrenIDs.count > 0){
+        } else if(!self.isStaff && self.parent.childrenIDs.count > 0){
             self.dbComm.usersRef.childByAppendingPath(self.parent.key).childByAppendingPath("childrenIDs").observeEventType(.Value,withBlock:{
                 snapshot in
                 if (snapshot.hasChildren()){
@@ -430,7 +428,9 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
             // For staff, create new log records for the day
             self.dbComm.currentLogRef.observeEventType(.Value, withBlock: {
                 snapshot in
-                if (snapshot.value.objectForKey(studentID) is NSNull){
+                // If the staff is the first one logging in on that day,
+                // or if the log for that particular student hasn't been created yet
+                if (!snapshot.exists() || snapshot.value.objectForKey(studentID) == nil){
                     self.dbComm.currentLogRef.updateChildValues([studentID : false])
                     self.studentsWrapper[studentID]!.arrived = false
                 }else{
@@ -459,12 +459,12 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
     
     // MARK: Function for carrying out the group messaging operations
     private func operation(phoneNumber:[String]) {
-      var phoneNumberOpSafe = checkPhoneNumber(phoneNumber)
+        var phoneNumberOpSafe = checkPhoneNumber(phoneNumber)
         if (phoneNumberOpSafe.count>0){
             let alert = UIAlertController(title: "Sending Group Text Message",
-                                        message: "Please enter the text message content below." ,
-                                        preferredStyle: .Alert)
-                
+                                          message: "Please enter the text message content below." ,
+                                          preferredStyle: .Alert)
+            
             let sendAction = UIAlertAction(title: "Send", style: .Default) { (action: UIAlertAction) -> Void in
                 // Get the text field from the alert controller
                 let textField = alert.textFields![0]
@@ -493,10 +493,10 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
                                   animated: true,
                                   completion: nil)
             
-     }else{
-        self.groupMessageFailureAlert()
+        }else{
+            self.groupMessageFailureAlert()
+        }
     }
-   }
     
     private func checkPhoneNumber(phoneNum:[String]) -> [String]{
         var temp = phoneNum
@@ -529,4 +529,6 @@ class StudentListTableViewController: UITableViewController, MFMailComposeViewCo
             break
         }
     }
+    
+
 }
